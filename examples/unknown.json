@@ -1,0 +1,15 @@
+{
+  "model": "register",
+  "initial": 0,
+  "operations": [
+    {
+      "id": "p",
+      "client": "a",
+      "call": 1,
+      "input": {
+        "type": "write",
+        "value": 1
+      }
+    }
+  ]
+}

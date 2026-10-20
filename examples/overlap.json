@@ -1,0 +1,27 @@
+{
+  "model": "register",
+  "initial": 0,
+  "operations": [
+    {
+      "id": "w",
+      "client": "cw",
+      "call": 1,
+      "return": 4,
+      "input": {
+        "type": "write",
+        "value": 1
+      },
+      "output": "ok"
+    },
+    {
+      "id": "r",
+      "client": "cr",
+      "call": 2,
+      "return": 3,
+      "input": {
+        "type": "read"
+      },
+      "output": 0
+    }
+  ]
+}

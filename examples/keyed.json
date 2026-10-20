@@ -1,0 +1,42 @@
+{
+  "model": "kv_register",
+  "initial": {},
+  "operations": [
+    {
+      "id": "wx",
+      "client": "cwx",
+      "call": 1,
+      "return": 2,
+      "input": {
+        "type": "write",
+        "value": 1,
+        "key": "x"
+      },
+      "output": "ok"
+    },
+    {
+      "id": "wy",
+      "client": "cwy",
+      "call": 3,
+      "return": 4,
+      "input": {
+        "type": "write",
+        "value": 2,
+        "key": "y"
+      },
+      "output": "ok"
+    },
+    {
+      "id": "rx",
+      "client": "crx",
+      "call": 5,
+      "return": 6,
+      "input": {
+        "type": "read",
+        "key": "x"
+      },
+      "output": 1
+    }
+  ],
+  "partition": true
+}

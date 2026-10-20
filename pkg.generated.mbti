@@ -1,0 +1,73 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "123123213weqw/moon_historycheck"
+
+import {
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub fn analyze(Json) -> Json raise HistoryError
+
+pub fn execute(Json) -> Json
+
+pub fn from_json(Json) -> Value
+
+pub fn parse_history(Json) -> History raise HistoryError
+
+pub fn run(Value) -> Value
+
+// Errors
+pub(all) suberror HistoryError {
+  HistoryError(String)
+} derive(@debug.Debug)
+pub fn HistoryError::to_repr(Self) -> @debug.Repr
+
+// Types and methods
+pub(all) struct History {
+  model : Model
+  initial : Value
+  operations : Array[Operation]
+} derive(Eq, @debug.Debug)
+pub fn History::equal(Self, Self) -> Bool
+pub fn History::not_equal(Self, Self) -> Bool
+pub fn History::to_repr(Self) -> @debug.Repr
+
+pub(all) enum Model {
+  Register
+  KeyValue
+  Queue
+} derive(Eq, @debug.Debug)
+pub fn Model::equal(Self, Self) -> Bool
+pub fn Model::not_equal(Self, Self) -> Bool
+pub fn Model::to_repr(Self) -> @debug.Repr
+
+pub(all) struct Operation {
+  id : String
+  client : String
+  call : Double
+  returned : Double?
+  input : Value
+  output : Value
+  complete : Bool
+} derive(Eq, @debug.Debug)
+pub fn Operation::equal(Self, Self) -> Bool
+pub fn Operation::not_equal(Self, Self) -> Bool
+pub fn Operation::to_repr(Self) -> @debug.Repr
+
+pub(all) enum Value {
+  Null
+  Bool(Bool)
+  Number(Double)
+  String(String)
+  Array(Array[Value])
+  Object(Map[String, Value])
+} derive(Eq, @debug.Debug)
+pub fn Value::canonical(Self) -> String
+pub fn Value::equal(Self, Self) -> Bool
+pub fn Value::not_equal(Self, Self) -> Bool
+pub fn Value::to_json(Self) -> Json
+pub fn Value::to_repr(Self) -> @debug.Repr
+
+// Type aliases
+
+// Traits

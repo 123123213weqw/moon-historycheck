@@ -1,0 +1,1765 @@
+[
+  {
+    "name": "empty register",
+    "request": {
+      "model": "register",
+      "initial": 0,
+      "operations": []
+    },
+    "exit": 0,
+    "expected": {
+      "verdict": "linearizable",
+      "witness": [],
+      "witness_verified": true
+    }
+  },
+  {
+    "name": "empty queue",
+    "request": {
+      "model": "queue",
+      "initial": [],
+      "operations": []
+    },
+    "exit": 0,
+    "expected": {
+      "verdict": "linearizable"
+    }
+  },
+  {
+    "name": "ordered successful history",
+    "request": {
+      "model": "register",
+      "initial": 0,
+      "operations": [
+        {
+          "id": "w",
+          "client": "cw",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "write",
+            "value": 1
+          },
+          "output": "ok"
+        },
+        {
+          "id": "r",
+          "client": "cr",
+          "call": 3,
+          "return": 4,
+          "input": {
+            "type": "read"
+          },
+          "output": 1
+        }
+      ]
+    },
+    "exit": 0,
+    "expected": {
+      "verdict": "linearizable",
+      "witness": [
+        "w",
+        "r"
+      ],
+      "final_state": 1
+    }
+  },
+  {
+    "name": "stale completed write",
+    "request": {
+      "model": "register",
+      "initial": 0,
+      "operations": [
+        {
+          "id": "w",
+          "client": "cw",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "write",
+            "value": 1
+          },
+          "output": "ok"
+        },
+        {
+          "id": "r",
+          "client": "cr",
+          "call": 3,
+          "return": 4,
+          "input": {
+            "type": "read"
+          },
+          "output": 0
+        }
+      ]
+    },
+    "exit": 2,
+    "expected": {
+      "verdict": "non_linearizable",
+      "complete_search": true
+    }
+  },
+  {
+    "name": "backtrack concurrent read",
+    "request": {
+      "model": "register",
+      "initial": 0,
+      "operations": [
+        {
+          "id": "w",
+          "client": "cw",
+          "call": 1,
+          "return": 4,
+          "input": {
+            "type": "write",
+            "value": 1
+          },
+          "output": "ok"
+        },
+        {
+          "id": "r",
+          "client": "cr",
+          "call": 2,
+          "return": 3,
+          "input": {
+            "type": "read"
+          },
+          "output": 0
+        }
+      ]
+    },
+    "exit": 0,
+    "expected": {
+      "verdict": "linearizable",
+      "witness": [
+        "r",
+        "w"
+      ]
+    }
+  },
+  {
+    "name": "boolean is not number",
+    "request": {
+      "model": "register",
+      "initial": true,
+      "operations": [
+        {
+          "id": "r",
+          "client": "cr",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "read"
+          },
+          "output": 1
+        }
+      ]
+    },
+    "exit": 2,
+    "expected": {
+      "verdict": "non_linearizable"
+    }
+  },
+  {
+    "name": "null is a real value",
+    "request": {
+      "model": "register",
+      "initial": null,
+      "operations": [
+        {
+          "id": "r",
+          "client": "cr",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "read"
+          },
+          "output": null
+        }
+      ]
+    },
+    "exit": 0,
+    "expected": {
+      "verdict": "linearizable"
+    }
+  },
+  {
+    "name": "object equality ignores order",
+    "request": {
+      "model": "register",
+      "initial": {
+        "a": 1,
+        "b": [
+          true
+        ]
+      },
+      "operations": [
+        {
+          "id": "r",
+          "client": "cr",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "read"
+          },
+          "output": {
+            "b": [
+              true
+            ],
+            "a": 1
+          }
+        }
+      ]
+    },
+    "exit": 0,
+    "expected": {
+      "verdict": "linearizable"
+    }
+  },
+  {
+    "name": "CAS successful",
+    "request": {
+      "model": "register",
+      "initial": 0,
+      "operations": [
+        {
+          "id": "c",
+          "client": "cc",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "cas",
+            "expected": 0,
+            "value": 1
+          },
+          "output": true
+        }
+      ]
+    },
+    "exit": 0,
+    "expected": {
+      "verdict": "linearizable",
+      "final_state": 1
+    }
+  },
+  {
+    "name": "CAS rejected unchanged",
+    "request": {
+      "model": "register",
+      "initial": 0,
+      "operations": [
+        {
+          "id": "c",
+          "client": "cc",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "cas",
+            "expected": 2,
+            "value": 1
+          },
+          "output": false
+        }
+      ]
+    },
+    "exit": 0,
+    "expected": {
+      "verdict": "linearizable",
+      "final_state": 0
+    }
+  },
+  {
+    "name": "CAS false success rejected",
+    "request": {
+      "model": "register",
+      "initial": 0,
+      "operations": [
+        {
+          "id": "c",
+          "client": "cc",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "cas",
+            "expected": 2,
+            "value": 1
+          },
+          "output": true
+        }
+      ]
+    },
+    "exit": 2,
+    "expected": {
+      "verdict": "non_linearizable"
+    }
+  },
+  {
+    "name": "write wrong ack",
+    "request": {
+      "model": "register",
+      "initial": 0,
+      "operations": [
+        {
+          "id": "w",
+          "client": "cw",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "write",
+            "value": 1
+          },
+          "output": true
+        }
+      ]
+    },
+    "exit": 2,
+    "expected": {
+      "verdict": "non_linearizable"
+    }
+  },
+  {
+    "name": "queue FIFO",
+    "request": {
+      "model": "queue",
+      "initial": [],
+      "operations": [
+        {
+          "id": "e",
+          "client": "ce",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "enqueue",
+            "value": null
+          },
+          "output": "ok"
+        },
+        {
+          "id": "d",
+          "client": "cd",
+          "call": 3,
+          "return": 4,
+          "input": {
+            "type": "dequeue"
+          },
+          "output": {
+            "value": null
+          }
+        }
+      ]
+    },
+    "exit": 0,
+    "expected": {
+      "verdict": "linearizable",
+      "final_state": []
+    }
+  },
+  {
+    "name": "queue empty",
+    "request": {
+      "model": "queue",
+      "initial": [],
+      "operations": [
+        {
+          "id": "d",
+          "client": "cd",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "dequeue"
+          },
+          "output": {
+            "empty": true
+          }
+        }
+      ]
+    },
+    "exit": 0,
+    "expected": {
+      "verdict": "linearizable"
+    }
+  },
+  {
+    "name": "queue null not empty",
+    "request": {
+      "model": "queue",
+      "initial": [
+        null
+      ],
+      "operations": [
+        {
+          "id": "d",
+          "client": "cd",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "dequeue"
+          },
+          "output": {
+            "empty": true
+          }
+        }
+      ]
+    },
+    "exit": 2,
+    "expected": {
+      "verdict": "non_linearizable"
+    }
+  },
+  {
+    "name": "queue FIFO violated",
+    "request": {
+      "model": "queue",
+      "initial": [
+        1,
+        2
+      ],
+      "operations": [
+        {
+          "id": "d",
+          "client": "cd",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "dequeue"
+          },
+          "output": {
+            "value": 2
+          }
+        }
+      ]
+    },
+    "exit": 2,
+    "expected": {
+      "verdict": "non_linearizable"
+    }
+  },
+  {
+    "name": "global partition witness",
+    "request": {
+      "model": "kv_register",
+      "initial": {},
+      "operations": [
+        {
+          "id": "wx",
+          "client": "cwx",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "write",
+            "value": 1,
+            "key": "x"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "wy",
+          "client": "cwy",
+          "call": 3,
+          "return": 4,
+          "input": {
+            "type": "write",
+            "value": 2,
+            "key": "y"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "rx",
+          "client": "crx",
+          "call": 5,
+          "return": 6,
+          "input": {
+            "type": "read",
+            "key": "x"
+          },
+          "output": 1
+        }
+      ],
+      "partition": true
+    },
+    "exit": 0,
+    "expected": {
+      "verdict": "linearizable",
+      "witness": [
+        "wx",
+        "wy",
+        "rx"
+      ],
+      "witness_verified": true
+    }
+  },
+  {
+    "name": "missing key reads null",
+    "request": {
+      "model": "kv_register",
+      "initial": {},
+      "operations": [
+        {
+          "id": "r",
+          "client": "cr",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "read",
+            "key": "new"
+          },
+          "output": null
+        }
+      ],
+      "partition": true
+    },
+    "exit": 0,
+    "expected": {
+      "verdict": "linearizable"
+    }
+  },
+  {
+    "name": "partition failed object",
+    "request": {
+      "model": "kv_register",
+      "initial": {},
+      "operations": [
+        {
+          "id": "r",
+          "client": "cr",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "read",
+            "key": "x"
+          },
+          "output": 99
+        }
+      ],
+      "partition": true
+    },
+    "exit": 2,
+    "expected": {
+      "verdict": "non_linearizable",
+      "failed_key": "x"
+    }
+  },
+  {
+    "name": "unresolved write unknown",
+    "request": {
+      "model": "register",
+      "initial": 0,
+      "operations": [
+        {
+          "id": "p",
+          "client": "a",
+          "call": 1,
+          "input": {
+            "type": "write",
+            "value": 1
+          }
+        }
+      ]
+    },
+    "exit": 3,
+    "expected": {
+      "verdict": "unknown",
+      "reason": "incomplete_operations"
+    }
+  },
+  {
+    "name": "state budget unknown",
+    "request": {
+      "model": "register",
+      "initial": 0,
+      "operations": [
+        {
+          "id": "w",
+          "client": "cw",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "write",
+            "value": 1
+          },
+          "output": "ok"
+        },
+        {
+          "id": "r",
+          "client": "cr",
+          "call": 3,
+          "return": 4,
+          "input": {
+            "type": "read"
+          },
+          "output": 1
+        }
+      ],
+      "max_states": 1
+    },
+    "exit": 3,
+    "expected": {
+      "verdict": "unknown",
+      "reason": "max_states"
+    }
+  },
+  {
+    "name": "memo unit budget unknown",
+    "request": {
+      "model": "register",
+      "initial": 0,
+      "operations": [
+        {
+          "id": "r",
+          "client": "cr",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "read"
+          },
+          "output": 99
+        }
+      ],
+      "max_memo_units": 1
+    },
+    "exit": 3,
+    "expected": {
+      "verdict": "unknown",
+      "reason": "max_memo_units"
+    }
+  },
+  {
+    "name": "invalid zero state budget",
+    "request": {
+      "model": "register",
+      "initial": 0,
+      "operations": [
+        {
+          "id": "w",
+          "client": "cw",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "write",
+            "value": 1
+          },
+          "output": "ok"
+        },
+        {
+          "id": "r",
+          "client": "cr",
+          "call": 3,
+          "return": 4,
+          "input": {
+            "type": "read"
+          },
+          "output": 1
+        }
+      ],
+      "max_states": 0
+    },
+    "exit": 64,
+    "expected": {
+      "verdict": "invalid_input"
+    }
+  },
+  {
+    "name": "invalid fractional budget",
+    "request": {
+      "model": "register",
+      "initial": 0,
+      "operations": [
+        {
+          "id": "w",
+          "client": "cw",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "write",
+            "value": 1
+          },
+          "output": "ok"
+        },
+        {
+          "id": "r",
+          "client": "cr",
+          "call": 3,
+          "return": 4,
+          "input": {
+            "type": "read"
+          },
+          "output": 1
+        }
+      ],
+      "max_states": 1.5
+    },
+    "exit": 64,
+    "expected": {
+      "verdict": "invalid_input"
+    }
+  },
+  {
+    "name": "unsupported model",
+    "request": {
+      "model": "transaction",
+      "initial": 0,
+      "operations": []
+    },
+    "exit": 64,
+    "expected": {
+      "verdict": "invalid_input"
+    }
+  },
+  {
+    "name": "unknown request field",
+    "request": {
+      "model": "register",
+      "initial": 0,
+      "operations": [
+        {
+          "id": "w",
+          "client": "cw",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "write",
+            "value": 1
+          },
+          "output": "ok"
+        },
+        {
+          "id": "r",
+          "client": "cr",
+          "call": 3,
+          "return": 4,
+          "input": {
+            "type": "read"
+          },
+          "output": 1
+        }
+      ],
+      "typo": true
+    },
+    "exit": 64,
+    "expected": {
+      "verdict": "invalid_input"
+    }
+  },
+  {
+    "name": "unused budget on analyze",
+    "request": {
+      "model": "register",
+      "initial": 0,
+      "operations": [
+        {
+          "id": "w",
+          "client": "cw",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "write",
+            "value": 1
+          },
+          "output": "ok"
+        },
+        {
+          "id": "r",
+          "client": "cr",
+          "call": 3,
+          "return": 4,
+          "input": {
+            "type": "read"
+          },
+          "output": 1
+        }
+      ],
+      "operation": "analyze",
+      "max_states": 1
+    },
+    "exit": 64,
+    "expected": {
+      "verdict": "invalid_input"
+    }
+  },
+  {
+    "name": "invalid partition model",
+    "request": {
+      "model": "register",
+      "initial": 0,
+      "operations": [],
+      "partition": true
+    },
+    "exit": 64,
+    "expected": {
+      "verdict": "invalid_input"
+    }
+  },
+  {
+    "name": "invalid partition type",
+    "request": {
+      "model": "kv_register",
+      "initial": {},
+      "operations": [
+        {
+          "id": "wx",
+          "client": "cwx",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "write",
+            "value": 1,
+            "key": "x"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "wy",
+          "client": "cwy",
+          "call": 3,
+          "return": 4,
+          "input": {
+            "type": "write",
+            "value": 2,
+            "key": "y"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "rx",
+          "client": "crx",
+          "call": 5,
+          "return": 6,
+          "input": {
+            "type": "read",
+            "key": "x"
+          },
+          "output": 1
+        }
+      ],
+      "partition": "yes"
+    },
+    "exit": 64,
+    "expected": {
+      "verdict": "invalid_input"
+    }
+  },
+  {
+    "name": "duplicate ID",
+    "request": {
+      "model": "register",
+      "initial": 0,
+      "operations": [
+        {
+          "id": "x",
+          "client": "cx",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "read"
+          },
+          "output": 0
+        },
+        {
+          "id": "x",
+          "client": "cx",
+          "call": 3,
+          "return": 4,
+          "input": {
+            "type": "read"
+          },
+          "output": 0
+        }
+      ]
+    },
+    "exit": 64,
+    "expected": {
+      "verdict": "invalid_input"
+    }
+  },
+  {
+    "name": "duplicate ordinal",
+    "request": {
+      "model": "register",
+      "initial": 0,
+      "operations": [
+        {
+          "id": "x",
+          "client": "cx",
+          "call": 1,
+          "return": 4,
+          "input": {
+            "type": "read"
+          },
+          "output": 0
+        },
+        {
+          "id": "y",
+          "client": "cy",
+          "call": 1,
+          "return": 3,
+          "input": {
+            "type": "read"
+          },
+          "output": 0
+        }
+      ]
+    },
+    "exit": 64,
+    "expected": {
+      "verdict": "invalid_input"
+    }
+  },
+  {
+    "name": "negative call",
+    "request": {
+      "model": "register",
+      "initial": 0,
+      "operations": [
+        {
+          "id": "x",
+          "client": "cx",
+          "call": -1,
+          "return": 2,
+          "input": {
+            "type": "read"
+          },
+          "output": 0
+        }
+      ]
+    },
+    "exit": 64,
+    "expected": {
+      "verdict": "invalid_input"
+    }
+  },
+  {
+    "name": "fractional ordinal",
+    "request": {
+      "model": "register",
+      "initial": 0,
+      "operations": [
+        {
+          "id": "x",
+          "client": "cx",
+          "call": 1.5,
+          "return": 2,
+          "input": {
+            "type": "read"
+          },
+          "output": 0
+        }
+      ]
+    },
+    "exit": 64,
+    "expected": {
+      "verdict": "invalid_input"
+    }
+  },
+  {
+    "name": "unsafe JSON integer",
+    "request": {
+      "model": "register",
+      "initial": 0,
+      "operations": [
+        {
+          "id": "x",
+          "client": "cx",
+          "call": 9007199254740992,
+          "return": 9007199254740994,
+          "input": {
+            "type": "read"
+          },
+          "output": 0
+        }
+      ]
+    },
+    "exit": 64,
+    "expected": {
+      "verdict": "invalid_input"
+    }
+  },
+  {
+    "name": "reversed endpoints",
+    "request": {
+      "model": "register",
+      "initial": 0,
+      "operations": [
+        {
+          "id": "x",
+          "client": "cx",
+          "call": 3,
+          "return": 2,
+          "input": {
+            "type": "read"
+          },
+          "output": 0
+        }
+      ]
+    },
+    "exit": 64,
+    "expected": {
+      "verdict": "invalid_input"
+    }
+  },
+  {
+    "name": "pending output is ambiguous",
+    "request": {
+      "model": "register",
+      "initial": 0,
+      "operations": [
+        {
+          "id": "p",
+          "client": "a",
+          "call": 1,
+          "input": {
+            "type": "write",
+            "value": 1
+          },
+          "output": null
+        }
+      ]
+    },
+    "exit": 64,
+    "expected": {
+      "verdict": "invalid_input"
+    }
+  },
+  {
+    "name": "completed missing output",
+    "request": {
+      "model": "register",
+      "initial": 0,
+      "operations": [
+        {
+          "id": "w",
+          "client": "cw",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "write",
+            "value": 1
+          }
+        },
+        {
+          "id": "r",
+          "client": "cr",
+          "call": 3,
+          "return": 4,
+          "input": {
+            "type": "read"
+          },
+          "output": 1
+        }
+      ]
+    },
+    "exit": 64,
+    "expected": {
+      "verdict": "invalid_input"
+    }
+  },
+  {
+    "name": "write missing value",
+    "request": {
+      "model": "register",
+      "initial": 0,
+      "operations": [
+        {
+          "id": "w",
+          "client": "cw",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "write"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "r",
+          "client": "cr",
+          "call": 3,
+          "return": 4,
+          "input": {
+            "type": "read"
+          },
+          "output": 1
+        }
+      ]
+    },
+    "exit": 64,
+    "expected": {
+      "verdict": "invalid_input"
+    }
+  },
+  {
+    "name": "unknown model command",
+    "request": {
+      "model": "register",
+      "initial": 0,
+      "operations": [
+        {
+          "id": "x",
+          "client": "cx",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "remove"
+          },
+          "output": "ok"
+        }
+      ]
+    },
+    "exit": 64,
+    "expected": {
+      "verdict": "invalid_input"
+    }
+  },
+  {
+    "name": "single register no key",
+    "request": {
+      "model": "register",
+      "initial": 0,
+      "operations": [
+        {
+          "id": "x",
+          "client": "cx",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "read",
+            "key": "x"
+          },
+          "output": 0
+        }
+      ]
+    },
+    "exit": 64,
+    "expected": {
+      "verdict": "invalid_input"
+    }
+  },
+  {
+    "name": "queue initial must be array",
+    "request": {
+      "model": "queue",
+      "initial": 0,
+      "operations": []
+    },
+    "exit": 64,
+    "expected": {
+      "verdict": "invalid_input"
+    }
+  },
+  {
+    "name": "keyed initial must be object",
+    "request": {
+      "model": "kv_register",
+      "initial": 0,
+      "operations": []
+    },
+    "exit": 64,
+    "expected": {
+      "verdict": "invalid_input"
+    }
+  },
+  {
+    "name": "valid witness",
+    "request": {
+      "model": "register",
+      "initial": 0,
+      "operations": [
+        {
+          "id": "w",
+          "client": "cw",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "write",
+            "value": 1
+          },
+          "output": "ok"
+        },
+        {
+          "id": "r",
+          "client": "cr",
+          "call": 3,
+          "return": 4,
+          "input": {
+            "type": "read"
+          },
+          "output": 1
+        }
+      ],
+      "operation": "verify",
+      "witness": [
+        "w",
+        "r"
+      ]
+    },
+    "exit": 0,
+    "expected": {
+      "verdict": "valid_witness",
+      "valid": true
+    }
+  },
+  {
+    "name": "precedence invalid witness",
+    "request": {
+      "model": "register",
+      "initial": 0,
+      "operations": [
+        {
+          "id": "w",
+          "client": "cw",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "write",
+            "value": 1
+          },
+          "output": "ok"
+        },
+        {
+          "id": "r",
+          "client": "cr",
+          "call": 3,
+          "return": 4,
+          "input": {
+            "type": "read"
+          },
+          "output": 1
+        }
+      ],
+      "operation": "verify",
+      "witness": [
+        "r",
+        "w"
+      ]
+    },
+    "exit": 2,
+    "expected": {
+      "verdict": "invalid_witness",
+      "valid": false
+    }
+  },
+  {
+    "name": "model invalid witness",
+    "request": {
+      "model": "register",
+      "initial": 0,
+      "operations": [
+        {
+          "id": "w",
+          "client": "cw",
+          "call": 1,
+          "return": 4,
+          "input": {
+            "type": "write",
+            "value": 1
+          },
+          "output": "ok"
+        },
+        {
+          "id": "r",
+          "client": "cr",
+          "call": 2,
+          "return": 3,
+          "input": {
+            "type": "read"
+          },
+          "output": 0
+        }
+      ],
+      "operation": "verify",
+      "witness": [
+        "w",
+        "r"
+      ]
+    },
+    "exit": 2,
+    "expected": {
+      "verdict": "invalid_witness"
+    }
+  },
+  {
+    "name": "incomplete witness",
+    "request": {
+      "model": "register",
+      "initial": 0,
+      "operations": [
+        {
+          "id": "w",
+          "client": "cw",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "write",
+            "value": 1
+          },
+          "output": "ok"
+        },
+        {
+          "id": "r",
+          "client": "cr",
+          "call": 3,
+          "return": 4,
+          "input": {
+            "type": "read"
+          },
+          "output": 1
+        }
+      ],
+      "operation": "verify",
+      "witness": [
+        "w"
+      ]
+    },
+    "exit": 2,
+    "expected": {
+      "verdict": "invalid_witness"
+    }
+  },
+  {
+    "name": "duplicate witness",
+    "request": {
+      "model": "register",
+      "initial": 0,
+      "operations": [
+        {
+          "id": "w",
+          "client": "cw",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "write",
+            "value": 1
+          },
+          "output": "ok"
+        },
+        {
+          "id": "r",
+          "client": "cr",
+          "call": 3,
+          "return": 4,
+          "input": {
+            "type": "read"
+          },
+          "output": 1
+        }
+      ],
+      "operation": "verify",
+      "witness": [
+        "w",
+        "w"
+      ]
+    },
+    "exit": 2,
+    "expected": {
+      "verdict": "invalid_witness"
+    }
+  },
+  {
+    "name": "unknown witness ID",
+    "request": {
+      "model": "register",
+      "initial": 0,
+      "operations": [
+        {
+          "id": "w",
+          "client": "cw",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "write",
+            "value": 1
+          },
+          "output": "ok"
+        },
+        {
+          "id": "r",
+          "client": "cr",
+          "call": 3,
+          "return": 4,
+          "input": {
+            "type": "read"
+          },
+          "output": 1
+        }
+      ],
+      "operation": "verify",
+      "witness": [
+        "w",
+        "unknown"
+      ]
+    },
+    "exit": 2,
+    "expected": {
+      "verdict": "invalid_witness"
+    }
+  },
+  {
+    "name": "pending verification unknown",
+    "request": {
+      "model": "register",
+      "initial": 0,
+      "operations": [
+        {
+          "id": "p",
+          "client": "a",
+          "call": 1,
+          "input": {
+            "type": "write",
+            "value": 1
+          }
+        }
+      ],
+      "operation": "verify",
+      "witness": [
+        "p"
+      ]
+    },
+    "exit": 3,
+    "expected": {
+      "verdict": "unknown"
+    }
+  },
+  {
+    "name": "analyze serial",
+    "request": {
+      "model": "register",
+      "initial": 0,
+      "operations": [
+        {
+          "id": "w",
+          "client": "cw",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "write",
+            "value": 1
+          },
+          "output": "ok"
+        },
+        {
+          "id": "r",
+          "client": "cr",
+          "call": 3,
+          "return": 4,
+          "input": {
+            "type": "read"
+          },
+          "output": 1
+        }
+      ],
+      "operation": "analyze"
+    },
+    "exit": 0,
+    "expected": {
+      "edge_count": 1,
+      "overlap_pairs": 0,
+      "max_in_flight": 1
+    }
+  },
+  {
+    "name": "analyze overlap",
+    "request": {
+      "model": "register",
+      "initial": 0,
+      "operations": [
+        {
+          "id": "w",
+          "client": "cw",
+          "call": 1,
+          "return": 4,
+          "input": {
+            "type": "write",
+            "value": 1
+          },
+          "output": "ok"
+        },
+        {
+          "id": "r",
+          "client": "cr",
+          "call": 2,
+          "return": 3,
+          "input": {
+            "type": "read"
+          },
+          "output": 0
+        }
+      ],
+      "operation": "analyze"
+    },
+    "exit": 0,
+    "expected": {
+      "edge_count": 0,
+      "overlap_pairs": 1,
+      "max_in_flight": 2
+    }
+  },
+  {
+    "name": "reduce to definite pair",
+    "request": {
+      "model": "register",
+      "initial": 0,
+      "operations": [
+        {
+          "id": "noise",
+          "client": "cnoise",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "read"
+          },
+          "output": 0
+        },
+        {
+          "id": "w",
+          "client": "cw",
+          "call": 3,
+          "return": 4,
+          "input": {
+            "type": "write",
+            "value": 1
+          },
+          "output": "ok"
+        },
+        {
+          "id": "stale",
+          "client": "cstale",
+          "call": 5,
+          "return": 6,
+          "input": {
+            "type": "read"
+          },
+          "output": 0
+        }
+      ],
+      "operation": "reduce"
+    },
+    "exit": 2,
+    "expected": {
+      "verdict": "non_linearizable",
+      "remaining_operation_count": 2,
+      "reduction_complete": true
+    }
+  },
+  {
+    "name": "reduction budget not minimal",
+    "request": {
+      "model": "register",
+      "initial": 0,
+      "operations": [
+        {
+          "id": "noise",
+          "client": "cnoise",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "read"
+          },
+          "output": 0
+        },
+        {
+          "id": "w",
+          "client": "cw",
+          "call": 3,
+          "return": 4,
+          "input": {
+            "type": "write",
+            "value": 1
+          },
+          "output": "ok"
+        },
+        {
+          "id": "stale",
+          "client": "cstale",
+          "call": 5,
+          "return": 6,
+          "input": {
+            "type": "read"
+          },
+          "output": 0
+        }
+      ],
+      "operation": "reduce",
+      "max_checks": 1
+    },
+    "exit": 2,
+    "expected": {
+      "verdict": "non_linearizable",
+      "reduction_complete": false,
+      "minimality": "not_proven"
+    }
+  },
+  {
+    "name": "passing input not reduced",
+    "request": {
+      "model": "register",
+      "initial": 0,
+      "operations": [
+        {
+          "id": "w",
+          "client": "cw",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "write",
+            "value": 1
+          },
+          "output": "ok"
+        },
+        {
+          "id": "r",
+          "client": "cr",
+          "call": 3,
+          "return": 4,
+          "input": {
+            "type": "read"
+          },
+          "output": 1
+        }
+      ],
+      "operation": "reduce"
+    },
+    "exit": 0,
+    "expected": {
+      "verdict": "linearizable",
+      "reduction_complete": false
+    }
+  },
+  {
+    "name": "unknown input not reduced",
+    "request": {
+      "model": "register",
+      "initial": 0,
+      "operations": [
+        {
+          "id": "p",
+          "client": "a",
+          "call": 1,
+          "input": {
+            "type": "write",
+            "value": 1
+          }
+        }
+      ],
+      "operation": "reduce"
+    },
+    "exit": 3,
+    "expected": {
+      "verdict": "unknown",
+      "reduction_complete": false
+    }
+  },
+  {
+    "name": "unknown API operation",
+    "request": {
+      "model": "register",
+      "initial": 0,
+      "operations": [
+        {
+          "id": "w",
+          "client": "cw",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "write",
+            "value": 1
+          },
+          "output": "ok"
+        },
+        {
+          "id": "r",
+          "client": "cr",
+          "call": 3,
+          "return": 4,
+          "input": {
+            "type": "read"
+          },
+          "output": 1
+        }
+      ],
+      "operation": "stats"
+    },
+    "exit": 64,
+    "expected": {
+      "verdict": "invalid_input"
+    }
+  },
+  {
+    "name": "nested value depth limited",
+    "request": {
+      "model": "register",
+      "initial": [
+        [
+          [
+            [
+              [
+                [
+                  [
+                    [
+                      [
+                        [
+                          [
+                            [
+                              [
+                                [
+                                  [
+                                    [
+                                      [
+                                        [
+                                          [
+                                            [
+                                              [
+                                                [
+                                                  [
+                                                    [
+                                                      [
+                                                        [
+                                                          [
+                                                            [
+                                                              [
+                                                                [
+                                                                  [
+                                                                    [
+                                                                      [
+                                                                        [
+                                                                          0
+                                                                        ]
+                                                                      ]
+                                                                    ]
+                                                                  ]
+                                                                ]
+                                                              ]
+                                                            ]
+                                                          ]
+                                                        ]
+                                                      ]
+                                                    ]
+                                                  ]
+                                                ]
+                                              ]
+                                            ]
+                                          ]
+                                        ]
+                                      ]
+                                    ]
+                                  ]
+                                ]
+                              ]
+                            ]
+                          ]
+                        ]
+                      ]
+                    ]
+                  ]
+                ]
+              ]
+            ]
+          ]
+        ]
+      ],
+      "operations": []
+    },
+    "exit": 64,
+    "expected": {
+      "verdict": "invalid_input"
+    }
+  }
+]
