@@ -77,7 +77,7 @@ pub fn parse_history(request : Json) -> History raise HistoryError {
 fn parse_history_value(request : Value) -> History raise HistoryError {
   fields_only(request, [
     "operation", "model", "initial", "operations", "max_states", "max_memo_entries",
-    "partition", "witness", "max_checks",
+    "max_memo_units", "partition", "witness", "max_checks",
   ])
   let model = match string(required(request, "model")) {
     "register" => Register

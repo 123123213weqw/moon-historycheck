@@ -14,7 +14,9 @@ pub fn run(request : Value) -> Value {
       "check"
     }
     match operation {
-      "check" => check_history(history, limits)
+      "check" => check_verified(history, limits)
+      "verify" =>
+        verify_history(history, witness_ids(required(request, "witness")))
       "analyze" => analyze_history(history)
       _ => raise HistoryError("unsupported API operation: " + operation)
     }
