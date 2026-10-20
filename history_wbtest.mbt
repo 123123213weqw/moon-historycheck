@@ -1,0 +1,48 @@
+///|
+test "canonical object keys do not depend on insertion order" {
+  assert_eq(from_json({ "b": 2, "a": 1 }).canonical(), "{\"a\":1,\"b\":2}")
+}
+
+///|
+test "strict parser keeps incomplete operations observable" {
+  let history = parse_history({
+    "model": "register",
+    "initial": null,
+    "operations": [
+      {
+        "id": "w",
+        "client": "a",
+        "call": 1,
+        "input": { "type": "write", "value": 1 },
+      },
+    ],
+  })
+  assert_false(history.operations[0].complete)
+  assert_eq(history.initial, Null)
+}
+
+///|
+test "ambiguous event order is rejected" {
+  let rejected = try {
+    ignore(
+      parse_history({
+        "model": "register",
+        "initial": 0,
+        "operations": [
+          {
+            "id": "a",
+            "client": "c",
+            "call": 1,
+            "return": 1,
+            "input": { "type": "read" },
+            "output": 0,
+          },
+        ],
+      }),
+    )
+    false
+  } catch {
+    _ => true
+  }
+  assert_true(rejected)
+}
