@@ -4,6 +4,11 @@ test "canonical object keys do not depend on insertion order" {
 }
 
 ///|
+test "canonical object keys use lexical characters rather than string length" {
+  assert_eq(from_json({ "z": 1, "aa": 2 }).canonical(), "{\"aa\":2,\"z\":1}")
+}
+
+///|
 test "strict parser keeps incomplete operations observable" {
   let history = parse_history({
     "model": "register",

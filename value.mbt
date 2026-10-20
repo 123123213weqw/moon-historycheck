@@ -38,7 +38,7 @@ pub fn Value::canonical(self : Value) -> String {
   match self {
     Object(fields) => {
       let keys = fields.keys().collect()
-      keys.sort()
+      keys.sort_by(lexical_compare)
       "{" +
       keys
       .map(fn(k) {
@@ -50,6 +50,22 @@ pub fn Value::canonical(self : Value) -> String {
     Array(items) => "[" + items.map(fn(v) { v.canonical() }).join(",") + "]"
     _ => self.to_json().stringify()
   }
+}
+
+///|
+fn lexical_compare(left : String, right : String) -> Int32 {
+  let a = left.to_array()
+  let b = right.to_array()
+  let size = if a.length() < b.length() { a.length() } else { b.length() }
+  for i in 0..<size {
+    if a[i] < b[i] {
+      return -1
+    }
+    if a[i] > b[i] {
+      return 1
+    }
+  }
+  a.length() - b.length()
 }
 
 ///|

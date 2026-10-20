@@ -22,7 +22,7 @@ fn check_partitioned(
     }
   }
   let keys = groups.keys().collect()
-  keys.sort()
+  keys.sort_by(lexical_compare)
   let parts : Array[Value] = []
   let chains : Array[Array[String]] = []
   let mut explored = 0

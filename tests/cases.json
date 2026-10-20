@@ -1761,5 +1761,400 @@
     "expected": {
       "verdict": "invalid_input"
     }
+  },
+  {
+    "name": "certify closed rejection",
+    "request": {
+      "model": "register",
+      "initial": 0,
+      "operations": [
+        {
+          "id": "w",
+          "client": "cw",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "write",
+            "value": 1
+          },
+          "output": "ok"
+        },
+        {
+          "id": "r",
+          "client": "cr",
+          "call": 3,
+          "return": 4,
+          "input": {
+            "type": "read"
+          },
+          "output": 0
+        }
+      ],
+      "operation": "certify"
+    },
+    "exit": 2,
+    "expected": {
+      "verdict": "non_linearizable",
+      "certificate_verified": true,
+      "complete_search": true
+    }
+  },
+  {
+    "name": "certify successful order",
+    "request": {
+      "model": "register",
+      "initial": 0,
+      "operations": [
+        {
+          "id": "w",
+          "client": "cw",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "write",
+            "value": 1
+          },
+          "output": "ok"
+        },
+        {
+          "id": "r",
+          "client": "cr",
+          "call": 3,
+          "return": 4,
+          "input": {
+            "type": "read"
+          },
+          "output": 1
+        }
+      ],
+      "operation": "certify"
+    },
+    "exit": 0,
+    "expected": {
+      "verdict": "linearizable",
+      "witness_verified": true
+    }
+  },
+  {
+    "name": "certify limited search",
+    "request": {
+      "model": "register",
+      "initial": 0,
+      "operations": [
+        {
+          "id": "w",
+          "client": "cw",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "write",
+            "value": 1
+          },
+          "output": "ok"
+        },
+        {
+          "id": "r",
+          "client": "cr",
+          "call": 3,
+          "return": 4,
+          "input": {
+            "type": "read"
+          },
+          "output": 0
+        }
+      ],
+      "operation": "certify",
+      "max_states": 1
+    },
+    "exit": 3,
+    "expected": {
+      "verdict": "unknown"
+    }
+  },
+  {
+    "name": "verify externally specified closure",
+    "request": {
+      "model": "register",
+      "initial": 0,
+      "operations": [
+        {
+          "id": "w",
+          "client": "cw",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "write",
+            "value": 1
+          },
+          "output": "ok"
+        },
+        {
+          "id": "r",
+          "client": "cr",
+          "call": 3,
+          "return": 4,
+          "input": {
+            "type": "read"
+          },
+          "output": 0
+        }
+      ],
+      "operation": "verify_certificate",
+      "certificate": {
+        "schema_version": 1,
+        "history_canonical": "{\"initial\":0,\"model\":\"register\",\"operations\":[{\"call\":1,\"client\":\"cw\",\"id\":\"w\",\"input\":{\"type\":\"write\",\"value\":1},\"output\":\"ok\",\"return\":2},{\"call\":3,\"client\":\"cr\",\"id\":\"r\",\"input\":{\"type\":\"read\"},\"output\":0,\"return\":4}]}",
+        "nodes": [
+          {
+            "selected": [],
+            "state": 0,
+            "edges": [
+              {
+                "operation": "w",
+                "target": 1
+              }
+            ]
+          },
+          {
+            "selected": [
+              "w"
+            ],
+            "state": 1,
+            "edges": []
+          }
+        ]
+      }
+    },
+    "exit": 0,
+    "expected": {
+      "verdict": "valid_certificate",
+      "valid": true
+    }
+  },
+  {
+    "name": "certificate missing legal branch",
+    "request": {
+      "model": "register",
+      "initial": 0,
+      "operations": [
+        {
+          "id": "w",
+          "client": "cw",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "write",
+            "value": 1
+          },
+          "output": "ok"
+        },
+        {
+          "id": "r",
+          "client": "cr",
+          "call": 3,
+          "return": 4,
+          "input": {
+            "type": "read"
+          },
+          "output": 0
+        }
+      ],
+      "operation": "verify_certificate",
+      "certificate": {
+        "schema_version": 1,
+        "history_canonical": "{\"initial\":0,\"model\":\"register\",\"operations\":[{\"call\":1,\"client\":\"cw\",\"id\":\"w\",\"input\":{\"type\":\"write\",\"value\":1},\"output\":\"ok\",\"return\":2},{\"call\":3,\"client\":\"cr\",\"id\":\"r\",\"input\":{\"type\":\"read\"},\"output\":0,\"return\":4}]}",
+        "nodes": [
+          {
+            "selected": [],
+            "state": 0,
+            "edges": []
+          },
+          {
+            "selected": [
+              "w"
+            ],
+            "state": 1,
+            "edges": []
+          }
+        ]
+      }
+    },
+    "exit": 2,
+    "expected": {
+      "verdict": "invalid_certificate"
+    }
+  },
+  {
+    "name": "certificate wrong next state",
+    "request": {
+      "model": "register",
+      "initial": 0,
+      "operations": [
+        {
+          "id": "w",
+          "client": "cw",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "write",
+            "value": 1
+          },
+          "output": "ok"
+        },
+        {
+          "id": "r",
+          "client": "cr",
+          "call": 3,
+          "return": 4,
+          "input": {
+            "type": "read"
+          },
+          "output": 0
+        }
+      ],
+      "operation": "verify_certificate",
+      "certificate": {
+        "schema_version": 1,
+        "history_canonical": "{\"initial\":0,\"model\":\"register\",\"operations\":[{\"call\":1,\"client\":\"cw\",\"id\":\"w\",\"input\":{\"type\":\"write\",\"value\":1},\"output\":\"ok\",\"return\":2},{\"call\":3,\"client\":\"cr\",\"id\":\"r\",\"input\":{\"type\":\"read\"},\"output\":0,\"return\":4}]}",
+        "nodes": [
+          {
+            "selected": [],
+            "state": 0,
+            "edges": [
+              {
+                "operation": "w",
+                "target": 1
+              }
+            ]
+          },
+          {
+            "selected": [
+              "w"
+            ],
+            "state": 99,
+            "edges": []
+          }
+        ]
+      }
+    },
+    "exit": 2,
+    "expected": {
+      "verdict": "invalid_certificate"
+    }
+  },
+  {
+    "name": "certificate edge out of bounds",
+    "request": {
+      "model": "register",
+      "initial": 0,
+      "operations": [
+        {
+          "id": "w",
+          "client": "cw",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "write",
+            "value": 1
+          },
+          "output": "ok"
+        },
+        {
+          "id": "r",
+          "client": "cr",
+          "call": 3,
+          "return": 4,
+          "input": {
+            "type": "read"
+          },
+          "output": 0
+        }
+      ],
+      "operation": "verify_certificate",
+      "certificate": {
+        "schema_version": 1,
+        "history_canonical": "{\"initial\":0,\"model\":\"register\",\"operations\":[{\"call\":1,\"client\":\"cw\",\"id\":\"w\",\"input\":{\"type\":\"write\",\"value\":1},\"output\":\"ok\",\"return\":2},{\"call\":3,\"client\":\"cr\",\"id\":\"r\",\"input\":{\"type\":\"read\"},\"output\":0,\"return\":4}]}",
+        "nodes": [
+          {
+            "selected": [],
+            "state": 0,
+            "edges": [
+              {
+                "operation": "w",
+                "target": 90
+              }
+            ]
+          },
+          {
+            "selected": [
+              "w"
+            ],
+            "state": 1,
+            "edges": []
+          }
+        ]
+      }
+    },
+    "exit": 2,
+    "expected": {
+      "verdict": "invalid_certificate"
+    }
+  },
+  {
+    "name": "certificate wrong history",
+    "request": {
+      "model": "register",
+      "initial": 0,
+      "operations": [
+        {
+          "id": "w",
+          "client": "cw",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "write",
+            "value": 1
+          },
+          "output": "ok"
+        },
+        {
+          "id": "r",
+          "client": "cr",
+          "call": 3,
+          "return": 4,
+          "input": {
+            "type": "read"
+          },
+          "output": 0
+        }
+      ],
+      "operation": "verify_certificate",
+      "certificate": {
+        "schema_version": 1,
+        "history_canonical": "different history",
+        "nodes": [
+          {
+            "selected": [],
+            "state": 0,
+            "edges": [
+              {
+                "operation": "w",
+                "target": 1
+              }
+            ]
+          },
+          {
+            "selected": [
+              "w"
+            ],
+            "state": 1,
+            "edges": []
+          }
+        ]
+      }
+    },
+    "exit": 2,
+    "expected": {
+      "verdict": "invalid_certificate"
+    }
   }
 ]

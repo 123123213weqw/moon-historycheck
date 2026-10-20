@@ -35,6 +35,9 @@ pub fn run(request : Value) -> Value {
       "verify" =>
         verify_history(history, witness_ids(required(request, "witness")))
       "analyze" => analyze_history(history)
+      "certify" => certify_history(history, limits)
+      "verify_certificate" =>
+        verify_certificate(history, required(request, "certificate"))
       "reduce" =>
         reduce_history(history, limits, limit(request, "max_checks", 200, 2000))
       _ => raise HistoryError("unsupported API operation: " + operation)
@@ -60,13 +63,16 @@ fn validate_api_fields(request : Value) -> Unit raise HistoryError {
       allowed.push("max_memo_entries")
       allowed.push("max_memo_units")
     }
-    "reduce" => {
-      allowed.push("max_checks")
+    "reduce" | "certify" => {
+      if operation == "reduce" {
+        allowed.push("max_checks")
+      }
       allowed.push("max_states")
       allowed.push("max_memo_entries")
       allowed.push("max_memo_units")
     }
     "verify" => allowed.push("witness")
+    "verify_certificate" => allowed.push("certificate")
     "analyze" => ()
     _ => raise HistoryError("unsupported API operation: " + operation)
   }

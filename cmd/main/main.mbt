@@ -23,6 +23,7 @@ fn main {
       println(result.stringify(indent=2))
       let code = match result {
         { "verdict": "non_linearizable", .. }
+        | { "verdict": "invalid_certificate", .. }
         | { "verdict": "invalid_witness", .. } => 2
         { "verdict": "unknown", .. } => 3
         { "verdict": "invalid_input", .. } => 64

@@ -922,3 +922,136 @@ test "fixture nested value depth limited" {
     from_json(@json.parse("\"invalid_input\"")),
   )
 }
+
+///|
+test "fixture certify closed rejection" {
+  let result = from_json(
+    execute(
+      @json.parse(
+        "{\"model\":\"register\",\"initial\":0,\"operations\":[{\"id\":\"w\",\"client\":\"cw\",\"call\":1,\"return\":2,\"input\":{\"type\":\"write\",\"value\":1},\"output\":\"ok\"},{\"id\":\"r\",\"client\":\"cr\",\"call\":3,\"return\":4,\"input\":{\"type\":\"read\"},\"output\":0}],\"operation\":\"certify\"}",
+      ),
+    ),
+  )
+  assert_eq(
+    fixture_at(result, ["verdict"]),
+    from_json(@json.parse("\"non_linearizable\"")),
+  )
+  assert_eq(
+    fixture_at(result, ["certificate_verified"]),
+    from_json(@json.parse("true")),
+  )
+  assert_eq(
+    fixture_at(result, ["complete_search"]),
+    from_json(@json.parse("true")),
+  )
+}
+
+///|
+test "fixture certify successful order" {
+  let result = from_json(
+    execute(
+      @json.parse(
+        "{\"model\":\"register\",\"initial\":0,\"operations\":[{\"id\":\"w\",\"client\":\"cw\",\"call\":1,\"return\":2,\"input\":{\"type\":\"write\",\"value\":1},\"output\":\"ok\"},{\"id\":\"r\",\"client\":\"cr\",\"call\":3,\"return\":4,\"input\":{\"type\":\"read\"},\"output\":1}],\"operation\":\"certify\"}",
+      ),
+    ),
+  )
+  assert_eq(
+    fixture_at(result, ["verdict"]),
+    from_json(@json.parse("\"linearizable\"")),
+  )
+  assert_eq(
+    fixture_at(result, ["witness_verified"]),
+    from_json(@json.parse("true")),
+  )
+}
+
+///|
+test "fixture certify limited search" {
+  let result = from_json(
+    execute(
+      @json.parse(
+        "{\"model\":\"register\",\"initial\":0,\"operations\":[{\"id\":\"w\",\"client\":\"cw\",\"call\":1,\"return\":2,\"input\":{\"type\":\"write\",\"value\":1},\"output\":\"ok\"},{\"id\":\"r\",\"client\":\"cr\",\"call\":3,\"return\":4,\"input\":{\"type\":\"read\"},\"output\":0}],\"operation\":\"certify\",\"max_states\":1}",
+      ),
+    ),
+  )
+  assert_eq(
+    fixture_at(result, ["verdict"]),
+    from_json(@json.parse("\"unknown\"")),
+  )
+}
+
+///|
+test "fixture verify externally specified closure" {
+  let result = from_json(
+    execute(
+      @json.parse(
+        "{\"model\":\"register\",\"initial\":0,\"operations\":[{\"id\":\"w\",\"client\":\"cw\",\"call\":1,\"return\":2,\"input\":{\"type\":\"write\",\"value\":1},\"output\":\"ok\"},{\"id\":\"r\",\"client\":\"cr\",\"call\":3,\"return\":4,\"input\":{\"type\":\"read\"},\"output\":0}],\"operation\":\"verify_certificate\",\"certificate\":{\"schema_version\":1,\"history_canonical\":\"{\\\"initial\\\":0,\\\"model\\\":\\\"register\\\",\\\"operations\\\":[{\\\"call\\\":1,\\\"client\\\":\\\"cw\\\",\\\"id\\\":\\\"w\\\",\\\"input\\\":{\\\"type\\\":\\\"write\\\",\\\"value\\\":1},\\\"output\\\":\\\"ok\\\",\\\"return\\\":2},{\\\"call\\\":3,\\\"client\\\":\\\"cr\\\",\\\"id\\\":\\\"r\\\",\\\"input\\\":{\\\"type\\\":\\\"read\\\"},\\\"output\\\":0,\\\"return\\\":4}]}\",\"nodes\":[{\"selected\":[],\"state\":0,\"edges\":[{\"operation\":\"w\",\"target\":1}]},{\"selected\":[\"w\"],\"state\":1,\"edges\":[]}]}}",
+      ),
+    ),
+  )
+  assert_eq(
+    fixture_at(result, ["verdict"]),
+    from_json(@json.parse("\"valid_certificate\"")),
+  )
+  assert_eq(fixture_at(result, ["valid"]), from_json(@json.parse("true")))
+}
+
+///|
+test "fixture certificate missing legal branch" {
+  let result = from_json(
+    execute(
+      @json.parse(
+        "{\"model\":\"register\",\"initial\":0,\"operations\":[{\"id\":\"w\",\"client\":\"cw\",\"call\":1,\"return\":2,\"input\":{\"type\":\"write\",\"value\":1},\"output\":\"ok\"},{\"id\":\"r\",\"client\":\"cr\",\"call\":3,\"return\":4,\"input\":{\"type\":\"read\"},\"output\":0}],\"operation\":\"verify_certificate\",\"certificate\":{\"schema_version\":1,\"history_canonical\":\"{\\\"initial\\\":0,\\\"model\\\":\\\"register\\\",\\\"operations\\\":[{\\\"call\\\":1,\\\"client\\\":\\\"cw\\\",\\\"id\\\":\\\"w\\\",\\\"input\\\":{\\\"type\\\":\\\"write\\\",\\\"value\\\":1},\\\"output\\\":\\\"ok\\\",\\\"return\\\":2},{\\\"call\\\":3,\\\"client\\\":\\\"cr\\\",\\\"id\\\":\\\"r\\\",\\\"input\\\":{\\\"type\\\":\\\"read\\\"},\\\"output\\\":0,\\\"return\\\":4}]}\",\"nodes\":[{\"selected\":[],\"state\":0,\"edges\":[]},{\"selected\":[\"w\"],\"state\":1,\"edges\":[]}]}}",
+      ),
+    ),
+  )
+  assert_eq(
+    fixture_at(result, ["verdict"]),
+    from_json(@json.parse("\"invalid_certificate\"")),
+  )
+}
+
+///|
+test "fixture certificate wrong next state" {
+  let result = from_json(
+    execute(
+      @json.parse(
+        "{\"model\":\"register\",\"initial\":0,\"operations\":[{\"id\":\"w\",\"client\":\"cw\",\"call\":1,\"return\":2,\"input\":{\"type\":\"write\",\"value\":1},\"output\":\"ok\"},{\"id\":\"r\",\"client\":\"cr\",\"call\":3,\"return\":4,\"input\":{\"type\":\"read\"},\"output\":0}],\"operation\":\"verify_certificate\",\"certificate\":{\"schema_version\":1,\"history_canonical\":\"{\\\"initial\\\":0,\\\"model\\\":\\\"register\\\",\\\"operations\\\":[{\\\"call\\\":1,\\\"client\\\":\\\"cw\\\",\\\"id\\\":\\\"w\\\",\\\"input\\\":{\\\"type\\\":\\\"write\\\",\\\"value\\\":1},\\\"output\\\":\\\"ok\\\",\\\"return\\\":2},{\\\"call\\\":3,\\\"client\\\":\\\"cr\\\",\\\"id\\\":\\\"r\\\",\\\"input\\\":{\\\"type\\\":\\\"read\\\"},\\\"output\\\":0,\\\"return\\\":4}]}\",\"nodes\":[{\"selected\":[],\"state\":0,\"edges\":[{\"operation\":\"w\",\"target\":1}]},{\"selected\":[\"w\"],\"state\":99,\"edges\":[]}]}}",
+      ),
+    ),
+  )
+  assert_eq(
+    fixture_at(result, ["verdict"]),
+    from_json(@json.parse("\"invalid_certificate\"")),
+  )
+}
+
+///|
+test "fixture certificate edge out of bounds" {
+  let result = from_json(
+    execute(
+      @json.parse(
+        "{\"model\":\"register\",\"initial\":0,\"operations\":[{\"id\":\"w\",\"client\":\"cw\",\"call\":1,\"return\":2,\"input\":{\"type\":\"write\",\"value\":1},\"output\":\"ok\"},{\"id\":\"r\",\"client\":\"cr\",\"call\":3,\"return\":4,\"input\":{\"type\":\"read\"},\"output\":0}],\"operation\":\"verify_certificate\",\"certificate\":{\"schema_version\":1,\"history_canonical\":\"{\\\"initial\\\":0,\\\"model\\\":\\\"register\\\",\\\"operations\\\":[{\\\"call\\\":1,\\\"client\\\":\\\"cw\\\",\\\"id\\\":\\\"w\\\",\\\"input\\\":{\\\"type\\\":\\\"write\\\",\\\"value\\\":1},\\\"output\\\":\\\"ok\\\",\\\"return\\\":2},{\\\"call\\\":3,\\\"client\\\":\\\"cr\\\",\\\"id\\\":\\\"r\\\",\\\"input\\\":{\\\"type\\\":\\\"read\\\"},\\\"output\\\":0,\\\"return\\\":4}]}\",\"nodes\":[{\"selected\":[],\"state\":0,\"edges\":[{\"operation\":\"w\",\"target\":90}]},{\"selected\":[\"w\"],\"state\":1,\"edges\":[]}]}}",
+      ),
+    ),
+  )
+  assert_eq(
+    fixture_at(result, ["verdict"]),
+    from_json(@json.parse("\"invalid_certificate\"")),
+  )
+}
+
+///|
+test "fixture certificate wrong history" {
+  let result = from_json(
+    execute(
+      @json.parse(
+        "{\"model\":\"register\",\"initial\":0,\"operations\":[{\"id\":\"w\",\"client\":\"cw\",\"call\":1,\"return\":2,\"input\":{\"type\":\"write\",\"value\":1},\"output\":\"ok\"},{\"id\":\"r\",\"client\":\"cr\",\"call\":3,\"return\":4,\"input\":{\"type\":\"read\"},\"output\":0}],\"operation\":\"verify_certificate\",\"certificate\":{\"schema_version\":1,\"history_canonical\":\"different history\",\"nodes\":[{\"selected\":[],\"state\":0,\"edges\":[{\"operation\":\"w\",\"target\":1}]},{\"selected\":[\"w\"],\"state\":1,\"edges\":[]}]}}",
+      ),
+    ),
+  )
+  assert_eq(
+    fixture_at(result, ["verdict"]),
+    from_json(@json.parse("\"invalid_certificate\"")),
+  )
+}

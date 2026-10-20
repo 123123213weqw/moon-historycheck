@@ -52,7 +52,7 @@ def run(request):
     process=subprocess.run(['node',str(CLI),'-'],input=json.dumps(request),capture_output=True,text=True,encoding='utf-8',timeout=60)
     if not process.stdout:raise AssertionError(process.stderr)
     result=json.loads(process.stdout)
-    expected={'non_linearizable':2,'invalid_witness':2,'unknown':3,'invalid_input':64}.get(result.get('verdict'),0)
+    expected={'non_linearizable':2,'invalid_witness':2,'invalid_certificate':2,'unknown':3,'invalid_input':64}.get(result.get('verdict'),0)
     assert process.returncode==expected,(process.returncode,result,process.stderr)
     return result
 
