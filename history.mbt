@@ -96,10 +96,10 @@ fn parse_history_value(request : Value) -> History raise HistoryError {
   if raw.length() > 256 {
     raise HistoryError("history exceeds 256 operations")
   }
-  let ids : Map[String, Bool] = {}
-  let ordinals : Map[String, Bool] = {}
+  let ids : Map[String, Bool] = Map([])
+  let ordinals : Map[String, Bool] = Map([])
   let result : Array[Operation] = []
-  let nodes = Ref::new(0)
+  let nodes = Ref(0)
   validate_value(initial, 0, nodes)
   for entry in raw {
     fields_only(entry, ["id", "client", "call", "return", "input", "output"])
@@ -110,7 +110,7 @@ fn parse_history_value(request : Value) -> History raise HistoryError {
     ids[id] = true
     let client = identifier(required(entry, "client"))
     let call = ordinal(required(entry, "call"))
-    let key = Number(call).canonical()
+    let key = if call == 0.0 { "0" } else { Number(call).canonical() }
     if ordinals.contains(key) {
       raise HistoryError("event ordinals must be globally unique")
     }

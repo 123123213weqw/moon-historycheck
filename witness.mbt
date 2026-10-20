@@ -19,8 +19,8 @@ fn verify_history(history : History, witness : Array[String]) -> Value {
   if witness.length() != history.operations.length() {
     return invalid_witness("witness must cover every operation exactly once")
   }
-  let positions : Map[String, Int32] = Map::new()
-  let by_id : Map[String, Operation] = Map::new()
+  let positions : Map[String, Int32] = Map([])
+  let by_id : Map[String, Operation] = Map([])
   for op in history.operations {
     by_id[op.id] = op
   }
@@ -71,7 +71,7 @@ fn verify_history(history : History, witness : Array[String]) -> Value {
 
 ///|
 fn witness_ids(value : Value) -> Array[String] raise HistoryError {
-  array(value).map(fn(v) { identifier(v) })
+  array(value).map(v => identifier(v))
 }
 
 ///|

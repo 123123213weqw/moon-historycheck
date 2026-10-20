@@ -55,7 +55,7 @@ pub fn Value::canonical(self : Value) -> String {
 ///|
 pub(all) suberror HistoryError {
   HistoryError(String)
-} derive(Eq, Show)
+} derive(@debug.Debug)
 
 ///|
 fn object(value : Value) -> Map[String, Value] raise HistoryError {
@@ -119,7 +119,7 @@ fn fields_only(
 
 ///|
 fn record(items : Array[(String, Value)]) -> Value {
-  let result : Map[String, Value] = {}
+  let result : Map[String, Value] = Map([])
   for (key, value) in items {
     result[key] = value
   }

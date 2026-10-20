@@ -1,12 +1,12 @@
 ///|
-struct SearchLimits {
+priv struct SearchLimits {
   states : Int32
   entries : Int32
   units : Int32
 }
 
 ///|
-struct SearchContext {
+priv struct SearchContext {
   history : History
   incoming : Array[Array[Int32]]
   limits : SearchLimits
@@ -18,7 +18,7 @@ struct SearchContext {
 }
 
 ///|
-enum SearchOutcome {
+priv enum SearchOutcome {
   Found(Array[String], Value)
   Exhausted
   Limited(String)
@@ -106,7 +106,7 @@ fn check_history(history : History, limits : SearchLimits) -> Value {
     history,
     incoming: predecessors(history),
     limits,
-    memo: Map::new(),
+    memo: Map([]),
     explored: 0,
     hits: 0,
     rejected: 0,

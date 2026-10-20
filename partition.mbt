@@ -9,7 +9,7 @@ fn check_partitioned(
   if !pending_ids(history).is_empty() {
     return check_verified(history, limits)
   }
-  let groups : Map[String, Array[Operation]] = Map::new()
+  let groups : Map[String, Array[Operation]] = Map([])
   let initial = object(history.initial)
   for op in history.operations {
     let key = string(field(op.input, "key"))
@@ -78,7 +78,7 @@ fn check_partitioned(
   }
   // Merge local witness chains while retaining every global return-before-call edge.
   let incoming = predecessors(history)
-  let indexes : Map[String, Int32] = Map::new()
+  let indexes : Map[String, Int32] = Map([])
   for i, op in history.operations {
     indexes[op.id] = i
   }
