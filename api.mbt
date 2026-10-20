@@ -6,6 +6,7 @@ pub fn execute(request : Json) -> Json {
 ///|
 pub fn run(request : Value) -> Value {
   try {
+    validate_api_fields(request)
     let history = parse_history_value(request)
     let limits = search_limits(request)
     let operation = if has(request, "operation") {
@@ -34,10 +35,40 @@ pub fn run(request : Value) -> Value {
       "verify" =>
         verify_history(history, witness_ids(required(request, "witness")))
       "analyze" => analyze_history(history)
+      "reduce" =>
+        reduce_history(history, limits, limit(request, "max_checks", 200, 2000))
       _ => raise HistoryError("unsupported API operation: " + operation)
     }
   } catch {
     HistoryError(message) =>
       record([("verdict", String("invalid_input")), ("reason", String(message))])
   }
+}
+
+///|
+fn validate_api_fields(request : Value) -> Unit raise HistoryError {
+  let operation = if has(request, "operation") {
+    string(field(request, "operation"))
+  } else {
+    "check"
+  }
+  let allowed = ["operation", "model", "initial", "operations"]
+  match operation {
+    "check" => {
+      allowed.push("partition")
+      allowed.push("max_states")
+      allowed.push("max_memo_entries")
+      allowed.push("max_memo_units")
+    }
+    "reduce" => {
+      allowed.push("max_checks")
+      allowed.push("max_states")
+      allowed.push("max_memo_entries")
+      allowed.push("max_memo_units")
+    }
+    "verify" => allowed.push("witness")
+    "analyze" => ()
+    _ => raise HistoryError("unsupported API operation: " + operation)
+  }
+  fields_only(request, allowed)
 }
