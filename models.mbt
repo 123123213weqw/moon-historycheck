@@ -1,0 +1,81 @@
+///|
+fn register_transition(state : Value, input : Value, output : Value) -> Value? {
+  match field(input, "type") {
+    String("read") => if output == state { Some(state) } else { None }
+    String("write") =>
+      if output == String("ok") {
+        Some(field(input, "value"))
+      } else {
+        None
+      }
+    String("cas") => {
+      let succeeds = state == field(input, "expected")
+      if output != Bool(succeeds) {
+        None
+      } else if succeeds {
+        Some(field(input, "value"))
+      } else {
+        Some(state)
+      }
+    }
+    _ => None
+  }
+}
+
+///|
+fn transition(model : Model, state : Value, op : Operation) -> Value? {
+  match model {
+    Register => register_transition(state, op.input, op.output)
+    KeyValue =>
+      match (state, field(op.input, "key")) {
+        (Object(fields), String(key)) => {
+          let current = fields.get(key).unwrap_or(Null)
+          match register_transition(current, op.input, op.output) {
+            None => None
+            Some(next) =>
+              // A read or failed CAS must not introduce a previously absent key.
+              if current == next {
+                Some(state)
+              } else {
+                let result = fields.copy()
+                result[key] = next
+                Some(Object(result))
+              }
+          }
+        }
+        _ => None
+      }
+    Queue =>
+      match state {
+        Array(items) =>
+          match field(op.input, "type") {
+            String("enqueue") =>
+              if op.output != String("ok") {
+                None
+              } else {
+                let next = items.copy()
+                next.push(field(op.input, "value"))
+                Some(Array(next))
+              }
+            String("dequeue") =>
+              if items.is_empty() {
+                if op.output == record([("empty", Bool(true))]) {
+                  Some(state)
+                } else {
+                  None
+                }
+              } else if op.output == record([("value", items[0])]) {
+                let next : Array[Value] = []
+                for i in 1..<items.length() {
+                  next.push(items[i])
+                }
+                Some(Array(next))
+              } else {
+                None
+              }
+            _ => None
+          }
+        _ => None
+      }
+  }
+}
