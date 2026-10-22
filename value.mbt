@@ -90,6 +90,14 @@ fn array(value : Value) -> Array[Value] raise HistoryError {
 }
 
 ///|
+fn boolean(value : Value) -> Bool raise HistoryError {
+  match value {
+    Bool(v) => v
+    _ => raise HistoryError("expected boolean")
+  }
+}
+
+///|
 fn string(value : Value) -> String raise HistoryError {
   match value {
     String(v) => v

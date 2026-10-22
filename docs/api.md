@@ -27,8 +27,9 @@ No return/output means pending. Return without output, or output without a known
 | kv_register | Object mapping keys to values | Register commands with a nonempty key | Same per-key semantics; missing keys read null |
 | queue | Array | enqueue with value; dequeue | enqueue is "ok"; dequeue is exactly {"value":v} or {"empty":true} |
 | stack | Array | push with value; pop | push is "ok"; pop is exactly {"value":v} for the most recent push or {"empty":true} |
+| lock | Boolean held flag | acquire; release | acquire returns whether it took the lock; release is "ok" and requires holding |
 
-Failed CAS leaves state unchanged. Reads and failed CAS do not introduce missing keys. Null is not an empty queue or stack. Wrong model outputs are violations, not automatically interpreted as network timeouts. The recorder must represent unknown completion as pending.
+Failed CAS leaves state unchanged. Reads and failed CAS do not introduce missing keys. Null is not an empty queue or stack. Releasing an unheld lock is a violation. Wrong model outputs are violations, not automatically interpreted as network timeouts. The recorder must represent unknown completion as pending.
 
 ## check
 

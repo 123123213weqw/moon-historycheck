@@ -515,6 +515,86 @@
     }
   },
   {
+    "name": "lock mutual exclusion",
+    "request": {
+      "model": "lock",
+      "initial": false,
+      "operations": [
+        {
+          "id": "a",
+          "client": "ca",
+          "call": 1,
+          "return": 4,
+          "input": { "type": "acquire" },
+          "output": true
+        },
+        {
+          "id": "b",
+          "client": "cb",
+          "call": 2,
+          "return": 3,
+          "input": { "type": "acquire" },
+          "output": false
+        },
+        {
+          "id": "r",
+          "client": "cr",
+          "call": 5,
+          "return": 6,
+          "input": { "type": "release" },
+          "output": "ok"
+        }
+      ]
+    },
+    "exit": 0,
+    "expected": {
+      "verdict": "linearizable",
+      "final_state": false
+    }
+  },
+  {
+    "name": "lock denied while free",
+    "request": {
+      "model": "lock",
+      "initial": false,
+      "operations": [
+        {
+          "id": "a",
+          "client": "ca",
+          "call": 1,
+          "return": 2,
+          "input": { "type": "acquire" },
+          "output": false
+        }
+      ]
+    },
+    "exit": 2,
+    "expected": {
+      "verdict": "non_linearizable"
+    }
+  },
+  {
+    "name": "lock release unlocked rejected",
+    "request": {
+      "model": "lock",
+      "initial": false,
+      "operations": [
+        {
+          "id": "r",
+          "client": "cr",
+          "call": 1,
+          "return": 2,
+          "input": { "type": "release" },
+          "output": "ok"
+        }
+      ]
+    },
+    "exit": 2,
+    "expected": {
+      "verdict": "non_linearizable"
+    }
+  },
+  {
     "name": "global partition witness",
     "request": {
       "model": "kv_register",

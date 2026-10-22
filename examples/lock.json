@@ -1,0 +1,46 @@
+{
+  "model": "lock",
+  "initial": false,
+  "operations": [
+    {
+      "id": "a1",
+      "client": "a",
+      "call": 1,
+      "return": 6,
+      "input": {
+        "type": "acquire"
+      },
+      "output": true
+    },
+    {
+      "id": "a2",
+      "client": "b",
+      "call": 2,
+      "return": 3,
+      "input": {
+        "type": "acquire"
+      },
+      "output": false
+    },
+    {
+      "id": "r1",
+      "client": "a",
+      "call": 5,
+      "return": 8,
+      "input": {
+        "type": "release"
+      },
+      "output": "ok"
+    },
+    {
+      "id": "a3",
+      "client": "b",
+      "call": 7,
+      "return": 9,
+      "input": {
+        "type": "acquire"
+      },
+      "output": true
+    }
+  ]
+}

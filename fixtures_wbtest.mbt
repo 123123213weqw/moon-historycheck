@@ -316,6 +316,55 @@ test "fixture stack LIFO violated" {
 }
 
 ///|
+test "fixture lock mutual exclusion" {
+  let result = from_json(
+    execute(
+      @json.parse(
+        "{\"model\":\"lock\",\"initial\":false,\"operations\":[{\"id\":\"a\",\"client\":\"ca\",\"call\":1,\"return\":4,\"input\":{\"type\":\"acquire\"},\"output\":true},{\"id\":\"b\",\"client\":\"cb\",\"call\":2,\"return\":3,\"input\":{\"type\":\"acquire\"},\"output\":false},{\"id\":\"r\",\"client\":\"cr\",\"call\":5,\"return\":6,\"input\":{\"type\":\"release\"},\"output\":\"ok\"}]}",
+      ),
+    ),
+  )
+  assert_eq(
+    fixture_at(result, ["verdict"]),
+    from_json(@json.parse("\"linearizable\"")),
+  )
+  assert_eq(
+    fixture_at(result, ["final_state"]),
+    from_json(@json.parse("false")),
+  )
+}
+
+///|
+test "fixture lock denied while free" {
+  let result = from_json(
+    execute(
+      @json.parse(
+        "{\"model\":\"lock\",\"initial\":false,\"operations\":[{\"id\":\"a\",\"client\":\"ca\",\"call\":1,\"return\":2,\"input\":{\"type\":\"acquire\"},\"output\":false}]}",
+      ),
+    ),
+  )
+  assert_eq(
+    fixture_at(result, ["verdict"]),
+    from_json(@json.parse("\"non_linearizable\"")),
+  )
+}
+
+///|
+test "fixture lock release unlocked rejected" {
+  let result = from_json(
+    execute(
+      @json.parse(
+        "{\"model\":\"lock\",\"initial\":false,\"operations\":[{\"id\":\"r\",\"client\":\"cr\",\"call\":1,\"return\":2,\"input\":{\"type\":\"release\"},\"output\":\"ok\"}]}",
+      ),
+    ),
+  )
+  assert_eq(
+    fixture_at(result, ["verdict"]),
+    from_json(@json.parse("\"non_linearizable\"")),
+  )
+}
+
+///|
 test "fixture global partition witness" {
   let result = from_json(
     execute(

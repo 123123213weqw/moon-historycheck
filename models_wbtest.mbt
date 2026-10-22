@@ -99,6 +99,66 @@ test "stack pops the most recent push first" {
 }
 
 ///|
+test "lock acquire reports the holder and release requires holding" {
+  let acquire = parse_history({
+    "model": "lock",
+    "initial": false,
+    "operations": [
+      {
+        "id": "a",
+        "client": "ca",
+        "call": 1,
+        "return": 2,
+        "input": { "type": "acquire" },
+        "output": true,
+      },
+    ],
+  })
+  assert_eq(
+    transition(Lock, acquire.initial, acquire.operations[0]),
+    Some(Bool(true)),
+  )
+  assert_eq(transition(Lock, Bool(true), acquire.operations[0]), None)
+  let denied = parse_history({
+    "model": "lock",
+    "initial": true,
+    "operations": [
+      {
+        "id": "a",
+        "client": "ca",
+        "call": 1,
+        "return": 2,
+        "input": { "type": "acquire" },
+        "output": false,
+      },
+    ],
+  })
+  assert_eq(
+    transition(Lock, denied.initial, denied.operations[0]),
+    Some(Bool(true)),
+  )
+  let release = parse_history({
+    "model": "lock",
+    "initial": true,
+    "operations": [
+      {
+        "id": "r",
+        "client": "cr",
+        "call": 1,
+        "return": 2,
+        "input": { "type": "release" },
+        "output": "ok",
+      },
+    ],
+  })
+  assert_eq(
+    transition(Lock, release.initial, release.operations[0]),
+    Some(Bool(false)),
+  )
+  assert_eq(transition(Lock, Bool(false), release.operations[0]), None)
+}
+
+///|
 test "key updates do not mutate other branches" {
   let history = parse_history({
     "model": "kv_register",

@@ -1,6 +1,6 @@
 # Moon HistoryCheck
 
-Bounded linearizability checking for concurrent operation histories, implemented in MoonBit. Register/CAS, independent keyed registers, FIFO queues and LIFO stacks have executable sequential models. Results distinguish a verified legal ordering, an exhaustive rejection, an unknown result and malformed input.
+Bounded linearizability checking for concurrent operation histories, implemented in MoonBit. Register/CAS, independent keyed registers, FIFO queues, LIFO stacks and mutual-exclusion locks have executable sequential models. Results distinguish a verified legal ordering, an exhaustive rejection, an unknown result and malformed input.
 
 - Owner: `123123213weqw`
 - Module: `123123213weqw/moon_historycheck@0.1.0`
@@ -74,7 +74,7 @@ node scripts/record-demo.mjs /YOUR/SCRATCH/DIRECTORY
 python -B scripts/stats.py
 ```
 
-27 manual test declarations plus 68 generated golden API tests make 95 declarations. The same 68 golden cases also run through the CLI; they are repeated entry-point checks, not 163 independent requirements. The independent Python oracle checks 480 histories, 120 partition equivalence cases and 20 reductions. A separate closure audit checks 120 histories: 55 negative certificates and 65 positive witnesses, including tampering rejection. Tests are deterministic synthetic data. The async recorder runs controlled in-process services, not a production database.
+28 manual test declarations plus 71 generated golden API tests make 99 declarations. The same 71 golden cases also run through the CLI; they are repeated entry-point checks, not 170 independent requirements. The independent Python oracle checks 600 histories, 120 partition equivalence cases and 20 reductions. A separate closure audit checks 150 histories: 65 negative certificates and 85 positive witnesses, including tampering rejection. Tests are deterministic synthetic data. The async recorder runs controlled in-process services, not a production database.
 
 ## Contract and limits
 

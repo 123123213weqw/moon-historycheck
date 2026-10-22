@@ -110,5 +110,24 @@ fn transition(model : Model, state : Value, op : Operation) -> Value? {
           }
         _ => None
       }
+    Lock =>
+      match (state, field(op.input, "type")) {
+        // Acquire reports whether it took the lock: only one holder at a time.
+        (Bool(locked), String("acquire")) =>
+          if op.output == Bool(!locked) {
+            Some(Bool(true))
+          } else {
+            None
+          }
+        // Releasing requires holding the lock.
+        (Bool(true), String("release")) =>
+          if op.output == String("ok") {
+            Some(Bool(false))
+          } else {
+            None
+          }
+        (Bool(false), String("release")) => None
+        _ => None
+      }
   }
 }
