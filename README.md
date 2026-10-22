@@ -10,7 +10,7 @@ Bounded linearizability checking for concurrent operation histories, implemented
 ## Implemented
 
 1. Strict identities, recorder ordinals, model inputs and resource options. Unresolved operations return unknown.
-2. Precedence-aware DFS with full selected-set/model-state memoization. A search cut is never an impossibility proof.
+2. Precedence-aware DFS with full selected-set/model-state memoization and earliest-return-first candidate ordering. A search cut is never an impossibility proof.
 3. A witness verifier recomputes pairwise real-time obligations and replays the complete ordering.
 4. Independent-key decomposition with an aggregate state budget and fully verified global witness merge.
 5. Single-operation counterexample deletion, repeated checks and explicit incomplete-minimization reporting.
