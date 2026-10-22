@@ -53,9 +53,9 @@ Shared history, operation verify, and witness (array of IDs). Rejects omissions,
 
 ## reduce
 
-Shared history, operation reduce, optional search budgets and max_checks. Only a definite negative result is reduced. Each trial removes a complete operation pair; initial state and remaining outputs are retained. After accepting a deletion, scanning restarts.
+Shared history, operation reduce, optional search budgets and max_checks. Only a definite negative result is reduced. Trials delete contiguous chunks of complete operations, delta-debugging style: after an accepted chunk the granularity refines and scanning restarts, and the final pass always deletes one operation at a time. Initial state and remaining outputs are retained.
 
-Reports history, removed IDs, trials, solver_checks, total_expanded_states, stopping_reason, reduction_complete and minimality. A complete result is 1-minimal_under_single_operation_deletion, not globally smallest. Unknown cannot justify deletion and prevents unsupported minimality claims.
+Reports history, removed IDs, trials (removed_candidates, verdict, reason), solver_checks, total_expanded_states, stopping_reason, reduction_complete and minimality. A complete result is 1-minimal_under_single_operation_deletion, not globally smallest. Unknown cannot justify deletion and prevents unsupported minimality claims.
 
 ## certify
 

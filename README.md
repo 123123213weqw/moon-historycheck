@@ -13,7 +13,7 @@ Bounded linearizability checking for concurrent operation histories, implemented
 2. Precedence-aware DFS with full selected-set/model-state memoization and earliest-return-first candidate ordering. A search cut is never an impossibility proof.
 3. A witness verifier recomputes pairwise real-time obligations and replays the complete ordering.
 4. Independent-key decomposition with an aggregate state budget and fully verified global witness merge.
-5. Single-operation counterexample deletion, repeated checks and explicit incomplete-minimization reporting.
+5. Delta-debugging counterexample reduction with chunked operation deletion; completion still proves 1-minimality under single-operation deletion, and unknown subresults never justify a deletion.
 6. A separate breadth-first closed-state search emits finite rejection certificates. A verifier checks initial binding, every legal enabled successor, states, terminal exclusion and reachability without trusting the generator's predecessor graph.
 7. Verdict-aware CLI, examples and an actual async-call recorder with a controlled stale-read demo.
 
@@ -74,7 +74,7 @@ node scripts/record-demo.mjs /YOUR/SCRATCH/DIRECTORY
 python -B scripts/stats.py
 ```
 
-29 manual test declarations plus 75 generated golden API tests make 104 declarations. The same 75 golden cases also run through the CLI; they are repeated entry-point checks, not 179 independent requirements. The independent Python oracle checks 720 histories, 120 partition equivalence cases and 20 reductions. A separate closure audit checks 180 histories: 78 negative certificates and 102 positive witnesses, including tampering rejection. Tests are deterministic synthetic data. The async recorder runs controlled in-process services, not a production database.
+30 manual test declarations plus 75 generated golden API tests make 105 declarations. The same 75 golden cases also run through the CLI; they are repeated entry-point checks, not 180 independent requirements. The independent Python oracle checks 720 histories, 120 partition equivalence cases and 20 reductions. A separate closure audit checks 180 histories: 78 negative certificates and 102 positive witnesses, including tampering rejection. Tests are deterministic synthetic data. The async recorder runs controlled in-process services, not a production database.
 
 ## Contract and limits
 
