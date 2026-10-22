@@ -365,6 +365,67 @@ test "fixture lock release unlocked rejected" {
 }
 
 ///|
+test "fixture set add remove contains" {
+  let result = from_json(
+    execute(
+      @json.parse(
+        "{\"model\":\"set\",\"initial\":[],\"operations\":[{\"id\":\"a\",\"client\":\"ca\",\"call\":1,\"return\":6,\"input\":{\"type\":\"add\",\"value\":1},\"output\":\"ok\"},{\"id\":\"c\",\"client\":\"cc\",\"call\":2,\"return\":3,\"input\":{\"type\":\"contains\",\"value\":1},\"output\":true},{\"id\":\"r\",\"client\":\"cr\",\"call\":4,\"return\":5,\"input\":{\"type\":\"remove\",\"value\":1},\"output\":true}]}",
+      ),
+    ),
+  )
+  assert_eq(
+    fixture_at(result, ["verdict"]),
+    from_json(@json.parse("\"linearizable\"")),
+  )
+  assert_eq(fixture_at(result, ["final_state"]), from_json(@json.parse("[]")))
+}
+
+///|
+test "fixture set contains absent" {
+  let result = from_json(
+    execute(
+      @json.parse(
+        "{\"model\":\"set\",\"initial\":[],\"operations\":[{\"id\":\"c\",\"client\":\"cc\",\"call\":1,\"return\":2,\"input\":{\"type\":\"contains\",\"value\":null},\"output\":false}]}",
+      ),
+    ),
+  )
+  assert_eq(
+    fixture_at(result, ["verdict"]),
+    from_json(@json.parse("\"linearizable\"")),
+  )
+}
+
+///|
+test "fixture set wrong membership rejected" {
+  let result = from_json(
+    execute(
+      @json.parse(
+        "{\"model\":\"set\",\"initial\":[1],\"operations\":[{\"id\":\"c\",\"client\":\"cc\",\"call\":1,\"return\":2,\"input\":{\"type\":\"contains\",\"value\":true},\"output\":true}]}",
+      ),
+    ),
+  )
+  assert_eq(
+    fixture_at(result, ["verdict"]),
+    from_json(@json.parse("\"non_linearizable\"")),
+  )
+}
+
+///|
+test "fixture set remove absent reports false" {
+  let result = from_json(
+    execute(
+      @json.parse(
+        "{\"model\":\"set\",\"initial\":[],\"operations\":[{\"id\":\"r\",\"client\":\"cr\",\"call\":1,\"return\":2,\"input\":{\"type\":\"remove\",\"value\":0},\"output\":false}]}",
+      ),
+    ),
+  )
+  assert_eq(
+    fixture_at(result, ["verdict"]),
+    from_json(@json.parse("\"linearizable\"")),
+  )
+}
+
+///|
 test "fixture global partition witness" {
   let result = from_json(
     execute(

@@ -1,0 +1,39 @@
+{
+  "model": "set",
+  "initial": [],
+  "operations": [
+    {
+      "id": "a",
+      "client": "a",
+      "call": 1,
+      "return": 6,
+      "input": {
+        "type": "add",
+        "value": 1
+      },
+      "output": "ok"
+    },
+    {
+      "id": "c",
+      "client": "b",
+      "call": 2,
+      "return": 3,
+      "input": {
+        "type": "contains",
+        "value": 1
+      },
+      "output": true
+    },
+    {
+      "id": "c0",
+      "client": "c",
+      "call": 4,
+      "return": 5,
+      "input": {
+        "type": "contains",
+        "value": 2
+      },
+      "output": false
+    }
+  ]
+}

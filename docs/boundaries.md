@@ -1,6 +1,6 @@
 # Current boundaries
 
-- Built-in deterministic register/CAS, keyed register, FIFO queue, LIFO stack and mutual-exclusion lock models only. No transactions, arbitrary executable-model plug-ins or database protocol collector.
+- Built-in deterministic register/CAS, keyed register, FIFO queue, LIFO stack, mutual-exclusion lock and membership set models only. No transactions, arbitrary executable-model plug-ins or database protocol collector.
 - Finite observed histories are checked. Pending or unknown completion is not silently removed or completed.
 - Reliable recorder ordinals are required. Uncalibrated cross-machine clocks cannot supply this assumed ordering. Client labels add no implicit serial-client constraints.
 - Model values use finite Double and structural JSON equality, not arbitrary-precision decimal values.

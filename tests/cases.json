@@ -595,6 +595,107 @@
     }
   },
   {
+    "name": "set add remove contains",
+    "request": {
+      "model": "set",
+      "initial": [],
+      "operations": [
+        {
+          "id": "a",
+          "client": "ca",
+          "call": 1,
+          "return": 6,
+          "input": { "type": "add", "value": 1 },
+          "output": "ok"
+        },
+        {
+          "id": "c",
+          "client": "cc",
+          "call": 2,
+          "return": 3,
+          "input": { "type": "contains", "value": 1 },
+          "output": true
+        },
+        {
+          "id": "r",
+          "client": "cr",
+          "call": 4,
+          "return": 5,
+          "input": { "type": "remove", "value": 1 },
+          "output": true
+        }
+      ]
+    },
+    "exit": 0,
+    "expected": {
+      "verdict": "linearizable",
+      "final_state": []
+    }
+  },
+  {
+    "name": "set contains absent",
+    "request": {
+      "model": "set",
+      "initial": [],
+      "operations": [
+        {
+          "id": "c",
+          "client": "cc",
+          "call": 1,
+          "return": 2,
+          "input": { "type": "contains", "value": null },
+          "output": false
+        }
+      ]
+    },
+    "exit": 0,
+    "expected": {
+      "verdict": "linearizable"
+    }
+  },
+  {
+    "name": "set wrong membership rejected",
+    "request": {
+      "model": "set",
+      "initial": [1],
+      "operations": [
+        {
+          "id": "c",
+          "client": "cc",
+          "call": 1,
+          "return": 2,
+          "input": { "type": "contains", "value": true },
+          "output": true
+        }
+      ]
+    },
+    "exit": 2,
+    "expected": {
+      "verdict": "non_linearizable"
+    }
+  },
+  {
+    "name": "set remove absent reports false",
+    "request": {
+      "model": "set",
+      "initial": [],
+      "operations": [
+        {
+          "id": "r",
+          "client": "cr",
+          "call": 1,
+          "return": 2,
+          "input": { "type": "remove", "value": 0 },
+          "output": false
+        }
+      ]
+    },
+    "exit": 0,
+    "expected": {
+      "verdict": "linearizable"
+    }
+  },
+  {
     "name": "global partition witness",
     "request": {
       "model": "kv_register",

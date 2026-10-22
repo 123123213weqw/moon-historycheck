@@ -159,6 +159,77 @@ test "lock acquire reports the holder and release requires holding" {
 }
 
 ///|
+test "set membership and removal use structural equality" {
+  let add = parse_history({
+    "model": "set",
+    "initial": [1],
+    "operations": [
+      {
+        "id": "a",
+        "client": "ca",
+        "call": 1,
+        "return": 2,
+        "input": { "type": "add", "value": 1 },
+        "output": "ok",
+      },
+    ],
+  })
+  assert_eq(transition(Set, add.initial, add.operations[0]), Some(add.initial))
+  let add_true = parse_history({
+    "model": "set",
+    "initial": [1],
+    "operations": [
+      {
+        "id": "a",
+        "client": "ca",
+        "call": 1,
+        "return": 2,
+        "input": { "type": "add", "value": true },
+        "output": "ok",
+      },
+    ],
+  })
+  assert_eq(
+    transition(Set, add_true.initial, add_true.operations[0]),
+    Some(Array([Number(1), Bool(true)])),
+  )
+  let remove = parse_history({
+    "model": "set",
+    "initial": [1, true],
+    "operations": [
+      {
+        "id": "r",
+        "client": "cr",
+        "call": 1,
+        "return": 2,
+        "input": { "type": "remove", "value": true },
+        "output": true,
+      },
+    ],
+  })
+  assert_eq(
+    transition(Set, remove.initial, remove.operations[0]),
+    Some(Array([Number(1)])),
+  )
+  assert_eq(transition(Set, Array([]), remove.operations[0]), None)
+  let contains = parse_history({
+    "model": "set",
+    "initial": [1],
+    "operations": [
+      {
+        "id": "c",
+        "client": "cc",
+        "call": 1,
+        "return": 2,
+        "input": { "type": "contains", "value": true },
+        "output": true,
+      },
+    ],
+  })
+  assert_eq(transition(Set, contains.initial, contains.operations[0]), None)
+}
+
+///|
 test "key updates do not mutate other branches" {
   let history = parse_history({
     "model": "kv_register",

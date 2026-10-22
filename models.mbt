@@ -129,5 +129,49 @@ fn transition(model : Model, state : Value, op : Operation) -> Value? {
         (Bool(false), String("release")) => None
         _ => None
       }
+    Set =>
+      match state {
+        Array(items) =>
+          match field(op.input, "type") {
+            String("add") =>
+              if op.output != String("ok") {
+                None
+              } else if items.contains(field(op.input, "value")) {
+                Some(state)
+              } else {
+                let next = items.copy()
+                next.push(field(op.input, "value"))
+                Some(Array(next))
+              }
+            String("remove") => {
+              // Membership and removal use structural JSON equality: true is not 1.
+              let target = field(op.input, "value")
+              if op.output != Bool(items.contains(target)) {
+                None
+              } else if items.contains(target) {
+                let next : Array[Value] = []
+                let mut skipped = false
+                for item in items {
+                  if !skipped && item == target {
+                    skipped = true
+                  } else {
+                    next.push(item)
+                  }
+                }
+                Some(Array(next))
+              } else {
+                Some(state)
+              }
+            }
+            String("contains") =>
+              if op.output == Bool(items.contains(field(op.input, "value"))) {
+                Some(state)
+              } else {
+                None
+              }
+            _ => None
+          }
+        _ => None
+      }
   }
 }

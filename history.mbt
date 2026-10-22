@@ -5,6 +5,7 @@ pub(all) enum Model {
   Queue
   Stack
   Lock
+  Set
 } derive(Eq, @debug.Debug)
 
 ///|
@@ -33,6 +34,7 @@ fn model_name(model : Model) -> String {
     Queue => "queue"
     Stack => "stack"
     Lock => "lock"
+    Set => "set"
   }
 }
 
@@ -84,6 +86,14 @@ fn validate_input(model : Model, input : Value) -> Unit raise HistoryError {
         "release" => fields_only(input, ["type"])
         _ => raise HistoryError("unsupported lock operation: " + kind)
       }
+    Set =>
+      match kind {
+        "add" | "remove" | "contains" => {
+          fields_only(input, ["type", "value"])
+          ignore(required(input, "value"))
+        }
+        _ => raise HistoryError("unsupported set operation: " + kind)
+      }
   }
 }
 
@@ -104,13 +114,14 @@ fn parse_history_value(request : Value) -> History raise HistoryError {
     "queue" => Queue
     "stack" => Stack
     "lock" => Lock
+    "set" => Set
     name => raise HistoryError("unsupported model: " + name)
   }
   let initial = required(request, "initial")
   if model == KeyValue {
     ignore(object(initial))
   }
-  if model == Queue || model == Stack {
+  if model == Queue || model == Stack || model == Set {
     ignore(array(initial))
   }
   if model == Lock {

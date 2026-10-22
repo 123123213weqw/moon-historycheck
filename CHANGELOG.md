@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-Earliest-return-first DFS candidate ordering. LIFO stack and mutual-exclusion lock sequential models, each with independent Python permutation and closure-audit coverage, golden CLI cases and examples. Search backtracking regression test pins the reduced expansion count.
+Earliest-return-first DFS candidate ordering. LIFO stack, mutual-exclusion lock and membership set sequential models, each with independent Python permutation and closure-audit coverage, golden CLI cases and examples. Search backtracking regression test pins the reduced expansion count.
 
 ## 0.1.0 2026-10-20
 
