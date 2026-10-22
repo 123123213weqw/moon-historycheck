@@ -50,6 +50,55 @@ test "FIFO empty result is distinct from enqueued null" {
 }
 
 ///|
+test "stack pops the most recent push first" {
+  let history = parse_history({
+    "model": "stack",
+    "initial": [],
+    "operations": [
+      {
+        "id": "p1",
+        "client": "a",
+        "call": 1,
+        "return": 2,
+        "input": { "type": "push", "value": 1 },
+        "output": "ok",
+      },
+      {
+        "id": "p2",
+        "client": "b",
+        "call": 3,
+        "return": 4,
+        "input": { "type": "push", "value": 2 },
+        "output": "ok",
+      },
+    ],
+  })
+  assert_eq(
+    transition(Stack, history.initial, history.operations[1]),
+    Some(Array([Number(2)])),
+  )
+  let pop_history = parse_history({
+    "model": "stack",
+    "initial": [1, 2],
+    "operations": [
+      {
+        "id": "d",
+        "client": "a",
+        "call": 1,
+        "return": 2,
+        "input": { "type": "pop" },
+        "output": { "value": 2 },
+      },
+    ],
+  })
+  assert_eq(
+    transition(Stack, pop_history.initial, pop_history.operations[0]),
+    Some(Array([Number(1)])),
+  )
+  assert_eq(transition(Stack, Array([]), pop_history.operations[0]), None)
+}
+
+///|
 test "key updates do not mutate other branches" {
   let history = parse_history({
     "model": "kv_register",

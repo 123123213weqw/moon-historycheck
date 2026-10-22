@@ -270,6 +270,52 @@ test "fixture queue FIFO violated" {
 }
 
 ///|
+test "fixture stack LIFO" {
+  let result = from_json(
+    execute(
+      @json.parse(
+        "{\"model\":\"stack\",\"initial\":[],\"operations\":[{\"id\":\"p1\",\"client\":\"cp\",\"call\":1,\"return\":2,\"input\":{\"type\":\"push\",\"value\":1},\"output\":\"ok\"},{\"id\":\"p2\",\"client\":\"cp\",\"call\":3,\"return\":4,\"input\":{\"type\":\"push\",\"value\":2},\"output\":\"ok\"},{\"id\":\"d\",\"client\":\"cd\",\"call\":5,\"return\":6,\"input\":{\"type\":\"pop\"},\"output\":{\"value\":2}}]}",
+      ),
+    ),
+  )
+  assert_eq(
+    fixture_at(result, ["verdict"]),
+    from_json(@json.parse("\"linearizable\"")),
+  )
+  assert_eq(fixture_at(result, ["final_state"]), from_json(@json.parse("[1]")))
+}
+
+///|
+test "fixture stack empty" {
+  let result = from_json(
+    execute(
+      @json.parse(
+        "{\"model\":\"stack\",\"initial\":[],\"operations\":[{\"id\":\"d\",\"client\":\"cd\",\"call\":1,\"return\":2,\"input\":{\"type\":\"pop\"},\"output\":{\"empty\":true}}]}",
+      ),
+    ),
+  )
+  assert_eq(
+    fixture_at(result, ["verdict"]),
+    from_json(@json.parse("\"linearizable\"")),
+  )
+}
+
+///|
+test "fixture stack LIFO violated" {
+  let result = from_json(
+    execute(
+      @json.parse(
+        "{\"model\":\"stack\",\"initial\":[1,2],\"operations\":[{\"id\":\"d\",\"client\":\"cd\",\"call\":1,\"return\":2,\"input\":{\"type\":\"pop\"},\"output\":{\"value\":1}}]}",
+      ),
+    ),
+  )
+  assert_eq(
+    fixture_at(result, ["verdict"]),
+    from_json(@json.parse("\"non_linearizable\"")),
+  )
+}
+
+///|
 test "fixture global partition witness" {
   let result = from_json(
     execute(

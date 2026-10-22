@@ -21,6 +21,13 @@ def apply(model,state,op):
         expected={'value':state[0]} if state else {'empty':True}
         if not same(output,expected):return False,state
         return True,state[1:] if state else state
+    if model=='stack':
+        if kind=='push':
+            if not same(output,'ok'):return False,state
+            state.append(arg['value']);return True,state
+        expected={'value':state[-1]} if state else {'empty':True}
+        if not same(output,expected):return False,state
+        return True,state[:-1] if state else state
     key=arg.get('key');current=state.get(key) if model=='kv_register' else state
     next_value=current
     if kind=='read':legal=same(output,current)
@@ -58,21 +65,21 @@ def run(request):
 
 def generated(rng,model,index):
     n=rng.randrange(1,7);positive=index%2==0
-    state=[] if model=='queue' else ({'x':0,'y':0} if model=='kv_register' else 0)
+    state=[] if model in ('queue','stack') else ({'x':0,'y':0} if model=='kv_register' else 0)
     initial=copy.deepcopy(state);ops=[]
     for i in range(n):
-        kind=rng.choice(['enqueue','dequeue']) if model=='queue' else rng.choice(['read','write','cas'])
+        kind=rng.choice(['enqueue','dequeue'] if model=='queue' else ['push','pop'] if model=='stack' else ['read','write','cas'])
         arg={'type':kind}
         if model=='kv_register':arg['key']=rng.choice(['x','y'])
-        if kind in ['write','cas','enqueue']:arg['value']=rng.choice([None,False,0,1,2,{'nested':[1,True]}])
+        if kind in ['write','cas','enqueue','push']:arg['value']=rng.choice([None,False,0,1,2,{'nested':[1,True]}])
         if kind=='cas':arg['expected']=rng.choice([None,False,0,1,2])
         current=state.get(arg.get('key')) if model=='kv_register' else state
-        if kind in ['write','enqueue']:output='ok'
+        if kind in ['write','enqueue','push']:output='ok'
         elif kind=='cas':output=same(current,arg['expected'])
         elif kind=='read':output=copy.deepcopy(current)
-        else:output={'value':copy.deepcopy(state[0])} if state else {'empty':True}
+        else:output={'value':copy.deepcopy(state[-1] if model=='stack' else state[0])} if state else {'empty':True}
         if not positive and rng.random()<0.65:
-            output=99 if kind=='read' else (not output if kind=='cas' else ('wrong' if kind in ['write','enqueue'] else {'value':99}))
+            output=99 if kind=='read' else (not output if kind=='cas' else ('wrong' if kind in ['write','enqueue','push'] else {'value':99}))
         concurrent=index%3!=0
         op={'id':str(i),'client':'c'+str(i%3),'call':i+1 if concurrent else 2*i+1,'return':n+i+1 if concurrent else 2*i+2,'input':arg,'output':output}
         if positive:
@@ -90,7 +97,7 @@ def generated(rng,model,index):
 
 def main():
     rng=random.Random(20261020);checked=0;partitioned=0
-    for model in ['register','kv_register','queue']:
+    for model in ['register','kv_register','queue','stack']:
         for index in range(120):
             request=generated(rng,model,index);expected=oracle(request);result=run(request)
             assert result['verdict']==('linearizable' if expected is not None else 'non_linearizable'),(request,result,expected)

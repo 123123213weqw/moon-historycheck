@@ -435,6 +435,86 @@
     }
   },
   {
+    "name": "stack LIFO",
+    "request": {
+      "model": "stack",
+      "initial": [],
+      "operations": [
+        {
+          "id": "p1",
+          "client": "cp",
+          "call": 1,
+          "return": 2,
+          "input": { "type": "push", "value": 1 },
+          "output": "ok"
+        },
+        {
+          "id": "p2",
+          "client": "cp",
+          "call": 3,
+          "return": 4,
+          "input": { "type": "push", "value": 2 },
+          "output": "ok"
+        },
+        {
+          "id": "d",
+          "client": "cd",
+          "call": 5,
+          "return": 6,
+          "input": { "type": "pop" },
+          "output": { "value": 2 }
+        }
+      ]
+    },
+    "exit": 0,
+    "expected": {
+      "verdict": "linearizable",
+      "final_state": [1]
+    }
+  },
+  {
+    "name": "stack empty",
+    "request": {
+      "model": "stack",
+      "initial": [],
+      "operations": [
+        {
+          "id": "d",
+          "client": "cd",
+          "call": 1,
+          "return": 2,
+          "input": { "type": "pop" },
+          "output": { "empty": true }
+        }
+      ]
+    },
+    "exit": 0,
+    "expected": {
+      "verdict": "linearizable"
+    }
+  },
+  {
+    "name": "stack LIFO violated",
+    "request": {
+      "model": "stack",
+      "initial": [1, 2],
+      "operations": [
+        {
+          "id": "d",
+          "client": "cd",
+          "call": 1,
+          "return": 2,
+          "input": { "type": "pop" },
+          "output": { "value": 1 }
+        }
+      ]
+    },
+    "exit": 2,
+    "expected": {
+      "verdict": "non_linearizable"
+    }
+  },
+  {
     "name": "global partition witness",
     "request": {
       "model": "kv_register",

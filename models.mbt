@@ -77,5 +77,38 @@ fn transition(model : Model, state : Value, op : Operation) -> Value? {
           }
         _ => None
       }
+    Stack =>
+      match state {
+        Array(items) =>
+          match field(op.input, "type") {
+            String("push") =>
+              if op.output != String("ok") {
+                None
+              } else {
+                let next = items.copy()
+                next.push(field(op.input, "value"))
+                Some(Array(next))
+              }
+            String("pop") =>
+              if items.is_empty() {
+                if op.output == record([("empty", Bool(true))]) {
+                  Some(state)
+                } else {
+                  None
+                }
+              } else if op.output ==
+                record([("value", items[items.length() - 1])]) {
+                let next : Array[Value] = []
+                for i in 0..<(items.length() - 1) {
+                  next.push(items[i])
+                }
+                Some(Array(next))
+              } else {
+                None
+              }
+            _ => None
+          }
+        _ => None
+      }
   }
 }

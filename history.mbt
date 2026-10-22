@@ -3,6 +3,7 @@ pub(all) enum Model {
   Register
   KeyValue
   Queue
+  Stack
 } derive(Eq, @debug.Debug)
 
 ///|
@@ -29,6 +30,7 @@ fn model_name(model : Model) -> String {
     Register => "register"
     KeyValue => "kv_register"
     Queue => "queue"
+    Stack => "stack"
   }
 }
 
@@ -65,6 +67,15 @@ fn validate_input(model : Model, input : Value) -> Unit raise HistoryError {
         "dequeue" => fields_only(input, ["type"])
         _ => raise HistoryError("unsupported queue operation: " + kind)
       }
+    Stack =>
+      match kind {
+        "push" => {
+          fields_only(input, ["type", "value"])
+          ignore(required(input, "value"))
+        }
+        "pop" => fields_only(input, ["type"])
+        _ => raise HistoryError("unsupported stack operation: " + kind)
+      }
   }
 }
 
@@ -83,13 +94,14 @@ fn parse_history_value(request : Value) -> History raise HistoryError {
     "register" => Register
     "kv_register" => KeyValue
     "queue" => Queue
+    "stack" => Stack
     name => raise HistoryError("unsupported model: " + name)
   }
   let initial = required(request, "initial")
   if model == KeyValue {
     ignore(object(initial))
   }
-  if model == Queue {
+  if model == Queue || model == Stack {
     ignore(array(initial))
   }
   let raw = array(required(request, "operations"))
