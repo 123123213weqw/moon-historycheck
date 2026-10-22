@@ -88,6 +88,48 @@ test "budget cut is unknown and not a counterexample" {
 }
 
 ///|
+test "earliest-return candidates are explored before call order" {
+  let result = from_json(
+    execute({
+      "model": "register",
+      "initial": 0,
+      "operations": [
+        {
+          "id": "slow_write",
+          "client": "a",
+          "call": 1,
+          "return": 8,
+          "input": { "type": "write", "value": 1 },
+          "output": "ok",
+        },
+        {
+          "id": "quick_write",
+          "client": "b",
+          "call": 2,
+          "return": 3,
+          "input": { "type": "write", "value": 2 },
+          "output": "ok",
+        },
+        {
+          "id": "read_one",
+          "client": "c",
+          "call": 4,
+          "return": 5,
+          "input": { "type": "read" },
+          "output": 1,
+        },
+      ],
+    }),
+  )
+  assert_eq(field(result, "verdict"), String("linearizable"))
+  assert_eq(
+    field(result, "witness"),
+    strings(["quick_write", "slow_write", "read_one"]),
+  )
+  assert_eq(field(field(result, "stats"), "expanded_states"), Number(3))
+}
+
+///|
 test "malformed and pending requests are different outcomes" {
   assert_eq(
     field(

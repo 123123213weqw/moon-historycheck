@@ -9,6 +9,7 @@ priv struct SearchLimits {
 priv struct SearchContext {
   history : History
   incoming : Array[Array[Int32]]
+  order : Array[Int32]
   limits : SearchLimits
   memo : Map[String, Bool]
   mut explored : Int32
@@ -31,6 +32,32 @@ fn search_limits(request : Value) -> SearchLimits raise HistoryError {
     entries: limit(request, "max_memo_entries", 4096, 200000),
     units: limit(request, "max_memo_units", 1000000, 16000000),
   }
+}
+
+///|
+fn completion(op : Operation) -> Double {
+  match op.returned {
+    Some(end) => end
+    // Search runs only on complete histories; pending operations are reported as unknown earlier.
+    None => 9007199254740991.0
+  }
+}
+
+///|
+fn search_order(history : History) -> Array[Int32] {
+  let order : Array[Int32] = []
+  for i, op in history.operations {
+    match op.returned {
+      Some(_) => order.push(i)
+      None => ()
+    }
+  }
+  // Earliest-return candidates first: real-time-consistent linearizations surface
+  // early, so typical histories need less backtracking than call-order exploration.
+  order.sort_by(fn(a, b) {
+    completion(history.operations[a]).compare(completion(history.operations[b]))
+  })
+  order
 }
 
 ///|
@@ -59,7 +86,8 @@ fn search_dfs(
     return Limited("max_states")
   }
   ctx.explored += 1
-  for i, op in ctx.history.operations {
+  for i in ctx.order {
+    let op = ctx.history.operations[i]
     if selected[i] || !ready(ctx.incoming[i], selected) {
       continue
     }
@@ -105,6 +133,7 @@ fn check_history(history : History, limits : SearchLimits) -> Value {
   let ctx : SearchContext = {
     history,
     incoming: predecessors(history),
+    order: search_order(history),
     limits,
     memo: Map([]),
     explored: 0,
