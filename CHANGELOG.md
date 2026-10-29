@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+Counter steps accept an optional by amount (1..1000000, default 1) on increment and decrement; the oracle generates stepped operations and zero or oversized steps are refused.
+
 Partition extends to map: per-key sub-histories keep the map commands and missing-key semantics, aggregate budget and fully verified global witness merge unchanged; the Python oracle cross-checks 120 map partition equivalences.
 
 Key-value map sequential model (put is ok, get observes the entry or null when missing, remove reports membership and drops the key only when present), with permutation-oracle, closure-audit and golden-case coverage.

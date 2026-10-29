@@ -70,7 +70,8 @@ def apply(model,state,op):
     if model=='counter':
         if kind in ('increment','decrement'):
             if not same(output,'ok'):return False,state
-            return True,state+(1 if kind=='increment' else -1)
+            step=arg.get('by',1)
+            return True,state+(step if kind=='increment' else -step)
         if not same(output,state):return False,state
         return True,state
     key=arg.get('key');current=state.get(key) if model=='kv_register' else state
@@ -119,6 +120,7 @@ def generated(rng,model,index):
         if model=='kv_register':arg['key']=rng.choice(['x','y'])
         if model=='map':arg['key']=rng.choice(['x','y','z'])
         if kind in ['write','cas','enqueue','push','add','contains','put'] or (kind=='remove' and model=='set'):arg['value']=rng.choice([None,False,0,1,2,{'nested':[1,True]}])
+        if model=='counter' and kind in ('increment','decrement') and rng.random()<0.5:arg['by']=rng.choice([1,2,5,100,1000000])
         if kind=='cas':arg['expected']=rng.choice([None,False,0,1,2])
         current=state.get(arg.get('key')) if model=='kv_register' else state
         if kind in ['write','enqueue','push','release','add','increment','decrement','put']:output='ok'

@@ -74,7 +74,7 @@ node scripts/record-demo.mjs /YOUR/SCRATCH/DIRECTORY
 python -B scripts/stats.py
 ```
 
-32 manual test declarations plus 87 generated golden API tests make 119 declarations. The same 87 golden cases also run through the CLI; they are repeated entry-point checks, not 206 independent requirements. The independent Python oracle checks 960 histories, 240 partition equivalence cases and 20 reductions. A separate closure audit checks 240 histories: 107 negative certificates and 133 positive witnesses, including tampering rejection. Tests are deterministic synthetic data. The async recorder runs controlled in-process services, not a production database.
+32 manual test declarations plus 90 generated golden API tests make 122 declarations. The same 90 golden cases also run through the CLI; they are repeated entry-point checks, not 212 independent requirements. The independent Python oracle checks 960 histories, 240 partition equivalence cases and 20 reductions. A separate closure audit checks 240 histories: 107 negative certificates and 133 positive witnesses, including tampering rejection. Tests are deterministic synthetic data. The async recorder runs controlled in-process services, not a production database.
 
 ## Contract and limits
 

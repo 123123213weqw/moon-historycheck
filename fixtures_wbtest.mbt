@@ -1409,3 +1409,50 @@ test "fixture map partition failing key" {
   )
   assert_eq(fixture_at(result, ["failed_key"]), from_json(@json.parse("\"y\"")))
 }
+
+///|
+test "fixture counter steps by five" {
+  let result = from_json(
+    execute(
+      @json.parse(
+        "{\"model\":\"counter\",\"initial\":0,\"operations\":[{\"id\":\"i\",\"client\":\"ci\",\"call\":1,\"return\":2,\"input\":{\"type\":\"increment\",\"by\":5},\"output\":\"ok\"},{\"id\":\"r\",\"client\":\"cr\",\"call\":3,\"return\":4,\"input\":{\"type\":\"read\"},\"output\":5}]}",
+      ),
+    ),
+  )
+  assert_eq(
+    fixture_at(result, ["verdict"]),
+    from_json(@json.parse("\"linearizable\"")),
+  )
+  assert_eq(fixture_at(result, ["final_state"]), from_json(@json.parse("5")))
+}
+
+///|
+test "fixture counter decrements by three below zero" {
+  let result = from_json(
+    execute(
+      @json.parse(
+        "{\"model\":\"counter\",\"initial\":1,\"operations\":[{\"id\":\"d\",\"client\":\"cd\",\"call\":1,\"return\":2,\"input\":{\"type\":\"decrement\",\"by\":3},\"output\":\"ok\"},{\"id\":\"r\",\"client\":\"cr\",\"call\":3,\"return\":4,\"input\":{\"type\":\"read\"},\"output\":-2}]}",
+      ),
+    ),
+  )
+  assert_eq(
+    fixture_at(result, ["verdict"]),
+    from_json(@json.parse("\"linearizable\"")),
+  )
+  assert_eq(fixture_at(result, ["final_state"]), from_json(@json.parse("-2")))
+}
+
+///|
+test "fixture counter zero step rejected" {
+  let result = from_json(
+    execute(
+      @json.parse(
+        "{\"model\":\"counter\",\"initial\":0,\"operations\":[{\"id\":\"i\",\"client\":\"ci\",\"call\":1,\"return\":2,\"input\":{\"type\":\"increment\",\"by\":0},\"output\":\"ok\"}]}",
+      ),
+    ),
+  )
+  assert_eq(
+    fixture_at(result, ["verdict"]),
+    from_json(@json.parse("\"invalid_input\"")),
+  )
+}

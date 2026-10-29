@@ -100,7 +100,16 @@ fn validate_input(model : Model, input : Value) -> Unit raise HistoryError {
       }
     Counter =>
       match kind {
-        "increment" | "decrement" | "read" => fields_only(input, ["type"])
+        "increment" | "decrement" => {
+          fields_only(input, ["type", "by"])
+          if has(input, "by") {
+            let by = ordinal(field(input, "by"))
+            if by < 1.0 || by > 1000000.0 {
+              raise HistoryError("counter step must be 1..1000000")
+            }
+          }
+        }
+        "read" => fields_only(input, ["type"])
         _ => raise HistoryError("unsupported counter operation: " + kind)
       }
     Mapping =>

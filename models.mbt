@@ -176,7 +176,11 @@ fn transition(model : Model, state : Value, op : Operation) -> Value? {
     Counter =>
       match (state, field(op.input, "type")) {
         (Number(current), String("increment")) => {
-          let next = current + 1.0
+          let step = match field(op.input, "by") {
+            Number(n) => n
+            _ => 1.0
+          }
+          let next = current + step
           if next.is_nan() || next.is_inf() || next.abs() > 9007199254740991.0 {
             None
           } else if op.output == String("ok") {
@@ -186,7 +190,11 @@ fn transition(model : Model, state : Value, op : Operation) -> Value? {
           }
         }
         (Number(current), String("decrement")) => {
-          let next = current - 1.0
+          let step = match field(op.input, "by") {
+            Number(n) => n
+            _ => 1.0
+          }
+          let next = current - step
           if next.is_nan() || next.is_inf() || next.abs() > 9007199254740991.0 {
             None
           } else if op.output == String("ok") {

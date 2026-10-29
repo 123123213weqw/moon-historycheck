@@ -7975,5 +7975,99 @@
       "verdict": "non_linearizable",
       "failed_key": "y"
     }
+  },
+  {
+    "name": "counter steps by five",
+    "request": {
+      "model": "counter",
+      "initial": 0,
+      "operations": [
+        {
+          "id": "i",
+          "client": "ci",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "increment",
+            "by": 5
+          },
+          "output": "ok"
+        },
+        {
+          "id": "r",
+          "client": "cr",
+          "call": 3,
+          "return": 4,
+          "input": {
+            "type": "read"
+          },
+          "output": 5
+        }
+      ]
+    },
+    "exit": 0,
+    "expected": {
+      "verdict": "linearizable",
+      "final_state": 5
+    }
+  },
+  {
+    "name": "counter decrements by three below zero",
+    "request": {
+      "model": "counter",
+      "initial": 1,
+      "operations": [
+        {
+          "id": "d",
+          "client": "cd",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "decrement",
+            "by": 3
+          },
+          "output": "ok"
+        },
+        {
+          "id": "r",
+          "client": "cr",
+          "call": 3,
+          "return": 4,
+          "input": {
+            "type": "read"
+          },
+          "output": -2
+        }
+      ]
+    },
+    "exit": 0,
+    "expected": {
+      "verdict": "linearizable",
+      "final_state": -2
+    }
+  },
+  {
+    "name": "counter zero step rejected",
+    "request": {
+      "model": "counter",
+      "initial": 0,
+      "operations": [
+        {
+          "id": "i",
+          "client": "ci",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "increment",
+            "by": 0
+          },
+          "output": "ok"
+        }
+      ]
+    },
+    "exit": 64,
+    "expected": {
+      "verdict": "invalid_input"
+    }
   }
 ]
