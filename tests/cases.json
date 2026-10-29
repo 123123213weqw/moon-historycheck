@@ -7883,5 +7883,97 @@
     "expected": {
       "verdict": "non_linearizable"
     }
+  },
+  {
+    "name": "map partition witness",
+    "request": {
+      "model": "map",
+      "initial": {},
+      "operations": [
+        {
+          "id": "wx",
+          "client": "a",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "put",
+            "key": "x",
+            "value": 1
+          },
+          "output": "ok"
+        },
+        {
+          "id": "wy",
+          "client": "b",
+          "call": 3,
+          "return": 4,
+          "input": {
+            "type": "put",
+            "key": "y",
+            "value": 2
+          },
+          "output": "ok"
+        },
+        {
+          "id": "gx",
+          "client": "c",
+          "call": 5,
+          "return": 6,
+          "input": {
+            "type": "get",
+            "key": "x"
+          },
+          "output": 1
+        }
+      ],
+      "partition": true
+    },
+    "exit": 0,
+    "expected": {
+      "verdict": "linearizable",
+      "final_state": {
+        "x": 1,
+        "y": 2
+      },
+      "witness_verified": true
+    }
+  },
+  {
+    "name": "map partition failing key",
+    "request": {
+      "model": "map",
+      "initial": {},
+      "operations": [
+        {
+          "id": "wy",
+          "client": "a",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "put",
+            "key": "y",
+            "value": 2
+          },
+          "output": "ok"
+        },
+        {
+          "id": "gy",
+          "client": "b",
+          "call": 3,
+          "return": 4,
+          "input": {
+            "type": "get",
+            "key": "y"
+          },
+          "output": 9
+        }
+      ],
+      "partition": true
+    },
+    "exit": 2,
+    "expected": {
+      "verdict": "non_linearizable",
+      "failed_key": "y"
+    }
   }
 ]

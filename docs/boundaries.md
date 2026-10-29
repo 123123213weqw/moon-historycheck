@@ -5,7 +5,7 @@
 - Reliable recorder ordinals are required. Uncalibrated cross-machine clocks cannot supply this assumed ordering. Client labels add no implicit serial-client constraints.
 - Model values use finite Double and structural JSON equality, not arbitrary-precision decimal values.
 - At most 256 operations by default, raisable per request to 4,096 with max_operations. High overlap can exhaust budgets. Unknown is neither a pass nor an impossibility proof.
-- Key budgets measure string units and entries, not whole-process heap bytes. No in-core wall-clock cancellation contract.
+- Decomposition applies to per-key independent models only (kv_register, map). Key budgets measure string units and entries, not whole-process heap bytes. No in-core wall-clock cancellation contract.
 - Closed-state evidence concerns a supplied finite history and model, not every future system execution or implementation-level formal verification.
 - Reduction proves at most single-operation-deletion 1-minimality, not global minimum size.
 - The async demo runs controlled in-process services. No production database adoption or performance comparison against Porcupine is claimed.

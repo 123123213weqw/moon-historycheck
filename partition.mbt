@@ -3,18 +3,23 @@ fn check_partitioned(
   history : History,
   limits : SearchLimits,
 ) -> Value raise HistoryError {
-  if history.model != KeyValue {
-    raise HistoryError("partition is only supported by kv_register")
+  if history.model != KeyValue && history.model != Mapping {
+    raise HistoryError("partition is only supported by kv_register and map")
   }
   if !pending_ids(history).is_empty() {
     return check_verified(history, limits)
   }
+  // kv_register strips the key and checks each object as a plain register;
+  // map keeps the key because its commands name it and missing keys read null.
+  let strip_key = history.model == KeyValue
   let groups : Map[String, Array[Operation]] = Map([])
   let initial = object(history.initial)
   for op in history.operations {
     let key = string(field(op.input, "key"))
     let input = object(op.input).copy()
-    ignore(input.remove("key"))
+    if strip_key {
+      ignore(input.remove("key"))
+    }
     let item : Operation = { ..op, input: Object(input), }
     match groups.get(key) {
       Some(items) => items.push(item)
@@ -36,9 +41,23 @@ fn check_partitioned(
         ("expanded_states", Number(explored.to_double())),
       ])
     }
+    let sub_initial = if strip_key {
+      initial.get(key).unwrap_or(Null)
+    } else {
+      let seed : Map[String, Value] = Map([])
+      match initial.get(key) {
+        Some(value) => seed[key] = value
+        None => ()
+      }
+      Object(seed)
+    }
     let sub : History = {
-      model: Register,
-      initial: initial.get(key).unwrap_or(Null),
+      model: if strip_key {
+        Register
+      } else {
+        Mapping
+      },
+      initial: sub_initial,
       operations: groups[key],
     }
     let result = check_verified(sub, {

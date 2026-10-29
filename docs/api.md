@@ -36,7 +36,7 @@ Failed CAS leaves state unchanged. Reads and failed CAS do not introduce missing
 
 ## check
 
-Default operation. Optional max_states, max_memo_entries, max_memo_units, max_operations (1..4096, default 256) and partition (boolean, kv_register only). Every operation accepts max_operations because the limit guards shared history parsing.
+Default operation. Optional max_states, max_memo_entries, max_memo_units, max_operations (1..4096, default 256) and partition (boolean, kv_register or map). Every operation accepts max_operations because the limit guards shared history parsing.
 
 - linearizable: complete witness, final_state, witness_verified=true and stats.
 - non_linearizable: complete_search=true and stats.

@@ -1370,3 +1370,42 @@ test "fixture map wrong get rejected" {
     from_json(@json.parse("\"non_linearizable\"")),
   )
 }
+
+///|
+test "fixture map partition witness" {
+  let result = from_json(
+    execute(
+      @json.parse(
+        "{\"model\":\"map\",\"initial\":{},\"operations\":[{\"id\":\"wx\",\"client\":\"a\",\"call\":1,\"return\":2,\"input\":{\"type\":\"put\",\"key\":\"x\",\"value\":1},\"output\":\"ok\"},{\"id\":\"wy\",\"client\":\"b\",\"call\":3,\"return\":4,\"input\":{\"type\":\"put\",\"key\":\"y\",\"value\":2},\"output\":\"ok\"},{\"id\":\"gx\",\"client\":\"c\",\"call\":5,\"return\":6,\"input\":{\"type\":\"get\",\"key\":\"x\"},\"output\":1}],\"partition\":true}",
+      ),
+    ),
+  )
+  assert_eq(
+    fixture_at(result, ["verdict"]),
+    from_json(@json.parse("\"linearizable\"")),
+  )
+  assert_eq(
+    fixture_at(result, ["final_state"]),
+    from_json(@json.parse("{\"x\":1,\"y\":2}")),
+  )
+  assert_eq(
+    fixture_at(result, ["witness_verified"]),
+    from_json(@json.parse("true")),
+  )
+}
+
+///|
+test "fixture map partition failing key" {
+  let result = from_json(
+    execute(
+      @json.parse(
+        "{\"model\":\"map\",\"initial\":{},\"operations\":[{\"id\":\"wy\",\"client\":\"a\",\"call\":1,\"return\":2,\"input\":{\"type\":\"put\",\"key\":\"y\",\"value\":2},\"output\":\"ok\"},{\"id\":\"gy\",\"client\":\"b\",\"call\":3,\"return\":4,\"input\":{\"type\":\"get\",\"key\":\"y\"},\"output\":9}],\"partition\":true}",
+      ),
+    ),
+  )
+  assert_eq(
+    fixture_at(result, ["verdict"]),
+    from_json(@json.parse("\"non_linearizable\"")),
+  )
+  assert_eq(fixture_at(result, ["failed_key"]), from_json(@json.parse("\"y\"")))
+}

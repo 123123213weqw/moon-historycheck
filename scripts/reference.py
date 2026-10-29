@@ -157,7 +157,7 @@ def main():
                 bad=result['witness'][:-1]
                 assert not run({**request,'operation':'verify','witness':bad})['valid']
             else:assert result['complete_search']
-            if model=='kv_register':
+            if model in ('kv_register','map'):
                 part=run({**request,'partition':True});assert part['verdict']==result['verdict']
                 if expected is not None:assert verify(request,part['witness'])
                 partitioned+=1
