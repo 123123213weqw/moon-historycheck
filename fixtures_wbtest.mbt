@@ -1289,3 +1289,84 @@ test "fixture default ceiling rejects 257 operations" {
     from_json(@json.parse("\"invalid_input\"")),
   )
 }
+
+///|
+test "fixture map put get remove" {
+  let result = from_json(
+    execute(
+      @json.parse(
+        "{\"model\":\"map\",\"initial\":{},\"operations\":[{\"id\":\"p\",\"client\":\"cp\",\"call\":1,\"return\":2,\"input\":{\"type\":\"put\",\"key\":\"k\",\"value\":1},\"output\":\"ok\"},{\"id\":\"g\",\"client\":\"cg\",\"call\":3,\"return\":4,\"input\":{\"type\":\"get\",\"key\":\"k\"},\"output\":1},{\"id\":\"r\",\"client\":\"cr\",\"call\":5,\"return\":6,\"input\":{\"type\":\"remove\",\"key\":\"k\"},\"output\":true}]}",
+      ),
+    ),
+  )
+  assert_eq(
+    fixture_at(result, ["verdict"]),
+    from_json(@json.parse("\"linearizable\"")),
+  )
+  assert_eq(fixture_at(result, ["final_state"]), from_json(@json.parse("{}")))
+}
+
+///|
+test "fixture map get missing reads null" {
+  let result = from_json(
+    execute(
+      @json.parse(
+        "{\"model\":\"map\",\"initial\":{},\"operations\":[{\"id\":\"g\",\"client\":\"cg\",\"call\":1,\"return\":2,\"input\":{\"type\":\"get\",\"key\":\"x\"},\"output\":null}]}",
+      ),
+    ),
+  )
+  assert_eq(
+    fixture_at(result, ["verdict"]),
+    from_json(@json.parse("\"linearizable\"")),
+  )
+}
+
+///|
+test "fixture map remove absent reports false" {
+  let result = from_json(
+    execute(
+      @json.parse(
+        "{\"model\":\"map\",\"initial\":{\"a\":1},\"operations\":[{\"id\":\"r\",\"client\":\"cr\",\"call\":1,\"return\":2,\"input\":{\"type\":\"remove\",\"key\":\"b\"},\"output\":false}]}",
+      ),
+    ),
+  )
+  assert_eq(
+    fixture_at(result, ["verdict"]),
+    from_json(@json.parse("\"linearizable\"")),
+  )
+  assert_eq(
+    fixture_at(result, ["final_state"]),
+    from_json(@json.parse("{\"a\":1}")),
+  )
+}
+
+///|
+test "fixture map remove present drops key" {
+  let result = from_json(
+    execute(
+      @json.parse(
+        "{\"model\":\"map\",\"initial\":{\"a\":1},\"operations\":[{\"id\":\"r\",\"client\":\"cr\",\"call\":1,\"return\":2,\"input\":{\"type\":\"remove\",\"key\":\"a\"},\"output\":true}]}",
+      ),
+    ),
+  )
+  assert_eq(
+    fixture_at(result, ["verdict"]),
+    from_json(@json.parse("\"linearizable\"")),
+  )
+  assert_eq(fixture_at(result, ["final_state"]), from_json(@json.parse("{}")))
+}
+
+///|
+test "fixture map wrong get rejected" {
+  let result = from_json(
+    execute(
+      @json.parse(
+        "{\"model\":\"map\",\"initial\":{\"a\":1},\"operations\":[{\"id\":\"g\",\"client\":\"cg\",\"call\":1,\"return\":2,\"input\":{\"type\":\"get\",\"key\":\"a\"},\"output\":2}]}",
+      ),
+    ),
+  )
+  assert_eq(
+    fixture_at(result, ["verdict"]),
+    from_json(@json.parse("\"non_linearizable\"")),
+  )
+}

@@ -7,6 +7,7 @@ pub(all) enum Model {
   Lock
   Set
   Counter
+  Mapping
 } derive(Eq, @debug.Debug)
 
 ///|
@@ -37,6 +38,7 @@ fn model_name(model : Model) -> String {
     Lock => "lock"
     Set => "set"
     Counter => "counter"
+    Mapping => "map"
   }
 }
 
@@ -101,6 +103,19 @@ fn validate_input(model : Model, input : Value) -> Unit raise HistoryError {
         "increment" | "decrement" | "read" => fields_only(input, ["type"])
         _ => raise HistoryError("unsupported counter operation: " + kind)
       }
+    Mapping =>
+      match kind {
+        "put" => {
+          fields_only(input, ["type", "key", "value"])
+          ignore(identifier(required(input, "key")))
+          ignore(required(input, "value"))
+        }
+        "get" | "remove" => {
+          fields_only(input, ["type", "key"])
+          ignore(identifier(required(input, "key")))
+        }
+        _ => raise HistoryError("unsupported map operation: " + kind)
+      }
   }
 }
 
@@ -123,6 +138,7 @@ fn parse_history_value(request : Value) -> History raise HistoryError {
     "lock" => Lock
     "set" => Set
     "counter" => Counter
+    "map" => Mapping
     name => raise HistoryError("unsupported model: " + name)
   }
   let initial = required(request, "initial")
@@ -143,6 +159,9 @@ fn parse_history_value(request : Value) -> History raise HistoryError {
         }
       _ => raise HistoryError("counter initial must be a number")
     }
+  }
+  if model == Mapping {
+    ignore(object(initial))
   }
   let raw = array(required(request, "operations"))
   let max_operations = limit(request, "max_operations", 256, 4096)

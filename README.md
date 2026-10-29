@@ -1,6 +1,6 @@
 # Moon HistoryCheck
 
-Bounded linearizability checking for concurrent operation histories, implemented in MoonBit. Register/CAS, independent keyed registers, FIFO queues, LIFO stacks, mutual-exclusion locks, membership sets and integer counters have executable sequential models. Results distinguish a verified legal ordering, an exhaustive rejection, an unknown result and malformed input.
+Bounded linearizability checking for concurrent operation histories, implemented in MoonBit. Register/CAS, independent keyed registers, FIFO queues, LIFO stacks, mutual-exclusion locks, membership sets, integer counters and key-value maps have executable sequential models. Results distinguish a verified legal ordering, an exhaustive rejection, an unknown result and malformed input.
 
 - Owner: `123123213weqw`
 - Module: `123123213weqw/moon_historycheck@0.1.0`
@@ -74,7 +74,7 @@ node scripts/record-demo.mjs /YOUR/SCRATCH/DIRECTORY
 python -B scripts/stats.py
 ```
 
-31 manual test declarations plus 80 generated golden API tests make 111 declarations. The same 80 golden cases also run through the CLI; they are repeated entry-point checks, not 191 independent requirements. The independent Python oracle checks 840 histories, 120 partition equivalence cases and 20 reductions. A separate closure audit checks 210 histories: 93 negative certificates and 117 positive witnesses, including tampering rejection. Tests are deterministic synthetic data. The async recorder runs controlled in-process services, not a production database.
+32 manual test declarations plus 85 generated golden API tests make 117 declarations. The same 85 golden cases also run through the CLI; they are repeated entry-point checks, not 202 independent requirements. The independent Python oracle checks 960 histories, 120 partition equivalence cases and 20 reductions. A separate closure audit checks 240 histories: 107 negative certificates and 133 positive witnesses, including tampering rejection. Tests are deterministic synthetic data. The async recorder runs controlled in-process services, not a production database.
 
 ## Contract and limits
 

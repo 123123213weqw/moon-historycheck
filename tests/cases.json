@@ -7729,5 +7729,159 @@
     "expected": {
       "verdict": "invalid_input"
     }
+  },
+  {
+    "name": "map put get remove",
+    "request": {
+      "model": "map",
+      "initial": {},
+      "operations": [
+        {
+          "id": "p",
+          "client": "cp",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "put",
+            "key": "k",
+            "value": 1
+          },
+          "output": "ok"
+        },
+        {
+          "id": "g",
+          "client": "cg",
+          "call": 3,
+          "return": 4,
+          "input": {
+            "type": "get",
+            "key": "k"
+          },
+          "output": 1
+        },
+        {
+          "id": "r",
+          "client": "cr",
+          "call": 5,
+          "return": 6,
+          "input": {
+            "type": "remove",
+            "key": "k"
+          },
+          "output": true
+        }
+      ]
+    },
+    "exit": 0,
+    "expected": {
+      "verdict": "linearizable",
+      "final_state": {}
+    }
+  },
+  {
+    "name": "map get missing reads null",
+    "request": {
+      "model": "map",
+      "initial": {},
+      "operations": [
+        {
+          "id": "g",
+          "client": "cg",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "get",
+            "key": "x"
+          },
+          "output": null
+        }
+      ]
+    },
+    "exit": 0,
+    "expected": {
+      "verdict": "linearizable"
+    }
+  },
+  {
+    "name": "map remove absent reports false",
+    "request": {
+      "model": "map",
+      "initial": {
+        "a": 1
+      },
+      "operations": [
+        {
+          "id": "r",
+          "client": "cr",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "remove",
+            "key": "b"
+          },
+          "output": false
+        }
+      ]
+    },
+    "exit": 0,
+    "expected": {
+      "verdict": "linearizable",
+      "final_state": {
+        "a": 1
+      }
+    }
+  },
+  {
+    "name": "map remove present drops key",
+    "request": {
+      "model": "map",
+      "initial": {
+        "a": 1
+      },
+      "operations": [
+        {
+          "id": "r",
+          "client": "cr",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "remove",
+            "key": "a"
+          },
+          "output": true
+        }
+      ]
+    },
+    "exit": 0,
+    "expected": {
+      "verdict": "linearizable",
+      "final_state": {}
+    }
+  },
+  {
+    "name": "map wrong get rejected",
+    "request": {
+      "model": "map",
+      "initial": {
+        "a": 1
+      },
+      "operations": [
+        {
+          "id": "g",
+          "client": "cg",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "get",
+            "key": "a"
+          },
+          "output": 2
+        }
+      ]
+    },
+    "exit": 2,
+    "expected": {
+      "verdict": "non_linearizable"
+    }
   }
 ]

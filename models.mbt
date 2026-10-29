@@ -203,5 +203,41 @@ fn transition(model : Model, state : Value, op : Operation) -> Value? {
           }
         _ => None
       }
+    Mapping =>
+      match (state, field(op.input, "key")) {
+        (Object(fields), String(key)) =>
+          match field(op.input, "type") {
+            String("put") =>
+              if op.output != String("ok") {
+                None
+              } else {
+                let next = fields.copy()
+                next[key] = field(op.input, "value")
+                Some(Object(next))
+              }
+            String("get") => {
+              let current = fields.get(key).unwrap_or(Null)
+              if op.output == current {
+                Some(state)
+              } else {
+                None
+              }
+            }
+            String("remove") => {
+              let present = fields.contains(key)
+              if op.output != Bool(present) {
+                None
+              } else if present {
+                let next = fields.copy()
+                ignore(next.remove(key))
+                Some(Object(next))
+              } else {
+                Some(state)
+              }
+            }
+            _ => None
+          }
+        _ => None
+      }
   }
 }

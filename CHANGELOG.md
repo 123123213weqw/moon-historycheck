@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+Key-value map sequential model (put is ok, get observes the entry or null when missing, remove reports membership and drops the key only when present), with permutation-oracle, closure-audit and golden-case coverage.
+
 max_operations request field raises the per-history ceiling up to 4,096 operations (default 256); refusals name the effective limit and every API operation accepts the field.
 
 Integer counter sequential model (increment/decrement report "ok" and step by one, read observes exactly), with permutation-oracle, closure-audit and golden-case coverage.

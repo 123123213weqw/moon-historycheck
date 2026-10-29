@@ -40,6 +40,7 @@ pub(all) enum Model {
   Lock
   Set
   Counter
+  Mapping
 } derive(Eq, @debug.Debug)
 pub fn Model::equal(Self, Self) -> Bool
 pub fn Model::not_equal(Self, Self) -> Bool

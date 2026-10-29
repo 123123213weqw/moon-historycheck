@@ -328,3 +328,99 @@ test "counter increments decrements and reads exactly" {
     None,
   )
 }
+
+///|
+test "map puts gets and removes keys with membership outputs" {
+  let put = parse_history({
+    "model": "map",
+    "initial": {},
+    "operations": [
+      {
+        "id": "p",
+        "client": "a",
+        "call": 1,
+        "return": 2,
+        "input": { "type": "put", "key": "k", "value": 1 },
+        "output": "ok",
+      },
+    ],
+  })
+  assert_eq(
+    transition(Mapping, put.initial, put.operations[0]),
+    Some(from_json({ "k": 1 })),
+  )
+  let get = parse_history({
+    "model": "map",
+    "initial": { "k": 1 },
+    "operations": [
+      {
+        "id": "g",
+        "client": "a",
+        "call": 1,
+        "return": 2,
+        "input": { "type": "get", "key": "k" },
+        "output": 1,
+      },
+    ],
+  })
+  assert_eq(
+    transition(Mapping, get.initial, get.operations[0]),
+    Some(from_json({ "k": 1 })),
+  )
+  let missing = parse_history({
+    "model": "map",
+    "initial": {},
+    "operations": [
+      {
+        "id": "g",
+        "client": "a",
+        "call": 1,
+        "return": 2,
+        "input": { "type": "get", "key": "k" },
+        "output": null,
+      },
+    ],
+  })
+  assert_eq(
+    transition(Mapping, missing.initial, missing.operations[0]),
+    Some(from_json({})),
+  )
+  let remove = parse_history({
+    "model": "map",
+    "initial": { "k": 1 },
+    "operations": [
+      {
+        "id": "r",
+        "client": "a",
+        "call": 1,
+        "return": 2,
+        "input": { "type": "remove", "key": "k" },
+        "output": true,
+      },
+    ],
+  })
+  assert_eq(
+    transition(Mapping, remove.initial, remove.operations[0]),
+    Some(from_json({})),
+  )
+  let absent = parse_history({
+    "model": "map",
+    "initial": { "k": 1 },
+    "operations": [
+      {
+        "id": "r",
+        "client": "a",
+        "call": 1,
+        "return": 2,
+        "input": { "type": "remove", "key": "x" },
+        "output": false,
+      },
+    ],
+  })
+  assert_eq(
+    transition(Mapping, absent.initial, absent.operations[0]),
+    Some(from_json({ "k": 1 })),
+  )
+  // A get observing a stale value is rejected.
+  assert_eq(transition(Mapping, absent.initial, missing.operations[0]), None)
+}
