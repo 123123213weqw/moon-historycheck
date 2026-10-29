@@ -76,5 +76,6 @@ fn validate_api_fields(request : Value) -> Unit raise HistoryError {
     "analyze" => ()
     _ => raise HistoryError("unsupported API operation: " + operation)
   }
+  allowed.push("max_operations")
   fields_only(request, allowed)
 }

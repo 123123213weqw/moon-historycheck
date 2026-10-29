@@ -113,7 +113,7 @@ pub fn parse_history(request : Json) -> History raise HistoryError {
 fn parse_history_value(request : Value) -> History raise HistoryError {
   fields_only(request, [
     "operation", "model", "initial", "operations", "max_states", "max_memo_entries",
-    "max_memo_units", "partition", "witness", "max_checks", "certificate",
+    "max_memo_units", "partition", "witness", "max_checks", "certificate", "max_operations",
   ])
   let model = match string(required(request, "model")) {
     "register" => Register
@@ -145,8 +145,11 @@ fn parse_history_value(request : Value) -> History raise HistoryError {
     }
   }
   let raw = array(required(request, "operations"))
-  if raw.length() > 256 {
-    raise HistoryError("history exceeds 256 operations")
+  let max_operations = limit(request, "max_operations", 256, 4096)
+  if raw.length() > max_operations {
+    raise HistoryError(
+      "history exceeds " + max_operations.to_string() + " operations",
+    )
   }
   let ids : Map[String, Bool] = Map([])
   let ordinals : Map[String, Bool] = Map([])

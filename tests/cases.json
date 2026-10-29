@@ -2561,5 +2561,5173 @@
     "expected": {
       "verdict": "non_linearizable"
     }
+  },
+  {
+    "name": "raised ceiling admits 257 operations",
+    "request": {
+      "model": "counter",
+      "initial": 0,
+      "operations": [
+        {
+          "id": "o0",
+          "client": "c0",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o1",
+          "client": "c1",
+          "call": 3,
+          "return": 4,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o2",
+          "client": "c2",
+          "call": 5,
+          "return": 6,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o3",
+          "client": "c3",
+          "call": 7,
+          "return": 8,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o4",
+          "client": "c4",
+          "call": 9,
+          "return": 10,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o5",
+          "client": "c0",
+          "call": 11,
+          "return": 12,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o6",
+          "client": "c1",
+          "call": 13,
+          "return": 14,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o7",
+          "client": "c2",
+          "call": 15,
+          "return": 16,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o8",
+          "client": "c3",
+          "call": 17,
+          "return": 18,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o9",
+          "client": "c4",
+          "call": 19,
+          "return": 20,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o10",
+          "client": "c0",
+          "call": 21,
+          "return": 22,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o11",
+          "client": "c1",
+          "call": 23,
+          "return": 24,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o12",
+          "client": "c2",
+          "call": 25,
+          "return": 26,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o13",
+          "client": "c3",
+          "call": 27,
+          "return": 28,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o14",
+          "client": "c4",
+          "call": 29,
+          "return": 30,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o15",
+          "client": "c0",
+          "call": 31,
+          "return": 32,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o16",
+          "client": "c1",
+          "call": 33,
+          "return": 34,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o17",
+          "client": "c2",
+          "call": 35,
+          "return": 36,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o18",
+          "client": "c3",
+          "call": 37,
+          "return": 38,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o19",
+          "client": "c4",
+          "call": 39,
+          "return": 40,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o20",
+          "client": "c0",
+          "call": 41,
+          "return": 42,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o21",
+          "client": "c1",
+          "call": 43,
+          "return": 44,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o22",
+          "client": "c2",
+          "call": 45,
+          "return": 46,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o23",
+          "client": "c3",
+          "call": 47,
+          "return": 48,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o24",
+          "client": "c4",
+          "call": 49,
+          "return": 50,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o25",
+          "client": "c0",
+          "call": 51,
+          "return": 52,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o26",
+          "client": "c1",
+          "call": 53,
+          "return": 54,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o27",
+          "client": "c2",
+          "call": 55,
+          "return": 56,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o28",
+          "client": "c3",
+          "call": 57,
+          "return": 58,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o29",
+          "client": "c4",
+          "call": 59,
+          "return": 60,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o30",
+          "client": "c0",
+          "call": 61,
+          "return": 62,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o31",
+          "client": "c1",
+          "call": 63,
+          "return": 64,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o32",
+          "client": "c2",
+          "call": 65,
+          "return": 66,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o33",
+          "client": "c3",
+          "call": 67,
+          "return": 68,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o34",
+          "client": "c4",
+          "call": 69,
+          "return": 70,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o35",
+          "client": "c0",
+          "call": 71,
+          "return": 72,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o36",
+          "client": "c1",
+          "call": 73,
+          "return": 74,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o37",
+          "client": "c2",
+          "call": 75,
+          "return": 76,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o38",
+          "client": "c3",
+          "call": 77,
+          "return": 78,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o39",
+          "client": "c4",
+          "call": 79,
+          "return": 80,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o40",
+          "client": "c0",
+          "call": 81,
+          "return": 82,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o41",
+          "client": "c1",
+          "call": 83,
+          "return": 84,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o42",
+          "client": "c2",
+          "call": 85,
+          "return": 86,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o43",
+          "client": "c3",
+          "call": 87,
+          "return": 88,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o44",
+          "client": "c4",
+          "call": 89,
+          "return": 90,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o45",
+          "client": "c0",
+          "call": 91,
+          "return": 92,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o46",
+          "client": "c1",
+          "call": 93,
+          "return": 94,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o47",
+          "client": "c2",
+          "call": 95,
+          "return": 96,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o48",
+          "client": "c3",
+          "call": 97,
+          "return": 98,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o49",
+          "client": "c4",
+          "call": 99,
+          "return": 100,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o50",
+          "client": "c0",
+          "call": 101,
+          "return": 102,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o51",
+          "client": "c1",
+          "call": 103,
+          "return": 104,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o52",
+          "client": "c2",
+          "call": 105,
+          "return": 106,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o53",
+          "client": "c3",
+          "call": 107,
+          "return": 108,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o54",
+          "client": "c4",
+          "call": 109,
+          "return": 110,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o55",
+          "client": "c0",
+          "call": 111,
+          "return": 112,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o56",
+          "client": "c1",
+          "call": 113,
+          "return": 114,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o57",
+          "client": "c2",
+          "call": 115,
+          "return": 116,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o58",
+          "client": "c3",
+          "call": 117,
+          "return": 118,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o59",
+          "client": "c4",
+          "call": 119,
+          "return": 120,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o60",
+          "client": "c0",
+          "call": 121,
+          "return": 122,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o61",
+          "client": "c1",
+          "call": 123,
+          "return": 124,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o62",
+          "client": "c2",
+          "call": 125,
+          "return": 126,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o63",
+          "client": "c3",
+          "call": 127,
+          "return": 128,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o64",
+          "client": "c4",
+          "call": 129,
+          "return": 130,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o65",
+          "client": "c0",
+          "call": 131,
+          "return": 132,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o66",
+          "client": "c1",
+          "call": 133,
+          "return": 134,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o67",
+          "client": "c2",
+          "call": 135,
+          "return": 136,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o68",
+          "client": "c3",
+          "call": 137,
+          "return": 138,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o69",
+          "client": "c4",
+          "call": 139,
+          "return": 140,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o70",
+          "client": "c0",
+          "call": 141,
+          "return": 142,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o71",
+          "client": "c1",
+          "call": 143,
+          "return": 144,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o72",
+          "client": "c2",
+          "call": 145,
+          "return": 146,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o73",
+          "client": "c3",
+          "call": 147,
+          "return": 148,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o74",
+          "client": "c4",
+          "call": 149,
+          "return": 150,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o75",
+          "client": "c0",
+          "call": 151,
+          "return": 152,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o76",
+          "client": "c1",
+          "call": 153,
+          "return": 154,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o77",
+          "client": "c2",
+          "call": 155,
+          "return": 156,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o78",
+          "client": "c3",
+          "call": 157,
+          "return": 158,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o79",
+          "client": "c4",
+          "call": 159,
+          "return": 160,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o80",
+          "client": "c0",
+          "call": 161,
+          "return": 162,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o81",
+          "client": "c1",
+          "call": 163,
+          "return": 164,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o82",
+          "client": "c2",
+          "call": 165,
+          "return": 166,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o83",
+          "client": "c3",
+          "call": 167,
+          "return": 168,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o84",
+          "client": "c4",
+          "call": 169,
+          "return": 170,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o85",
+          "client": "c0",
+          "call": 171,
+          "return": 172,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o86",
+          "client": "c1",
+          "call": 173,
+          "return": 174,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o87",
+          "client": "c2",
+          "call": 175,
+          "return": 176,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o88",
+          "client": "c3",
+          "call": 177,
+          "return": 178,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o89",
+          "client": "c4",
+          "call": 179,
+          "return": 180,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o90",
+          "client": "c0",
+          "call": 181,
+          "return": 182,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o91",
+          "client": "c1",
+          "call": 183,
+          "return": 184,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o92",
+          "client": "c2",
+          "call": 185,
+          "return": 186,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o93",
+          "client": "c3",
+          "call": 187,
+          "return": 188,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o94",
+          "client": "c4",
+          "call": 189,
+          "return": 190,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o95",
+          "client": "c0",
+          "call": 191,
+          "return": 192,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o96",
+          "client": "c1",
+          "call": 193,
+          "return": 194,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o97",
+          "client": "c2",
+          "call": 195,
+          "return": 196,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o98",
+          "client": "c3",
+          "call": 197,
+          "return": 198,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o99",
+          "client": "c4",
+          "call": 199,
+          "return": 200,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o100",
+          "client": "c0",
+          "call": 201,
+          "return": 202,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o101",
+          "client": "c1",
+          "call": 203,
+          "return": 204,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o102",
+          "client": "c2",
+          "call": 205,
+          "return": 206,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o103",
+          "client": "c3",
+          "call": 207,
+          "return": 208,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o104",
+          "client": "c4",
+          "call": 209,
+          "return": 210,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o105",
+          "client": "c0",
+          "call": 211,
+          "return": 212,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o106",
+          "client": "c1",
+          "call": 213,
+          "return": 214,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o107",
+          "client": "c2",
+          "call": 215,
+          "return": 216,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o108",
+          "client": "c3",
+          "call": 217,
+          "return": 218,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o109",
+          "client": "c4",
+          "call": 219,
+          "return": 220,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o110",
+          "client": "c0",
+          "call": 221,
+          "return": 222,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o111",
+          "client": "c1",
+          "call": 223,
+          "return": 224,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o112",
+          "client": "c2",
+          "call": 225,
+          "return": 226,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o113",
+          "client": "c3",
+          "call": 227,
+          "return": 228,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o114",
+          "client": "c4",
+          "call": 229,
+          "return": 230,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o115",
+          "client": "c0",
+          "call": 231,
+          "return": 232,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o116",
+          "client": "c1",
+          "call": 233,
+          "return": 234,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o117",
+          "client": "c2",
+          "call": 235,
+          "return": 236,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o118",
+          "client": "c3",
+          "call": 237,
+          "return": 238,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o119",
+          "client": "c4",
+          "call": 239,
+          "return": 240,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o120",
+          "client": "c0",
+          "call": 241,
+          "return": 242,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o121",
+          "client": "c1",
+          "call": 243,
+          "return": 244,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o122",
+          "client": "c2",
+          "call": 245,
+          "return": 246,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o123",
+          "client": "c3",
+          "call": 247,
+          "return": 248,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o124",
+          "client": "c4",
+          "call": 249,
+          "return": 250,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o125",
+          "client": "c0",
+          "call": 251,
+          "return": 252,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o126",
+          "client": "c1",
+          "call": 253,
+          "return": 254,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o127",
+          "client": "c2",
+          "call": 255,
+          "return": 256,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o128",
+          "client": "c3",
+          "call": 257,
+          "return": 258,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o129",
+          "client": "c4",
+          "call": 259,
+          "return": 260,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o130",
+          "client": "c0",
+          "call": 261,
+          "return": 262,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o131",
+          "client": "c1",
+          "call": 263,
+          "return": 264,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o132",
+          "client": "c2",
+          "call": 265,
+          "return": 266,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o133",
+          "client": "c3",
+          "call": 267,
+          "return": 268,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o134",
+          "client": "c4",
+          "call": 269,
+          "return": 270,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o135",
+          "client": "c0",
+          "call": 271,
+          "return": 272,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o136",
+          "client": "c1",
+          "call": 273,
+          "return": 274,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o137",
+          "client": "c2",
+          "call": 275,
+          "return": 276,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o138",
+          "client": "c3",
+          "call": 277,
+          "return": 278,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o139",
+          "client": "c4",
+          "call": 279,
+          "return": 280,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o140",
+          "client": "c0",
+          "call": 281,
+          "return": 282,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o141",
+          "client": "c1",
+          "call": 283,
+          "return": 284,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o142",
+          "client": "c2",
+          "call": 285,
+          "return": 286,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o143",
+          "client": "c3",
+          "call": 287,
+          "return": 288,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o144",
+          "client": "c4",
+          "call": 289,
+          "return": 290,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o145",
+          "client": "c0",
+          "call": 291,
+          "return": 292,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o146",
+          "client": "c1",
+          "call": 293,
+          "return": 294,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o147",
+          "client": "c2",
+          "call": 295,
+          "return": 296,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o148",
+          "client": "c3",
+          "call": 297,
+          "return": 298,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o149",
+          "client": "c4",
+          "call": 299,
+          "return": 300,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o150",
+          "client": "c0",
+          "call": 301,
+          "return": 302,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o151",
+          "client": "c1",
+          "call": 303,
+          "return": 304,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o152",
+          "client": "c2",
+          "call": 305,
+          "return": 306,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o153",
+          "client": "c3",
+          "call": 307,
+          "return": 308,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o154",
+          "client": "c4",
+          "call": 309,
+          "return": 310,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o155",
+          "client": "c0",
+          "call": 311,
+          "return": 312,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o156",
+          "client": "c1",
+          "call": 313,
+          "return": 314,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o157",
+          "client": "c2",
+          "call": 315,
+          "return": 316,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o158",
+          "client": "c3",
+          "call": 317,
+          "return": 318,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o159",
+          "client": "c4",
+          "call": 319,
+          "return": 320,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o160",
+          "client": "c0",
+          "call": 321,
+          "return": 322,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o161",
+          "client": "c1",
+          "call": 323,
+          "return": 324,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o162",
+          "client": "c2",
+          "call": 325,
+          "return": 326,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o163",
+          "client": "c3",
+          "call": 327,
+          "return": 328,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o164",
+          "client": "c4",
+          "call": 329,
+          "return": 330,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o165",
+          "client": "c0",
+          "call": 331,
+          "return": 332,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o166",
+          "client": "c1",
+          "call": 333,
+          "return": 334,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o167",
+          "client": "c2",
+          "call": 335,
+          "return": 336,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o168",
+          "client": "c3",
+          "call": 337,
+          "return": 338,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o169",
+          "client": "c4",
+          "call": 339,
+          "return": 340,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o170",
+          "client": "c0",
+          "call": 341,
+          "return": 342,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o171",
+          "client": "c1",
+          "call": 343,
+          "return": 344,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o172",
+          "client": "c2",
+          "call": 345,
+          "return": 346,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o173",
+          "client": "c3",
+          "call": 347,
+          "return": 348,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o174",
+          "client": "c4",
+          "call": 349,
+          "return": 350,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o175",
+          "client": "c0",
+          "call": 351,
+          "return": 352,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o176",
+          "client": "c1",
+          "call": 353,
+          "return": 354,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o177",
+          "client": "c2",
+          "call": 355,
+          "return": 356,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o178",
+          "client": "c3",
+          "call": 357,
+          "return": 358,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o179",
+          "client": "c4",
+          "call": 359,
+          "return": 360,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o180",
+          "client": "c0",
+          "call": 361,
+          "return": 362,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o181",
+          "client": "c1",
+          "call": 363,
+          "return": 364,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o182",
+          "client": "c2",
+          "call": 365,
+          "return": 366,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o183",
+          "client": "c3",
+          "call": 367,
+          "return": 368,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o184",
+          "client": "c4",
+          "call": 369,
+          "return": 370,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o185",
+          "client": "c0",
+          "call": 371,
+          "return": 372,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o186",
+          "client": "c1",
+          "call": 373,
+          "return": 374,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o187",
+          "client": "c2",
+          "call": 375,
+          "return": 376,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o188",
+          "client": "c3",
+          "call": 377,
+          "return": 378,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o189",
+          "client": "c4",
+          "call": 379,
+          "return": 380,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o190",
+          "client": "c0",
+          "call": 381,
+          "return": 382,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o191",
+          "client": "c1",
+          "call": 383,
+          "return": 384,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o192",
+          "client": "c2",
+          "call": 385,
+          "return": 386,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o193",
+          "client": "c3",
+          "call": 387,
+          "return": 388,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o194",
+          "client": "c4",
+          "call": 389,
+          "return": 390,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o195",
+          "client": "c0",
+          "call": 391,
+          "return": 392,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o196",
+          "client": "c1",
+          "call": 393,
+          "return": 394,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o197",
+          "client": "c2",
+          "call": 395,
+          "return": 396,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o198",
+          "client": "c3",
+          "call": 397,
+          "return": 398,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o199",
+          "client": "c4",
+          "call": 399,
+          "return": 400,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o200",
+          "client": "c0",
+          "call": 401,
+          "return": 402,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o201",
+          "client": "c1",
+          "call": 403,
+          "return": 404,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o202",
+          "client": "c2",
+          "call": 405,
+          "return": 406,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o203",
+          "client": "c3",
+          "call": 407,
+          "return": 408,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o204",
+          "client": "c4",
+          "call": 409,
+          "return": 410,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o205",
+          "client": "c0",
+          "call": 411,
+          "return": 412,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o206",
+          "client": "c1",
+          "call": 413,
+          "return": 414,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o207",
+          "client": "c2",
+          "call": 415,
+          "return": 416,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o208",
+          "client": "c3",
+          "call": 417,
+          "return": 418,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o209",
+          "client": "c4",
+          "call": 419,
+          "return": 420,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o210",
+          "client": "c0",
+          "call": 421,
+          "return": 422,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o211",
+          "client": "c1",
+          "call": 423,
+          "return": 424,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o212",
+          "client": "c2",
+          "call": 425,
+          "return": 426,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o213",
+          "client": "c3",
+          "call": 427,
+          "return": 428,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o214",
+          "client": "c4",
+          "call": 429,
+          "return": 430,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o215",
+          "client": "c0",
+          "call": 431,
+          "return": 432,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o216",
+          "client": "c1",
+          "call": 433,
+          "return": 434,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o217",
+          "client": "c2",
+          "call": 435,
+          "return": 436,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o218",
+          "client": "c3",
+          "call": 437,
+          "return": 438,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o219",
+          "client": "c4",
+          "call": 439,
+          "return": 440,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o220",
+          "client": "c0",
+          "call": 441,
+          "return": 442,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o221",
+          "client": "c1",
+          "call": 443,
+          "return": 444,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o222",
+          "client": "c2",
+          "call": 445,
+          "return": 446,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o223",
+          "client": "c3",
+          "call": 447,
+          "return": 448,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o224",
+          "client": "c4",
+          "call": 449,
+          "return": 450,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o225",
+          "client": "c0",
+          "call": 451,
+          "return": 452,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o226",
+          "client": "c1",
+          "call": 453,
+          "return": 454,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o227",
+          "client": "c2",
+          "call": 455,
+          "return": 456,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o228",
+          "client": "c3",
+          "call": 457,
+          "return": 458,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o229",
+          "client": "c4",
+          "call": 459,
+          "return": 460,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o230",
+          "client": "c0",
+          "call": 461,
+          "return": 462,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o231",
+          "client": "c1",
+          "call": 463,
+          "return": 464,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o232",
+          "client": "c2",
+          "call": 465,
+          "return": 466,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o233",
+          "client": "c3",
+          "call": 467,
+          "return": 468,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o234",
+          "client": "c4",
+          "call": 469,
+          "return": 470,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o235",
+          "client": "c0",
+          "call": 471,
+          "return": 472,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o236",
+          "client": "c1",
+          "call": 473,
+          "return": 474,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o237",
+          "client": "c2",
+          "call": 475,
+          "return": 476,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o238",
+          "client": "c3",
+          "call": 477,
+          "return": 478,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o239",
+          "client": "c4",
+          "call": 479,
+          "return": 480,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o240",
+          "client": "c0",
+          "call": 481,
+          "return": 482,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o241",
+          "client": "c1",
+          "call": 483,
+          "return": 484,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o242",
+          "client": "c2",
+          "call": 485,
+          "return": 486,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o243",
+          "client": "c3",
+          "call": 487,
+          "return": 488,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o244",
+          "client": "c4",
+          "call": 489,
+          "return": 490,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o245",
+          "client": "c0",
+          "call": 491,
+          "return": 492,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o246",
+          "client": "c1",
+          "call": 493,
+          "return": 494,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o247",
+          "client": "c2",
+          "call": 495,
+          "return": 496,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o248",
+          "client": "c3",
+          "call": 497,
+          "return": 498,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o249",
+          "client": "c4",
+          "call": 499,
+          "return": 500,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o250",
+          "client": "c0",
+          "call": 501,
+          "return": 502,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o251",
+          "client": "c1",
+          "call": 503,
+          "return": 504,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o252",
+          "client": "c2",
+          "call": 505,
+          "return": 506,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o253",
+          "client": "c3",
+          "call": 507,
+          "return": 508,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o254",
+          "client": "c4",
+          "call": 509,
+          "return": 510,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o255",
+          "client": "c0",
+          "call": 511,
+          "return": 512,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o256",
+          "client": "c1",
+          "call": 513,
+          "return": 514,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        }
+      ],
+      "max_operations": 257
+    },
+    "exit": 0,
+    "expected": {
+      "verdict": "linearizable",
+      "final_state": 257
+    }
+  },
+  {
+    "name": "default ceiling rejects 257 operations",
+    "request": {
+      "model": "counter",
+      "initial": 0,
+      "operations": [
+        {
+          "id": "o0",
+          "client": "c0",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o1",
+          "client": "c1",
+          "call": 3,
+          "return": 4,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o2",
+          "client": "c2",
+          "call": 5,
+          "return": 6,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o3",
+          "client": "c3",
+          "call": 7,
+          "return": 8,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o4",
+          "client": "c4",
+          "call": 9,
+          "return": 10,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o5",
+          "client": "c0",
+          "call": 11,
+          "return": 12,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o6",
+          "client": "c1",
+          "call": 13,
+          "return": 14,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o7",
+          "client": "c2",
+          "call": 15,
+          "return": 16,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o8",
+          "client": "c3",
+          "call": 17,
+          "return": 18,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o9",
+          "client": "c4",
+          "call": 19,
+          "return": 20,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o10",
+          "client": "c0",
+          "call": 21,
+          "return": 22,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o11",
+          "client": "c1",
+          "call": 23,
+          "return": 24,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o12",
+          "client": "c2",
+          "call": 25,
+          "return": 26,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o13",
+          "client": "c3",
+          "call": 27,
+          "return": 28,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o14",
+          "client": "c4",
+          "call": 29,
+          "return": 30,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o15",
+          "client": "c0",
+          "call": 31,
+          "return": 32,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o16",
+          "client": "c1",
+          "call": 33,
+          "return": 34,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o17",
+          "client": "c2",
+          "call": 35,
+          "return": 36,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o18",
+          "client": "c3",
+          "call": 37,
+          "return": 38,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o19",
+          "client": "c4",
+          "call": 39,
+          "return": 40,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o20",
+          "client": "c0",
+          "call": 41,
+          "return": 42,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o21",
+          "client": "c1",
+          "call": 43,
+          "return": 44,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o22",
+          "client": "c2",
+          "call": 45,
+          "return": 46,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o23",
+          "client": "c3",
+          "call": 47,
+          "return": 48,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o24",
+          "client": "c4",
+          "call": 49,
+          "return": 50,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o25",
+          "client": "c0",
+          "call": 51,
+          "return": 52,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o26",
+          "client": "c1",
+          "call": 53,
+          "return": 54,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o27",
+          "client": "c2",
+          "call": 55,
+          "return": 56,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o28",
+          "client": "c3",
+          "call": 57,
+          "return": 58,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o29",
+          "client": "c4",
+          "call": 59,
+          "return": 60,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o30",
+          "client": "c0",
+          "call": 61,
+          "return": 62,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o31",
+          "client": "c1",
+          "call": 63,
+          "return": 64,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o32",
+          "client": "c2",
+          "call": 65,
+          "return": 66,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o33",
+          "client": "c3",
+          "call": 67,
+          "return": 68,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o34",
+          "client": "c4",
+          "call": 69,
+          "return": 70,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o35",
+          "client": "c0",
+          "call": 71,
+          "return": 72,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o36",
+          "client": "c1",
+          "call": 73,
+          "return": 74,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o37",
+          "client": "c2",
+          "call": 75,
+          "return": 76,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o38",
+          "client": "c3",
+          "call": 77,
+          "return": 78,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o39",
+          "client": "c4",
+          "call": 79,
+          "return": 80,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o40",
+          "client": "c0",
+          "call": 81,
+          "return": 82,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o41",
+          "client": "c1",
+          "call": 83,
+          "return": 84,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o42",
+          "client": "c2",
+          "call": 85,
+          "return": 86,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o43",
+          "client": "c3",
+          "call": 87,
+          "return": 88,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o44",
+          "client": "c4",
+          "call": 89,
+          "return": 90,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o45",
+          "client": "c0",
+          "call": 91,
+          "return": 92,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o46",
+          "client": "c1",
+          "call": 93,
+          "return": 94,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o47",
+          "client": "c2",
+          "call": 95,
+          "return": 96,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o48",
+          "client": "c3",
+          "call": 97,
+          "return": 98,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o49",
+          "client": "c4",
+          "call": 99,
+          "return": 100,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o50",
+          "client": "c0",
+          "call": 101,
+          "return": 102,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o51",
+          "client": "c1",
+          "call": 103,
+          "return": 104,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o52",
+          "client": "c2",
+          "call": 105,
+          "return": 106,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o53",
+          "client": "c3",
+          "call": 107,
+          "return": 108,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o54",
+          "client": "c4",
+          "call": 109,
+          "return": 110,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o55",
+          "client": "c0",
+          "call": 111,
+          "return": 112,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o56",
+          "client": "c1",
+          "call": 113,
+          "return": 114,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o57",
+          "client": "c2",
+          "call": 115,
+          "return": 116,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o58",
+          "client": "c3",
+          "call": 117,
+          "return": 118,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o59",
+          "client": "c4",
+          "call": 119,
+          "return": 120,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o60",
+          "client": "c0",
+          "call": 121,
+          "return": 122,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o61",
+          "client": "c1",
+          "call": 123,
+          "return": 124,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o62",
+          "client": "c2",
+          "call": 125,
+          "return": 126,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o63",
+          "client": "c3",
+          "call": 127,
+          "return": 128,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o64",
+          "client": "c4",
+          "call": 129,
+          "return": 130,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o65",
+          "client": "c0",
+          "call": 131,
+          "return": 132,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o66",
+          "client": "c1",
+          "call": 133,
+          "return": 134,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o67",
+          "client": "c2",
+          "call": 135,
+          "return": 136,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o68",
+          "client": "c3",
+          "call": 137,
+          "return": 138,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o69",
+          "client": "c4",
+          "call": 139,
+          "return": 140,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o70",
+          "client": "c0",
+          "call": 141,
+          "return": 142,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o71",
+          "client": "c1",
+          "call": 143,
+          "return": 144,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o72",
+          "client": "c2",
+          "call": 145,
+          "return": 146,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o73",
+          "client": "c3",
+          "call": 147,
+          "return": 148,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o74",
+          "client": "c4",
+          "call": 149,
+          "return": 150,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o75",
+          "client": "c0",
+          "call": 151,
+          "return": 152,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o76",
+          "client": "c1",
+          "call": 153,
+          "return": 154,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o77",
+          "client": "c2",
+          "call": 155,
+          "return": 156,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o78",
+          "client": "c3",
+          "call": 157,
+          "return": 158,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o79",
+          "client": "c4",
+          "call": 159,
+          "return": 160,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o80",
+          "client": "c0",
+          "call": 161,
+          "return": 162,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o81",
+          "client": "c1",
+          "call": 163,
+          "return": 164,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o82",
+          "client": "c2",
+          "call": 165,
+          "return": 166,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o83",
+          "client": "c3",
+          "call": 167,
+          "return": 168,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o84",
+          "client": "c4",
+          "call": 169,
+          "return": 170,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o85",
+          "client": "c0",
+          "call": 171,
+          "return": 172,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o86",
+          "client": "c1",
+          "call": 173,
+          "return": 174,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o87",
+          "client": "c2",
+          "call": 175,
+          "return": 176,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o88",
+          "client": "c3",
+          "call": 177,
+          "return": 178,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o89",
+          "client": "c4",
+          "call": 179,
+          "return": 180,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o90",
+          "client": "c0",
+          "call": 181,
+          "return": 182,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o91",
+          "client": "c1",
+          "call": 183,
+          "return": 184,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o92",
+          "client": "c2",
+          "call": 185,
+          "return": 186,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o93",
+          "client": "c3",
+          "call": 187,
+          "return": 188,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o94",
+          "client": "c4",
+          "call": 189,
+          "return": 190,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o95",
+          "client": "c0",
+          "call": 191,
+          "return": 192,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o96",
+          "client": "c1",
+          "call": 193,
+          "return": 194,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o97",
+          "client": "c2",
+          "call": 195,
+          "return": 196,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o98",
+          "client": "c3",
+          "call": 197,
+          "return": 198,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o99",
+          "client": "c4",
+          "call": 199,
+          "return": 200,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o100",
+          "client": "c0",
+          "call": 201,
+          "return": 202,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o101",
+          "client": "c1",
+          "call": 203,
+          "return": 204,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o102",
+          "client": "c2",
+          "call": 205,
+          "return": 206,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o103",
+          "client": "c3",
+          "call": 207,
+          "return": 208,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o104",
+          "client": "c4",
+          "call": 209,
+          "return": 210,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o105",
+          "client": "c0",
+          "call": 211,
+          "return": 212,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o106",
+          "client": "c1",
+          "call": 213,
+          "return": 214,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o107",
+          "client": "c2",
+          "call": 215,
+          "return": 216,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o108",
+          "client": "c3",
+          "call": 217,
+          "return": 218,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o109",
+          "client": "c4",
+          "call": 219,
+          "return": 220,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o110",
+          "client": "c0",
+          "call": 221,
+          "return": 222,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o111",
+          "client": "c1",
+          "call": 223,
+          "return": 224,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o112",
+          "client": "c2",
+          "call": 225,
+          "return": 226,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o113",
+          "client": "c3",
+          "call": 227,
+          "return": 228,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o114",
+          "client": "c4",
+          "call": 229,
+          "return": 230,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o115",
+          "client": "c0",
+          "call": 231,
+          "return": 232,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o116",
+          "client": "c1",
+          "call": 233,
+          "return": 234,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o117",
+          "client": "c2",
+          "call": 235,
+          "return": 236,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o118",
+          "client": "c3",
+          "call": 237,
+          "return": 238,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o119",
+          "client": "c4",
+          "call": 239,
+          "return": 240,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o120",
+          "client": "c0",
+          "call": 241,
+          "return": 242,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o121",
+          "client": "c1",
+          "call": 243,
+          "return": 244,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o122",
+          "client": "c2",
+          "call": 245,
+          "return": 246,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o123",
+          "client": "c3",
+          "call": 247,
+          "return": 248,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o124",
+          "client": "c4",
+          "call": 249,
+          "return": 250,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o125",
+          "client": "c0",
+          "call": 251,
+          "return": 252,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o126",
+          "client": "c1",
+          "call": 253,
+          "return": 254,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o127",
+          "client": "c2",
+          "call": 255,
+          "return": 256,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o128",
+          "client": "c3",
+          "call": 257,
+          "return": 258,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o129",
+          "client": "c4",
+          "call": 259,
+          "return": 260,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o130",
+          "client": "c0",
+          "call": 261,
+          "return": 262,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o131",
+          "client": "c1",
+          "call": 263,
+          "return": 264,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o132",
+          "client": "c2",
+          "call": 265,
+          "return": 266,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o133",
+          "client": "c3",
+          "call": 267,
+          "return": 268,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o134",
+          "client": "c4",
+          "call": 269,
+          "return": 270,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o135",
+          "client": "c0",
+          "call": 271,
+          "return": 272,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o136",
+          "client": "c1",
+          "call": 273,
+          "return": 274,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o137",
+          "client": "c2",
+          "call": 275,
+          "return": 276,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o138",
+          "client": "c3",
+          "call": 277,
+          "return": 278,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o139",
+          "client": "c4",
+          "call": 279,
+          "return": 280,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o140",
+          "client": "c0",
+          "call": 281,
+          "return": 282,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o141",
+          "client": "c1",
+          "call": 283,
+          "return": 284,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o142",
+          "client": "c2",
+          "call": 285,
+          "return": 286,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o143",
+          "client": "c3",
+          "call": 287,
+          "return": 288,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o144",
+          "client": "c4",
+          "call": 289,
+          "return": 290,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o145",
+          "client": "c0",
+          "call": 291,
+          "return": 292,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o146",
+          "client": "c1",
+          "call": 293,
+          "return": 294,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o147",
+          "client": "c2",
+          "call": 295,
+          "return": 296,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o148",
+          "client": "c3",
+          "call": 297,
+          "return": 298,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o149",
+          "client": "c4",
+          "call": 299,
+          "return": 300,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o150",
+          "client": "c0",
+          "call": 301,
+          "return": 302,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o151",
+          "client": "c1",
+          "call": 303,
+          "return": 304,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o152",
+          "client": "c2",
+          "call": 305,
+          "return": 306,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o153",
+          "client": "c3",
+          "call": 307,
+          "return": 308,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o154",
+          "client": "c4",
+          "call": 309,
+          "return": 310,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o155",
+          "client": "c0",
+          "call": 311,
+          "return": 312,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o156",
+          "client": "c1",
+          "call": 313,
+          "return": 314,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o157",
+          "client": "c2",
+          "call": 315,
+          "return": 316,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o158",
+          "client": "c3",
+          "call": 317,
+          "return": 318,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o159",
+          "client": "c4",
+          "call": 319,
+          "return": 320,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o160",
+          "client": "c0",
+          "call": 321,
+          "return": 322,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o161",
+          "client": "c1",
+          "call": 323,
+          "return": 324,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o162",
+          "client": "c2",
+          "call": 325,
+          "return": 326,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o163",
+          "client": "c3",
+          "call": 327,
+          "return": 328,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o164",
+          "client": "c4",
+          "call": 329,
+          "return": 330,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o165",
+          "client": "c0",
+          "call": 331,
+          "return": 332,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o166",
+          "client": "c1",
+          "call": 333,
+          "return": 334,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o167",
+          "client": "c2",
+          "call": 335,
+          "return": 336,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o168",
+          "client": "c3",
+          "call": 337,
+          "return": 338,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o169",
+          "client": "c4",
+          "call": 339,
+          "return": 340,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o170",
+          "client": "c0",
+          "call": 341,
+          "return": 342,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o171",
+          "client": "c1",
+          "call": 343,
+          "return": 344,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o172",
+          "client": "c2",
+          "call": 345,
+          "return": 346,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o173",
+          "client": "c3",
+          "call": 347,
+          "return": 348,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o174",
+          "client": "c4",
+          "call": 349,
+          "return": 350,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o175",
+          "client": "c0",
+          "call": 351,
+          "return": 352,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o176",
+          "client": "c1",
+          "call": 353,
+          "return": 354,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o177",
+          "client": "c2",
+          "call": 355,
+          "return": 356,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o178",
+          "client": "c3",
+          "call": 357,
+          "return": 358,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o179",
+          "client": "c4",
+          "call": 359,
+          "return": 360,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o180",
+          "client": "c0",
+          "call": 361,
+          "return": 362,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o181",
+          "client": "c1",
+          "call": 363,
+          "return": 364,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o182",
+          "client": "c2",
+          "call": 365,
+          "return": 366,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o183",
+          "client": "c3",
+          "call": 367,
+          "return": 368,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o184",
+          "client": "c4",
+          "call": 369,
+          "return": 370,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o185",
+          "client": "c0",
+          "call": 371,
+          "return": 372,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o186",
+          "client": "c1",
+          "call": 373,
+          "return": 374,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o187",
+          "client": "c2",
+          "call": 375,
+          "return": 376,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o188",
+          "client": "c3",
+          "call": 377,
+          "return": 378,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o189",
+          "client": "c4",
+          "call": 379,
+          "return": 380,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o190",
+          "client": "c0",
+          "call": 381,
+          "return": 382,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o191",
+          "client": "c1",
+          "call": 383,
+          "return": 384,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o192",
+          "client": "c2",
+          "call": 385,
+          "return": 386,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o193",
+          "client": "c3",
+          "call": 387,
+          "return": 388,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o194",
+          "client": "c4",
+          "call": 389,
+          "return": 390,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o195",
+          "client": "c0",
+          "call": 391,
+          "return": 392,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o196",
+          "client": "c1",
+          "call": 393,
+          "return": 394,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o197",
+          "client": "c2",
+          "call": 395,
+          "return": 396,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o198",
+          "client": "c3",
+          "call": 397,
+          "return": 398,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o199",
+          "client": "c4",
+          "call": 399,
+          "return": 400,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o200",
+          "client": "c0",
+          "call": 401,
+          "return": 402,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o201",
+          "client": "c1",
+          "call": 403,
+          "return": 404,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o202",
+          "client": "c2",
+          "call": 405,
+          "return": 406,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o203",
+          "client": "c3",
+          "call": 407,
+          "return": 408,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o204",
+          "client": "c4",
+          "call": 409,
+          "return": 410,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o205",
+          "client": "c0",
+          "call": 411,
+          "return": 412,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o206",
+          "client": "c1",
+          "call": 413,
+          "return": 414,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o207",
+          "client": "c2",
+          "call": 415,
+          "return": 416,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o208",
+          "client": "c3",
+          "call": 417,
+          "return": 418,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o209",
+          "client": "c4",
+          "call": 419,
+          "return": 420,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o210",
+          "client": "c0",
+          "call": 421,
+          "return": 422,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o211",
+          "client": "c1",
+          "call": 423,
+          "return": 424,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o212",
+          "client": "c2",
+          "call": 425,
+          "return": 426,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o213",
+          "client": "c3",
+          "call": 427,
+          "return": 428,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o214",
+          "client": "c4",
+          "call": 429,
+          "return": 430,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o215",
+          "client": "c0",
+          "call": 431,
+          "return": 432,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o216",
+          "client": "c1",
+          "call": 433,
+          "return": 434,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o217",
+          "client": "c2",
+          "call": 435,
+          "return": 436,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o218",
+          "client": "c3",
+          "call": 437,
+          "return": 438,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o219",
+          "client": "c4",
+          "call": 439,
+          "return": 440,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o220",
+          "client": "c0",
+          "call": 441,
+          "return": 442,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o221",
+          "client": "c1",
+          "call": 443,
+          "return": 444,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o222",
+          "client": "c2",
+          "call": 445,
+          "return": 446,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o223",
+          "client": "c3",
+          "call": 447,
+          "return": 448,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o224",
+          "client": "c4",
+          "call": 449,
+          "return": 450,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o225",
+          "client": "c0",
+          "call": 451,
+          "return": 452,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o226",
+          "client": "c1",
+          "call": 453,
+          "return": 454,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o227",
+          "client": "c2",
+          "call": 455,
+          "return": 456,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o228",
+          "client": "c3",
+          "call": 457,
+          "return": 458,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o229",
+          "client": "c4",
+          "call": 459,
+          "return": 460,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o230",
+          "client": "c0",
+          "call": 461,
+          "return": 462,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o231",
+          "client": "c1",
+          "call": 463,
+          "return": 464,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o232",
+          "client": "c2",
+          "call": 465,
+          "return": 466,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o233",
+          "client": "c3",
+          "call": 467,
+          "return": 468,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o234",
+          "client": "c4",
+          "call": 469,
+          "return": 470,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o235",
+          "client": "c0",
+          "call": 471,
+          "return": 472,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o236",
+          "client": "c1",
+          "call": 473,
+          "return": 474,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o237",
+          "client": "c2",
+          "call": 475,
+          "return": 476,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o238",
+          "client": "c3",
+          "call": 477,
+          "return": 478,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o239",
+          "client": "c4",
+          "call": 479,
+          "return": 480,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o240",
+          "client": "c0",
+          "call": 481,
+          "return": 482,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o241",
+          "client": "c1",
+          "call": 483,
+          "return": 484,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o242",
+          "client": "c2",
+          "call": 485,
+          "return": 486,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o243",
+          "client": "c3",
+          "call": 487,
+          "return": 488,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o244",
+          "client": "c4",
+          "call": 489,
+          "return": 490,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o245",
+          "client": "c0",
+          "call": 491,
+          "return": 492,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o246",
+          "client": "c1",
+          "call": 493,
+          "return": 494,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o247",
+          "client": "c2",
+          "call": 495,
+          "return": 496,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o248",
+          "client": "c3",
+          "call": 497,
+          "return": 498,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o249",
+          "client": "c4",
+          "call": 499,
+          "return": 500,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o250",
+          "client": "c0",
+          "call": 501,
+          "return": 502,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o251",
+          "client": "c1",
+          "call": 503,
+          "return": 504,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o252",
+          "client": "c2",
+          "call": 505,
+          "return": 506,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o253",
+          "client": "c3",
+          "call": 507,
+          "return": 508,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o254",
+          "client": "c4",
+          "call": 509,
+          "return": 510,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o255",
+          "client": "c0",
+          "call": 511,
+          "return": 512,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "o256",
+          "client": "c1",
+          "call": 513,
+          "return": 514,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        }
+      ]
+    },
+    "exit": 64,
+    "expected": {
+      "verdict": "invalid_input"
+    }
   }
 ]
