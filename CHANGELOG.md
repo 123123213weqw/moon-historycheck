@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+Integer counter sequential model (increment/decrement report "ok" and step by one, read observes exactly), with permutation-oracle, closure-audit and golden-case coverage.
+
 Earliest-return-first DFS candidate ordering. LIFO stack, mutual-exclusion lock and membership set sequential models, each with independent Python permutation and closure-audit coverage, golden CLI cases and examples. Delta-debugging counterexample reduction replaces single-deletion scanning: chunked deletions shrink grouped noise with fewer solver checks while the final single-operation pass preserves the 1-minimality contract.
 
 ## 0.1.0 2026-10-20

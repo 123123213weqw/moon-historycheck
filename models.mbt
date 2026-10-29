@@ -173,5 +173,35 @@ fn transition(model : Model, state : Value, op : Operation) -> Value? {
           }
         _ => None
       }
+    Counter =>
+      match (state, field(op.input, "type")) {
+        (Number(current), String("increment")) => {
+          let next = current + 1.0
+          if next.is_nan() || next.is_inf() || next.abs() > 9007199254740991.0 {
+            None
+          } else if op.output == String("ok") {
+            Some(Number(next))
+          } else {
+            None
+          }
+        }
+        (Number(current), String("decrement")) => {
+          let next = current - 1.0
+          if next.is_nan() || next.is_inf() || next.abs() > 9007199254740991.0 {
+            None
+          } else if op.output == String("ok") {
+            Some(Number(next))
+          } else {
+            None
+          }
+        }
+        (Number(current), String("read")) =>
+          if op.output == Number(current) {
+            Some(state)
+          } else {
+            None
+          }
+        _ => None
+      }
   }
 }

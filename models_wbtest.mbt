@@ -251,3 +251,80 @@ test "key updates do not mutate other branches" {
   )
   assert_eq(history.initial, from_json({ "a": 0 }))
 }
+
+///|
+test "counter increments decrements and reads exactly" {
+  let increment = parse_history({
+    "model": "counter",
+    "initial": 5,
+    "operations": [
+      {
+        "id": "i",
+        "client": "a",
+        "call": 1,
+        "return": 2,
+        "input": { "type": "increment" },
+        "output": "ok",
+      },
+    ],
+  })
+  assert_eq(
+    transition(Counter, increment.initial, increment.operations[0]),
+    Some(Number(6)),
+  )
+  let decrement = parse_history({
+    "model": "counter",
+    "initial": 5,
+    "operations": [
+      {
+        "id": "d",
+        "client": "a",
+        "call": 1,
+        "return": 2,
+        "input": { "type": "decrement" },
+        "output": "ok",
+      },
+    ],
+  })
+  assert_eq(
+    transition(Counter, decrement.initial, decrement.operations[0]),
+    Some(Number(4)),
+  )
+  let read = parse_history({
+    "model": "counter",
+    "initial": 5,
+    "operations": [
+      {
+        "id": "r",
+        "client": "a",
+        "call": 1,
+        "return": 2,
+        "input": { "type": "read" },
+        "output": 5,
+      },
+    ],
+  })
+  assert_eq(
+    transition(Counter, read.initial, read.operations[0]),
+    Some(Number(5)),
+  )
+  // An increment whose observed output is not "ok" cannot replay anywhere.
+  let misreported = parse_history({
+    "model": "counter",
+    "initial": 5,
+    "operations": [
+      {
+        "id": "i",
+        "client": "a",
+        "call": 1,
+        "return": 2,
+        "input": { "type": "increment" },
+        "output": "wrong",
+      },
+    ],
+  })
+  assert_eq(
+    transition(Counter, misreported.initial, misreported.operations[0]),
+    None,
+  )
+}

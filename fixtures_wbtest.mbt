@@ -1211,3 +1211,50 @@ test "fixture certificate wrong history" {
     from_json(@json.parse("\"invalid_certificate\"")),
   )
 }
+
+///|
+test "fixture counter increments and reads" {
+  let result = from_json(
+    execute(
+      @json.parse(
+        "{\"model\":\"counter\",\"initial\":0,\"operations\":[{\"id\":\"i\",\"client\":\"ci\",\"call\":1,\"return\":2,\"input\":{\"type\":\"increment\"},\"output\":\"ok\"},{\"id\":\"r\",\"client\":\"cr\",\"call\":3,\"return\":4,\"input\":{\"type\":\"read\"},\"output\":1}]}",
+      ),
+    ),
+  )
+  assert_eq(
+    fixture_at(result, ["verdict"]),
+    from_json(@json.parse("\"linearizable\"")),
+  )
+  assert_eq(fixture_at(result, ["final_state"]), from_json(@json.parse("1")))
+}
+
+///|
+test "fixture counter decrements below zero path" {
+  let result = from_json(
+    execute(
+      @json.parse(
+        "{\"model\":\"counter\",\"initial\":5,\"operations\":[{\"id\":\"d\",\"client\":\"cd\",\"call\":1,\"return\":2,\"input\":{\"type\":\"decrement\"},\"output\":\"ok\"},{\"id\":\"r\",\"client\":\"cr\",\"call\":3,\"return\":4,\"input\":{\"type\":\"read\"},\"output\":4}]}",
+      ),
+    ),
+  )
+  assert_eq(
+    fixture_at(result, ["verdict"]),
+    from_json(@json.parse("\"linearizable\"")),
+  )
+  assert_eq(fixture_at(result, ["final_state"]), from_json(@json.parse("4")))
+}
+
+///|
+test "fixture counter wrong read rejected" {
+  let result = from_json(
+    execute(
+      @json.parse(
+        "{\"model\":\"counter\",\"initial\":5,\"operations\":[{\"id\":\"r\",\"client\":\"cr\",\"call\":1,\"return\":2,\"input\":{\"type\":\"read\"},\"output\":4}]}",
+      ),
+    ),
+  )
+  assert_eq(
+    fixture_at(result, ["verdict"]),
+    from_json(@json.parse("\"non_linearizable\"")),
+  )
+}

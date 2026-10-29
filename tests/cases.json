@@ -445,7 +445,10 @@
           "client": "cp",
           "call": 1,
           "return": 2,
-          "input": { "type": "push", "value": 1 },
+          "input": {
+            "type": "push",
+            "value": 1
+          },
           "output": "ok"
         },
         {
@@ -453,7 +456,10 @@
           "client": "cp",
           "call": 3,
           "return": 4,
-          "input": { "type": "push", "value": 2 },
+          "input": {
+            "type": "push",
+            "value": 2
+          },
           "output": "ok"
         },
         {
@@ -461,15 +467,21 @@
           "client": "cd",
           "call": 5,
           "return": 6,
-          "input": { "type": "pop" },
-          "output": { "value": 2 }
+          "input": {
+            "type": "pop"
+          },
+          "output": {
+            "value": 2
+          }
         }
       ]
     },
     "exit": 0,
     "expected": {
       "verdict": "linearizable",
-      "final_state": [1]
+      "final_state": [
+        1
+      ]
     }
   },
   {
@@ -483,8 +495,12 @@
           "client": "cd",
           "call": 1,
           "return": 2,
-          "input": { "type": "pop" },
-          "output": { "empty": true }
+          "input": {
+            "type": "pop"
+          },
+          "output": {
+            "empty": true
+          }
         }
       ]
     },
@@ -497,15 +513,22 @@
     "name": "stack LIFO violated",
     "request": {
       "model": "stack",
-      "initial": [1, 2],
+      "initial": [
+        1,
+        2
+      ],
       "operations": [
         {
           "id": "d",
           "client": "cd",
           "call": 1,
           "return": 2,
-          "input": { "type": "pop" },
-          "output": { "value": 1 }
+          "input": {
+            "type": "pop"
+          },
+          "output": {
+            "value": 1
+          }
         }
       ]
     },
@@ -525,7 +548,9 @@
           "client": "ca",
           "call": 1,
           "return": 4,
-          "input": { "type": "acquire" },
+          "input": {
+            "type": "acquire"
+          },
           "output": true
         },
         {
@@ -533,7 +558,9 @@
           "client": "cb",
           "call": 2,
           "return": 3,
-          "input": { "type": "acquire" },
+          "input": {
+            "type": "acquire"
+          },
           "output": false
         },
         {
@@ -541,7 +568,9 @@
           "client": "cr",
           "call": 5,
           "return": 6,
-          "input": { "type": "release" },
+          "input": {
+            "type": "release"
+          },
           "output": "ok"
         }
       ]
@@ -563,7 +592,9 @@
           "client": "ca",
           "call": 1,
           "return": 2,
-          "input": { "type": "acquire" },
+          "input": {
+            "type": "acquire"
+          },
           "output": false
         }
       ]
@@ -584,7 +615,9 @@
           "client": "cr",
           "call": 1,
           "return": 2,
-          "input": { "type": "release" },
+          "input": {
+            "type": "release"
+          },
           "output": "ok"
         }
       ]
@@ -605,7 +638,10 @@
           "client": "ca",
           "call": 1,
           "return": 6,
-          "input": { "type": "add", "value": 1 },
+          "input": {
+            "type": "add",
+            "value": 1
+          },
           "output": "ok"
         },
         {
@@ -613,7 +649,10 @@
           "client": "cc",
           "call": 2,
           "return": 3,
-          "input": { "type": "contains", "value": 1 },
+          "input": {
+            "type": "contains",
+            "value": 1
+          },
           "output": true
         },
         {
@@ -621,7 +660,10 @@
           "client": "cr",
           "call": 4,
           "return": 5,
-          "input": { "type": "remove", "value": 1 },
+          "input": {
+            "type": "remove",
+            "value": 1
+          },
           "output": true
         }
       ]
@@ -643,7 +685,10 @@
           "client": "cc",
           "call": 1,
           "return": 2,
-          "input": { "type": "contains", "value": null },
+          "input": {
+            "type": "contains",
+            "value": null
+          },
           "output": false
         }
       ]
@@ -657,14 +702,19 @@
     "name": "set wrong membership rejected",
     "request": {
       "model": "set",
-      "initial": [1],
+      "initial": [
+        1
+      ],
       "operations": [
         {
           "id": "c",
           "client": "cc",
           "call": 1,
           "return": 2,
-          "input": { "type": "contains", "value": true },
+          "input": {
+            "type": "contains",
+            "value": true
+          },
           "output": true
         }
       ]
@@ -685,7 +735,10 @@
           "client": "cr",
           "call": 1,
           "return": 2,
-          "input": { "type": "remove", "value": 0 },
+          "input": {
+            "type": "remove",
+            "value": 0
+          },
           "output": false
         }
       ]
@@ -2416,6 +2469,97 @@
     "exit": 2,
     "expected": {
       "verdict": "invalid_certificate"
+    }
+  },
+  {
+    "name": "counter increments and reads",
+    "request": {
+      "model": "counter",
+      "initial": 0,
+      "operations": [
+        {
+          "id": "i",
+          "client": "ci",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "increment"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "r",
+          "client": "cr",
+          "call": 3,
+          "return": 4,
+          "input": {
+            "type": "read"
+          },
+          "output": 1
+        }
+      ]
+    },
+    "exit": 0,
+    "expected": {
+      "verdict": "linearizable",
+      "final_state": 1
+    }
+  },
+  {
+    "name": "counter decrements below zero path",
+    "request": {
+      "model": "counter",
+      "initial": 5,
+      "operations": [
+        {
+          "id": "d",
+          "client": "cd",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "decrement"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "r",
+          "client": "cr",
+          "call": 3,
+          "return": 4,
+          "input": {
+            "type": "read"
+          },
+          "output": 4
+        }
+      ]
+    },
+    "exit": 0,
+    "expected": {
+      "verdict": "linearizable",
+      "final_state": 4
+    }
+  },
+  {
+    "name": "counter wrong read rejected",
+    "request": {
+      "model": "counter",
+      "initial": 5,
+      "operations": [
+        {
+          "id": "r",
+          "client": "cr",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "read"
+          },
+          "output": 4
+        }
+      ]
+    },
+    "exit": 2,
+    "expected": {
+      "verdict": "non_linearizable"
     }
   }
 ]
