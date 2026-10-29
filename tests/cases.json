@@ -8069,5 +8069,242 @@
     "expected": {
       "verdict": "invalid_input"
     }
+  },
+  {
+    "name": "lww tie is add-wins",
+    "request": {
+      "model": "lww_set",
+      "initial": {
+        "adds": {},
+        "rems": {}
+      },
+      "operations": [
+        {
+          "id": "a",
+          "client": "ca",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "add",
+            "element": "e",
+            "at": 5
+          },
+          "output": "ok"
+        },
+        {
+          "id": "r",
+          "client": "cr",
+          "call": 3,
+          "return": 4,
+          "input": {
+            "type": "remove",
+            "element": "e",
+            "at": 5
+          },
+          "output": "ok"
+        },
+        {
+          "id": "c",
+          "client": "cc",
+          "call": 5,
+          "return": 6,
+          "input": {
+            "type": "contains",
+            "element": "e"
+          },
+          "output": true
+        }
+      ]
+    },
+    "exit": 0,
+    "expected": {
+      "verdict": "linearizable",
+      "final_state": {
+        "adds": {
+          "e": 5
+        },
+        "rems": {
+          "e": 5
+        }
+      }
+    }
+  },
+  {
+    "name": "lww later remove hides element",
+    "request": {
+      "model": "lww_set",
+      "initial": {
+        "adds": {},
+        "rems": {}
+      },
+      "operations": [
+        {
+          "id": "a",
+          "client": "ca",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "add",
+            "element": "e",
+            "at": 3
+          },
+          "output": "ok"
+        },
+        {
+          "id": "r",
+          "client": "cr",
+          "call": 3,
+          "return": 4,
+          "input": {
+            "type": "remove",
+            "element": "e",
+            "at": 7
+          },
+          "output": "ok"
+        },
+        {
+          "id": "c",
+          "client": "cc",
+          "call": 5,
+          "return": 6,
+          "input": {
+            "type": "contains",
+            "element": "e"
+          },
+          "output": false
+        }
+      ]
+    },
+    "exit": 0,
+    "expected": {
+      "verdict": "linearizable",
+      "final_state": {
+        "adds": {
+          "e": 3
+        },
+        "rems": {
+          "e": 7
+        }
+      }
+    }
+  },
+  {
+    "name": "lww re-add after remove revives",
+    "request": {
+      "model": "lww_set",
+      "initial": {
+        "adds": {},
+        "rems": {}
+      },
+      "operations": [
+        {
+          "id": "a1",
+          "client": "ca",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "add",
+            "element": "e",
+            "at": 1
+          },
+          "output": "ok"
+        },
+        {
+          "id": "r",
+          "client": "cr",
+          "call": 3,
+          "return": 4,
+          "input": {
+            "type": "remove",
+            "element": "e",
+            "at": 2
+          },
+          "output": "ok"
+        },
+        {
+          "id": "a2",
+          "client": "ca",
+          "call": 5,
+          "return": 6,
+          "input": {
+            "type": "add",
+            "element": "e",
+            "at": 3
+          },
+          "output": "ok"
+        },
+        {
+          "id": "c",
+          "client": "cc",
+          "call": 7,
+          "return": 8,
+          "input": {
+            "type": "contains",
+            "element": "e"
+          },
+          "output": true
+        }
+      ]
+    },
+    "exit": 0,
+    "expected": {
+      "verdict": "linearizable"
+    }
+  },
+  {
+    "name": "lww wrong contains rejected",
+    "request": {
+      "model": "lww_set",
+      "initial": {
+        "adds": {
+          "e": 1
+        },
+        "rems": {}
+      },
+      "operations": [
+        {
+          "id": "c",
+          "client": "cc",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "contains",
+            "element": "e"
+          },
+          "output": false
+        }
+      ]
+    },
+    "exit": 2,
+    "expected": {
+      "verdict": "non_linearizable"
+    }
+  },
+  {
+    "name": "lww missing at rejected",
+    "request": {
+      "model": "lww_set",
+      "initial": {
+        "adds": {},
+        "rems": {}
+      },
+      "operations": [
+        {
+          "id": "a",
+          "client": "ca",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "add",
+            "element": "e"
+          },
+          "output": "ok"
+        }
+      ]
+    },
+    "exit": 64,
+    "expected": {
+      "verdict": "invalid_input"
+    }
   }
 ]

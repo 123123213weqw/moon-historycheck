@@ -55,6 +55,18 @@ def apply(model,state,op):
         if not same(output,present):return False,state
         if kind=='remove' and present:state=without_first(state,v)
         return True,state
+    if model=='lww_set':
+        e=arg['element'];t=arg.get('at')
+        if kind in ('add','remove'):
+            if not same(output,'ok'):return False,state
+            table='adds' if kind=='add' else 'rems'
+            cur=state[table].get(e)
+            if cur is None or t>=cur:state[table][e]=t
+            return True,state
+        a=state['adds'].get(e);r=state['rems'].get(e)
+        expected=a is not None and (r is None or a>=r)
+        if not same(output,expected):return False,state
+        return True,state
     if model=='map':
         key=arg['key'];present=key in state
         if kind=='put':
@@ -111,27 +123,33 @@ def run(request):
 
 def generated(rng,model,index):
     n=rng.randrange(1,7);positive=index%2==0
-    state=False if model=='lock' else ([] if model in ('queue','stack','set') else ({'x':0,'y':0} if model=='kv_register' else ({} if model=='map' else 0)))
+    state=False if model=='lock' else ([] if model in ('queue','stack','set') else ({'x':0,'y':0} if model=='kv_register' else ({} if model=='map' else ({'adds':{},'rems':{}} if model=='lww_set' else 0))))
     initial=copy.deepcopy(state);ops=[]
     for i in range(n):
-        kind=rng.choice(['enqueue','dequeue'] if model=='queue' else ['push','pop'] if model=='stack' else ['acquire','release'] if model=='lock' else ['add','remove','contains'] if model=='set' else ['increment','decrement','read'] if model=='counter' else ['put','get','remove'] if model=='map' else ['read','write','cas'])
+        kind=rng.choice(['enqueue','dequeue'] if model=='queue' else ['push','pop'] if model=='stack' else ['acquire','release'] if model=='lock' else ['add','remove','contains'] if model=='set' else ['increment','decrement','read'] if model=='counter' else ['put','get','remove'] if model=='map' else ['add','remove','contains'] if model=='lww_set' else ['read','write','cas'])
         if model=='lock' and kind=='release' and not state:kind='acquire'
         arg={'type':kind}
         if model=='kv_register':arg['key']=rng.choice(['x','y'])
         if model=='map':arg['key']=rng.choice(['x','y','z'])
-        if kind in ['write','cas','enqueue','push','add','contains','put'] or (kind=='remove' and model=='set'):arg['value']=rng.choice([None,False,0,1,2,{'nested':[1,True]}])
+        if model=='lww_set':
+            arg['element']=rng.choice(['a','b','c'])
+            if kind in ('add','remove'):arg['at']=rng.randrange(0,10)
+        if model!='lww_set' and (kind in ['write','cas','enqueue','push','add','contains','put'] or (kind=='remove' and model=='set')):arg['value']=rng.choice([None,False,0,1,2,{'nested':[1,True]}])
         if model=='counter' and kind in ('increment','decrement') and rng.random()<0.5:arg['by']=rng.choice([1,2,5,100,1000000])
         if kind=='cas':arg['expected']=rng.choice([None,False,0,1,2])
         current=state.get(arg.get('key')) if model=='kv_register' else state
-        if kind in ['write','enqueue','push','release','add','increment','decrement','put']:output='ok'
+        if kind in ['write','enqueue','push','release','add','increment','decrement','put'] or (model=='lww_set' and kind in ('add','remove')):output='ok'
         elif kind=='acquire':output=not current
         elif kind=='cas':output=same(current,arg['expected'])
+        elif model=='lww_set' and kind=='contains':
+            e=arg['element'];a=state['adds'].get(e);r=state['rems'].get(e)
+            output=a is not None and (r is None or a>=r)
         elif model=='map' and kind=='get':output=copy.deepcopy(state[arg['key']]) if arg['key'] in state else None
         elif kind in ['remove','contains']:output=member(state,arg['value']) if model!='map' else (arg['key'] in state)
         elif kind=='read':output=copy.deepcopy(current)
         else:output={'value':copy.deepcopy(state[-1] if model=='stack' else state[0])} if state else {'empty':True}
         if not positive and rng.random()<0.65:
-            output=99 if kind in ['read','get'] else (not output if kind in ['cas','acquire','remove','contains'] else ('wrong' if kind in ['write','enqueue','push','release','add','increment','decrement','put'] else {'value':99}))
+            output=99 if kind in ['read','get'] or (model=='lww_set' and kind=='contains' and False) else (not output if kind in ['cas','acquire','remove','contains'] or (model=='lww_set' and kind=='contains') else ('wrong' if kind in ['write','enqueue','push','release','add','increment','decrement','put'] or (model=='lww_set' and kind in ('add','remove')) else {'value':99}))
         concurrent=index%3!=0
         op={'id':str(i),'client':'c'+str(i%3),'call':i+1 if concurrent else 2*i+1,'return':n+i+1 if concurrent else 2*i+2,'input':arg,'output':output}
         if positive:
@@ -149,7 +167,7 @@ def generated(rng,model,index):
 
 def main():
     rng=random.Random(20261020);checked=0;partitioned=0
-    for model in ['register','kv_register','queue','stack','lock','set','counter','map']:
+    for model in ['register','kv_register','queue','stack','lock','set','counter','map','lww_set']:
         for index in range(120):
             request=generated(rng,model,index);expected=oracle(request);result=run(request)
             assert result['verdict']==('linearizable' if expected is not None else 'non_linearizable'),(request,result,expected)

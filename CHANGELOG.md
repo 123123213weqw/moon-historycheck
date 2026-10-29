@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+LWW element-set sequential model over string elements: add and remove carry a timestamp and keep the greatest one, contains resolves add-wins on ties; duplicate older writes are idempotent. Permutation-oracle, closure-audit and golden-case coverage included.
+
 Counter steps accept an optional by amount (1..1000000, default 1) on increment and decrement; the oracle generates stepped operations and zero or oversized steps are refused.
 
 Partition extends to map: per-key sub-histories keep the map commands and missing-key semantics, aggregate budget and fully verified global witness merge unchanged; the Python oracle cross-checks 120 map partition equivalences.

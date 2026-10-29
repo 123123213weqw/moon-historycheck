@@ -1456,3 +1456,86 @@ test "fixture counter zero step rejected" {
     from_json(@json.parse("\"invalid_input\"")),
   )
 }
+
+///|
+test "fixture lww tie is add-wins" {
+  let result = from_json(
+    execute(
+      @json.parse(
+        "{\"model\":\"lww_set\",\"initial\":{\"adds\":{},\"rems\":{}},\"operations\":[{\"id\":\"a\",\"client\":\"ca\",\"call\":1,\"return\":2,\"input\":{\"type\":\"add\",\"element\":\"e\",\"at\":5},\"output\":\"ok\"},{\"id\":\"r\",\"client\":\"cr\",\"call\":3,\"return\":4,\"input\":{\"type\":\"remove\",\"element\":\"e\",\"at\":5},\"output\":\"ok\"},{\"id\":\"c\",\"client\":\"cc\",\"call\":5,\"return\":6,\"input\":{\"type\":\"contains\",\"element\":\"e\"},\"output\":true}]}",
+      ),
+    ),
+  )
+  assert_eq(
+    fixture_at(result, ["verdict"]),
+    from_json(@json.parse("\"linearizable\"")),
+  )
+  assert_eq(
+    fixture_at(result, ["final_state"]),
+    from_json(@json.parse("{\"adds\":{\"e\":5},\"rems\":{\"e\":5}}")),
+  )
+}
+
+///|
+test "fixture lww later remove hides element" {
+  let result = from_json(
+    execute(
+      @json.parse(
+        "{\"model\":\"lww_set\",\"initial\":{\"adds\":{},\"rems\":{}},\"operations\":[{\"id\":\"a\",\"client\":\"ca\",\"call\":1,\"return\":2,\"input\":{\"type\":\"add\",\"element\":\"e\",\"at\":3},\"output\":\"ok\"},{\"id\":\"r\",\"client\":\"cr\",\"call\":3,\"return\":4,\"input\":{\"type\":\"remove\",\"element\":\"e\",\"at\":7},\"output\":\"ok\"},{\"id\":\"c\",\"client\":\"cc\",\"call\":5,\"return\":6,\"input\":{\"type\":\"contains\",\"element\":\"e\"},\"output\":false}]}",
+      ),
+    ),
+  )
+  assert_eq(
+    fixture_at(result, ["verdict"]),
+    from_json(@json.parse("\"linearizable\"")),
+  )
+  assert_eq(
+    fixture_at(result, ["final_state"]),
+    from_json(@json.parse("{\"adds\":{\"e\":3},\"rems\":{\"e\":7}}")),
+  )
+}
+
+///|
+test "fixture lww re-add after remove revives" {
+  let result = from_json(
+    execute(
+      @json.parse(
+        "{\"model\":\"lww_set\",\"initial\":{\"adds\":{},\"rems\":{}},\"operations\":[{\"id\":\"a1\",\"client\":\"ca\",\"call\":1,\"return\":2,\"input\":{\"type\":\"add\",\"element\":\"e\",\"at\":1},\"output\":\"ok\"},{\"id\":\"r\",\"client\":\"cr\",\"call\":3,\"return\":4,\"input\":{\"type\":\"remove\",\"element\":\"e\",\"at\":2},\"output\":\"ok\"},{\"id\":\"a2\",\"client\":\"ca\",\"call\":5,\"return\":6,\"input\":{\"type\":\"add\",\"element\":\"e\",\"at\":3},\"output\":\"ok\"},{\"id\":\"c\",\"client\":\"cc\",\"call\":7,\"return\":8,\"input\":{\"type\":\"contains\",\"element\":\"e\"},\"output\":true}]}",
+      ),
+    ),
+  )
+  assert_eq(
+    fixture_at(result, ["verdict"]),
+    from_json(@json.parse("\"linearizable\"")),
+  )
+}
+
+///|
+test "fixture lww wrong contains rejected" {
+  let result = from_json(
+    execute(
+      @json.parse(
+        "{\"model\":\"lww_set\",\"initial\":{\"adds\":{\"e\":1},\"rems\":{}},\"operations\":[{\"id\":\"c\",\"client\":\"cc\",\"call\":1,\"return\":2,\"input\":{\"type\":\"contains\",\"element\":\"e\"},\"output\":false}]}",
+      ),
+    ),
+  )
+  assert_eq(
+    fixture_at(result, ["verdict"]),
+    from_json(@json.parse("\"non_linearizable\"")),
+  )
+}
+
+///|
+test "fixture lww missing at rejected" {
+  let result = from_json(
+    execute(
+      @json.parse(
+        "{\"model\":\"lww_set\",\"initial\":{\"adds\":{},\"rems\":{}},\"operations\":[{\"id\":\"a\",\"client\":\"ca\",\"call\":1,\"return\":2,\"input\":{\"type\":\"add\",\"element\":\"e\"},\"output\":\"ok\"}]}",
+      ),
+    ),
+  )
+  assert_eq(
+    fixture_at(result, ["verdict"]),
+    from_json(@json.parse("\"invalid_input\"")),
+  )
+}

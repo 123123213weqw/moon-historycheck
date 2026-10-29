@@ -8,6 +8,7 @@ pub(all) enum Model {
   Set
   Counter
   Mapping
+  LwwSet
 } derive(Eq, @debug.Debug)
 
 ///|
@@ -39,6 +40,7 @@ fn model_name(model : Model) -> String {
     Set => "set"
     Counter => "counter"
     Mapping => "map"
+    LwwSet => "lww_set"
   }
 }
 
@@ -125,6 +127,19 @@ fn validate_input(model : Model, input : Value) -> Unit raise HistoryError {
         }
         _ => raise HistoryError("unsupported map operation: " + kind)
       }
+    LwwSet =>
+      match kind {
+        "add" | "remove" => {
+          fields_only(input, ["type", "element", "at"])
+          ignore(identifier(required(input, "element")))
+          ignore(ordinal(required(input, "at")))
+        }
+        "contains" => {
+          fields_only(input, ["type", "element"])
+          ignore(identifier(required(input, "element")))
+        }
+        _ => raise HistoryError("unsupported lww_set operation: " + kind)
+      }
   }
 }
 
@@ -148,6 +163,7 @@ fn parse_history_value(request : Value) -> History raise HistoryError {
     "set" => Set
     "counter" => Counter
     "map" => Mapping
+    "lww_set" => LwwSet
     name => raise HistoryError("unsupported model: " + name)
   }
   let initial = required(request, "initial")
@@ -171,6 +187,14 @@ fn parse_history_value(request : Value) -> History raise HistoryError {
   }
   if model == Mapping {
     ignore(object(initial))
+  }
+  if model == LwwSet {
+    let sets = object(initial)
+    if !sets.contains("adds") || !sets.contains("rems") {
+      raise HistoryError("lww_set initial requires adds and rems objects")
+    }
+    ignore(object(sets["adds"]))
+    ignore(object(sets["rems"]))
   }
   let raw = array(required(request, "operations"))
   let max_operations = limit(request, "max_operations", 256, 4096)

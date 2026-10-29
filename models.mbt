@@ -247,5 +247,70 @@ fn transition(model : Model, state : Value, op : Operation) -> Value? {
           }
         _ => None
       }
+    LwwSet =>
+      match state {
+        Object(sets) =>
+          match (sets.get("adds"), sets.get("rems")) {
+            (Some(Object(adds)), Some(Object(rems))) =>
+              match (field(op.input, "type"), field(op.input, "element")) {
+                (String(kind), String(element)) =>
+                  if kind == "add" || kind == "remove" {
+                    let at = match field(op.input, "at") {
+                      Number(n) => n
+                      _ => -1.0
+                    }
+                    if at < 0.0 || op.output != String("ok") {
+                      None
+                    } else {
+                      let table = if kind == "add" { adds } else { rems }
+                      let newer = match table.get(element) {
+                        Some(Number(existing)) => at >= existing
+                        _ => true
+                      }
+                      if !newer {
+                        Some(state)
+                      } else {
+                        let next_table = table.copy()
+                        next_table[element] = Number(at)
+                        let next : Map[String, Value] = Map([])
+                        next["adds"] = Object(
+                          if kind == "add" {
+                            next_table
+                          } else {
+                            adds
+                          },
+                        )
+                        next["rems"] = Object(
+                          if kind == "add" {
+                            rems
+                          } else {
+                            next_table
+                          },
+                        )
+                        Some(Object(next))
+                      }
+                    }
+                  } else if kind == "contains" {
+                    // Add-wins bias: an add tied with the remove keeps the element.
+                    let present = match (adds.get(element), rems.get(element)) {
+                      (Some(Number(added)), Some(Number(removed))) =>
+                        added >= removed
+                      (Some(_), None) => true
+                      _ => false
+                    }
+                    if op.output == Bool(present) {
+                      Some(state)
+                    } else {
+                      None
+                    }
+                  } else {
+                    None
+                  }
+                _ => None
+              }
+            _ => None
+          }
+        _ => None
+      }
   }
 }

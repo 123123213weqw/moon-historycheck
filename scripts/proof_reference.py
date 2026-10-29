@@ -23,7 +23,7 @@ def audit(request,certificate):
 
 def main():
     rng=random.Random(921334);closed=0;positive=0
-    for model in ['register','kv_register','queue','stack','lock','set','counter','map']:
+    for model in ['register','kv_register','queue','stack','lock','set','counter','map','lww_set']:
         for index in range(30):
             request=generated(rng,model,index);expected=oracle(request);result=run({**request,'operation':'certify'})
             assert result['verdict']==('linearizable' if expected is not None else 'non_linearizable'),(request,result)

@@ -424,3 +424,94 @@ test "map puts gets and removes keys with membership outputs" {
   // A get observing a stale value is rejected.
   assert_eq(transition(Mapping, absent.initial, missing.operations[0]), None)
 }
+
+///|
+test "lww set resolves ties add-wins and honors later removes" {
+  let tie = parse_history({
+    "model": "lww_set",
+    "initial": { "adds": {}, "rems": {} },
+    "operations": [
+      {
+        "id": "a",
+        "client": "x",
+        "call": 1,
+        "return": 2,
+        "input": { "type": "add", "element": "e", "at": 5 },
+        "output": "ok",
+      },
+      {
+        "id": "r",
+        "client": "y",
+        "call": 3,
+        "return": 4,
+        "input": { "type": "remove", "element": "e", "at": 5 },
+        "output": "ok",
+      },
+      {
+        "id": "c",
+        "client": "z",
+        "call": 5,
+        "return": 6,
+        "input": { "type": "contains", "element": "e" },
+        "output": true,
+      },
+    ],
+  })
+  let mut state = tie.initial
+  for op in tie.operations {
+    match transition(LwwSet, state, op) {
+      Some(next) => state = next
+      None => abort("lww tie replay failed")
+    }
+  }
+  assert_eq(state, from_json({ "adds": { "e": 5 }, "rems": { "e": 5 } }))
+  let later_remove = parse_history({
+    "model": "lww_set",
+    "initial": { "adds": { "e": 3 }, "rems": {} },
+    "operations": [
+      {
+        "id": "r",
+        "client": "y",
+        "call": 1,
+        "return": 2,
+        "input": { "type": "remove", "element": "e", "at": 7 },
+        "output": "ok",
+      },
+      {
+        "id": "c",
+        "client": "z",
+        "call": 3,
+        "return": 4,
+        "input": { "type": "contains", "element": "e" },
+        "output": false,
+      },
+    ],
+  })
+  let mut second = later_remove.initial
+  for op in later_remove.operations {
+    match transition(LwwSet, second, op) {
+      Some(next) => second = next
+      None => abort("lww remove replay failed")
+    }
+  }
+  assert_eq(second, from_json({ "adds": { "e": 3 }, "rems": { "e": 7 } }))
+  // An older duplicate add does not regress the recorded timestamp.
+  let older = parse_history({
+    "model": "lww_set",
+    "initial": { "adds": { "e": 5 }, "rems": {} },
+    "operations": [
+      {
+        "id": "a",
+        "client": "x",
+        "call": 1,
+        "return": 2,
+        "input": { "type": "add", "element": "e", "at": 3 },
+        "output": "ok",
+      },
+    ],
+  })
+  assert_eq(
+    transition(LwwSet, older.initial, older.operations[0]),
+    Some(older.initial),
+  )
+}

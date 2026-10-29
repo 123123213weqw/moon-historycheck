@@ -41,6 +41,7 @@ pub(all) enum Model {
   Set
   Counter
   Mapping
+  LwwSet
 } derive(Eq, @debug.Debug)
 pub fn Model::equal(Self, Self) -> Bool
 pub fn Model::not_equal(Self, Self) -> Bool
