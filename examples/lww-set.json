@@ -1,0 +1,44 @@
+{
+  "model": "lww_set",
+  "initial": {
+    "adds": {},
+    "rems": {}
+  },
+  "operations": [
+    {
+      "id": "add",
+      "client": "a",
+      "call": 1,
+      "return": 4,
+      "input": {
+        "type": "add",
+        "element": "item",
+        "at": 10
+      },
+      "output": "ok"
+    },
+    {
+      "id": "remove",
+      "client": "b",
+      "call": 2,
+      "return": 3,
+      "input": {
+        "type": "remove",
+        "element": "item",
+        "at": 10
+      },
+      "output": "ok"
+    },
+    {
+      "id": "contains",
+      "client": "c",
+      "call": 5,
+      "return": 6,
+      "input": {
+        "type": "contains",
+        "element": "item"
+      },
+      "output": true
+    }
+  ]
+}
