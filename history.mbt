@@ -51,7 +51,11 @@ fn model_name(model : Model) -> String {
 }
 
 ///|
-fn validate_input(model : Model, input : Value) -> Unit raise HistoryError {
+fn validate_input(
+  model : Model,
+  id : String,
+  input : Value,
+) -> Unit raise HistoryError {
   let kind = string(required(input, "type"))
   match model {
     Register | KeyValue => {
@@ -59,7 +63,8 @@ fn validate_input(model : Model, input : Value) -> Unit raise HistoryError {
         "read" => ["type", "key"]
         "write" => ["type", "key", "value"]
         "cas" => ["type", "key", "value", "expected"]
-        _ => raise HistoryError("unsupported register operation: " + kind)
+        _ =>
+          raise HistoryError(id + ": unsupported register operation: " + kind)
       }
       fields_only(input, allowed)
       if model == KeyValue {
@@ -81,7 +86,7 @@ fn validate_input(model : Model, input : Value) -> Unit raise HistoryError {
           ignore(required(input, "value"))
         }
         "dequeue" => fields_only(input, ["type"])
-        _ => raise HistoryError("unsupported queue operation: " + kind)
+        _ => raise HistoryError(id + ": unsupported queue operation: " + kind)
       }
     Stack =>
       match kind {
@@ -90,13 +95,13 @@ fn validate_input(model : Model, input : Value) -> Unit raise HistoryError {
           ignore(required(input, "value"))
         }
         "pop" => fields_only(input, ["type"])
-        _ => raise HistoryError("unsupported stack operation: " + kind)
+        _ => raise HistoryError(id + ": unsupported stack operation: " + kind)
       }
     Lock =>
       match kind {
         "acquire" => fields_only(input, ["type"])
         "release" => fields_only(input, ["type"])
-        _ => raise HistoryError("unsupported lock operation: " + kind)
+        _ => raise HistoryError(id + ": unsupported lock operation: " + kind)
       }
     Set =>
       match kind {
@@ -104,7 +109,7 @@ fn validate_input(model : Model, input : Value) -> Unit raise HistoryError {
           fields_only(input, ["type", "value"])
           ignore(required(input, "value"))
         }
-        _ => raise HistoryError("unsupported set operation: " + kind)
+        _ => raise HistoryError(id + ": unsupported set operation: " + kind)
       }
     Counter =>
       match kind {
@@ -118,7 +123,7 @@ fn validate_input(model : Model, input : Value) -> Unit raise HistoryError {
           }
         }
         "read" => fields_only(input, ["type"])
-        _ => raise HistoryError("unsupported counter operation: " + kind)
+        _ => raise HistoryError(id + ": unsupported counter operation: " + kind)
       }
     Mapping =>
       match kind {
@@ -131,7 +136,7 @@ fn validate_input(model : Model, input : Value) -> Unit raise HistoryError {
           fields_only(input, ["type", "key"])
           ignore(identifier(required(input, "key")))
         }
-        _ => raise HistoryError("unsupported map operation: " + kind)
+        _ => raise HistoryError(id + ": unsupported map operation: " + kind)
       }
     LwwSet =>
       match kind {
@@ -144,7 +149,7 @@ fn validate_input(model : Model, input : Value) -> Unit raise HistoryError {
           fields_only(input, ["type", "element"])
           ignore(identifier(required(input, "element")))
         }
-        _ => raise HistoryError("unsupported lww_set operation: " + kind)
+        _ => raise HistoryError(id + ": unsupported lww_set operation: " + kind)
       }
     MaxRegister =>
       match kind {
@@ -153,7 +158,10 @@ fn validate_input(model : Model, input : Value) -> Unit raise HistoryError {
           ignore(required(input, "value"))
         }
         "read" => fields_only(input, ["type"])
-        _ => raise HistoryError("unsupported max_register operation: " + kind)
+        _ =>
+          raise HistoryError(
+            id + ": unsupported max_register operation: " + kind,
+          )
       }
     GrowSet =>
       match kind {
@@ -161,7 +169,10 @@ fn validate_input(model : Model, input : Value) -> Unit raise HistoryError {
           fields_only(input, ["type", "value"])
           ignore(required(input, "value"))
         }
-        _ => raise HistoryError("unsupported grow_only_set operation: " + kind)
+        _ =>
+          raise HistoryError(
+            id + ": unsupported grow_only_set operation: " + kind,
+          )
       }
     TwoPhaseSet =>
       match kind {
@@ -169,7 +180,10 @@ fn validate_input(model : Model, input : Value) -> Unit raise HistoryError {
           fields_only(input, ["type", "value"])
           ignore(required(input, "value"))
         }
-        _ => raise HistoryError("unsupported two_phase_set operation: " + kind)
+        _ =>
+          raise HistoryError(
+            id + ": unsupported two_phase_set operation: " + kind,
+          )
       }
   }
 }
@@ -298,7 +312,7 @@ fn parse_history_value(request : Value) -> History raise HistoryError {
       raise HistoryError("pending operation must not supply output: " + id)
     }
     let input = required(entry, "input")
-    validate_input(model, input)
+    validate_input(model, id, input)
     validate_value(input, 0, nodes)
     let output = field(entry, "output")
     validate_value(output, 0, nodes)

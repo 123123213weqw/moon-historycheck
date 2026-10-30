@@ -51,3 +51,28 @@ test "ambiguous event order is rejected" {
   }
   assert_true(rejected)
 }
+
+///|
+test "model refusals name the operation" {
+  let failed : Value = String(
+    match
+      parse_history({
+        "model": "register",
+        "initial": 0,
+        "operations": [
+          {
+            "id": "swap-op",
+            "client": "a",
+            "call": 1,
+            "input": { "type": "swap" },
+          },
+        ],
+      }) {
+      _ => "no error raised"
+    },
+  ) catch {
+    HistoryError(message) => String(message)
+    _ => String("wrong error")
+  }
+  assert_eq(failed, String("swap-op: unsupported register operation: swap"))
+}
