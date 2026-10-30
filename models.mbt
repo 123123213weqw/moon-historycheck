@@ -312,5 +312,33 @@ fn transition(model : Model, state : Value, op : Operation) -> Value? {
           }
         _ => None
       }
+    MaxRegister =>
+      match (state, field(op.input, "type")) {
+        (Number(current), String("write")) => {
+          // Monotonic: a write below the current value cannot replay, and an
+          // equal one leaves the state where it was.
+          let value = field(op.input, "value")
+          match value {
+            Number(next) =>
+              if op.output != String("ok") || next.is_nan() || next.is_inf() {
+                None
+              } else if next > current {
+                Some(Number(next))
+              } else if next == current {
+                Some(state)
+              } else {
+                None
+              }
+            _ => None
+          }
+        }
+        (Number(current), String("read")) =>
+          if op.output == Number(current) {
+            Some(state)
+          } else {
+            None
+          }
+        _ => None
+      }
   }
 }

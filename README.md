@@ -1,6 +1,6 @@
 # Moon HistoryCheck
 
-Bounded linearizability checking for concurrent operation histories, implemented in MoonBit. Register/CAS, independent keyed registers, FIFO queues, LIFO stacks, mutual-exclusion locks, membership sets, integer counters, key-value maps and timestamped LWW sets have executable sequential models. Results distinguish a verified legal ordering, an exhaustive rejection, an unknown result and malformed input.
+Bounded linearizability checking for concurrent operation histories, implemented in MoonBit. Register/CAS, independent keyed registers, FIFO queues, LIFO stacks, mutual-exclusion locks, membership sets, integer counters, key-value maps, timestamped LWW sets and monotonic max-registers have executable sequential models. Results distinguish a verified legal ordering, an exhaustive rejection, an unknown result and malformed input.
 
 - Owner: `123123213weqw`
 - Module: `123123213weqw/moon_historycheck@0.1.0`
@@ -74,7 +74,7 @@ node scripts/record-demo.mjs /YOUR/SCRATCH/DIRECTORY
 python -B scripts/stats.py
 ```
 
-33 manual test declarations plus 95 generated golden API tests make 128 declarations. The same 95 golden cases also run through the CLI; they are repeated entry-point checks, not 223 independent requirements. The independent Python oracle checks 1080 histories, 240 partition equivalence cases and 20 reductions. A separate closure audit checks 270 histories: 121 negative certificates and 149 positive witnesses, including tampering rejection. Tests are deterministic synthetic data. The async recorder runs controlled in-process services, not a production database.
+34 manual test declarations plus 99 generated golden API tests make 133 declarations. The same 99 golden cases also run through the CLI; they are repeated entry-point checks, not 232 independent requirements. The independent Python oracle checks 1200 histories, 240 partition equivalence cases and 20 reductions. A separate closure audit checks 300 histories: 134 negative certificates and 166 positive witnesses, including tampering rejection. Tests are deterministic synthetic data. The async recorder runs controlled in-process services, not a production database.
 
 ## Contract and limits
 

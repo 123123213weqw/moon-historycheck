@@ -9,6 +9,7 @@ pub(all) enum Model {
   Counter
   Mapping
   LwwSet
+  MaxRegister
 } derive(Eq, @debug.Debug)
 
 ///|
@@ -41,6 +42,7 @@ fn model_name(model : Model) -> String {
     Counter => "counter"
     Mapping => "map"
     LwwSet => "lww_set"
+    MaxRegister => "max_register"
   }
 }
 
@@ -140,6 +142,15 @@ fn validate_input(model : Model, input : Value) -> Unit raise HistoryError {
         }
         _ => raise HistoryError("unsupported lww_set operation: " + kind)
       }
+    MaxRegister =>
+      match kind {
+        "write" => {
+          fields_only(input, ["type", "value"])
+          ignore(required(input, "value"))
+        }
+        "read" => fields_only(input, ["type"])
+        _ => raise HistoryError("unsupported max_register operation: " + kind)
+      }
   }
 }
 
@@ -164,6 +175,7 @@ fn parse_history_value(request : Value) -> History raise HistoryError {
     "counter" => Counter
     "map" => Mapping
     "lww_set" => LwwSet
+    "max_register" => MaxRegister
     name => raise HistoryError("unsupported model: " + name)
   }
   let initial = required(request, "initial")
@@ -187,6 +199,15 @@ fn parse_history_value(request : Value) -> History raise HistoryError {
   }
   if model == Mapping {
     ignore(object(initial))
+  }
+  if model == MaxRegister {
+    match initial {
+      Number(n) =>
+        if n.is_nan() || n.is_inf() {
+          raise HistoryError("max_register initial must be finite")
+        }
+      _ => raise HistoryError("max_register initial must be a number")
+    }
   }
   if model == LwwSet {
     let sets = object(initial)

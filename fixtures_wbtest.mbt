@@ -1539,3 +1539,65 @@ test "fixture lww missing at rejected" {
     from_json(@json.parse("\"invalid_input\"")),
   )
 }
+
+///|
+test "fixture max register grows" {
+  let result = from_json(
+    execute(
+      @json.parse(
+        "{\"model\":\"max_register\",\"initial\":0,\"operations\":[{\"id\":\"w1\",\"client\":\"a\",\"call\":1,\"return\":2,\"input\":{\"type\":\"write\",\"value\":5},\"output\":\"ok\"},{\"id\":\"r\",\"client\":\"b\",\"call\":3,\"return\":4,\"input\":{\"type\":\"read\"},\"output\":5}]}",
+      ),
+    ),
+  )
+  assert_eq(
+    fixture_at(result, ["verdict"]),
+    from_json(@json.parse("\"linearizable\"")),
+  )
+  assert_eq(fixture_at(result, ["final_state"]), from_json(@json.parse("5")))
+}
+
+///|
+test "fixture max register backwards write rejected" {
+  let result = from_json(
+    execute(
+      @json.parse(
+        "{\"model\":\"max_register\",\"initial\":9,\"operations\":[{\"id\":\"w1\",\"client\":\"a\",\"call\":1,\"return\":2,\"input\":{\"type\":\"write\",\"value\":4},\"output\":\"ok\"}]}",
+      ),
+    ),
+  )
+  assert_eq(
+    fixture_at(result, ["verdict"]),
+    from_json(@json.parse("\"non_linearizable\"")),
+  )
+}
+
+///|
+test "fixture max register stale read rejected" {
+  let result = from_json(
+    execute(
+      @json.parse(
+        "{\"model\":\"max_register\",\"initial\":9,\"operations\":[{\"id\":\"r\",\"client\":\"a\",\"call\":1,\"return\":2,\"input\":{\"type\":\"read\"},\"output\":8}]}",
+      ),
+    ),
+  )
+  assert_eq(
+    fixture_at(result, ["verdict"]),
+    from_json(@json.parse("\"non_linearizable\"")),
+  )
+}
+
+///|
+test "fixture max register concurrent maximum" {
+  let result = from_json(
+    execute(
+      @json.parse(
+        "{\"model\":\"max_register\",\"initial\":0,\"operations\":[{\"id\":\"w3\",\"client\":\"a\",\"call\":1,\"return\":6,\"input\":{\"type\":\"write\",\"value\":3},\"output\":\"ok\"},{\"id\":\"w9\",\"client\":\"b\",\"call\":2,\"return\":5,\"input\":{\"type\":\"write\",\"value\":9},\"output\":\"ok\"},{\"id\":\"r\",\"client\":\"c\",\"call\":7,\"return\":8,\"input\":{\"type\":\"read\"},\"output\":9}]}",
+      ),
+    ),
+  )
+  assert_eq(
+    fixture_at(result, ["verdict"]),
+    from_json(@json.parse("\"linearizable\"")),
+  )
+  assert_eq(fixture_at(result, ["final_state"]), from_json(@json.parse("9")))
+}
