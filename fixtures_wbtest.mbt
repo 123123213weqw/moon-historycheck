@@ -1663,3 +1663,67 @@ test "fixture grow-only set concurrent adds" {
     from_json(@json.parse("\"linearizable\"")),
   )
 }
+
+///|
+test "fixture two-phase set add remove contains" {
+  let result = from_json(
+    execute(
+      @json.parse(
+        "{\"model\":\"two_phase_set\",\"initial\":{\"added\":[],\"removed\":[]},\"operations\":[{\"id\":\"a\",\"client\":\"a\",\"call\":1,\"return\":2,\"input\":{\"type\":\"add\",\"value\":1},\"output\":\"ok\"},{\"id\":\"r\",\"client\":\"b\",\"call\":3,\"return\":4,\"input\":{\"type\":\"remove\",\"value\":1},\"output\":true},{\"id\":\"c\",\"client\":\"c\",\"call\":5,\"return\":6,\"input\":{\"type\":\"contains\",\"value\":1},\"output\":false}]}",
+      ),
+    ),
+  )
+  assert_eq(
+    fixture_at(result, ["verdict"]),
+    from_json(@json.parse("\"linearizable\"")),
+  )
+  assert_eq(
+    fixture_at(result, ["final_state"]),
+    from_json(@json.parse("{\"added\":[1],\"removed\":[1]}")),
+  )
+}
+
+///|
+test "fixture two-phase set remove absent reports false" {
+  let result = from_json(
+    execute(
+      @json.parse(
+        "{\"model\":\"two_phase_set\",\"initial\":{\"added\":[],\"removed\":[]},\"operations\":[{\"id\":\"r\",\"client\":\"a\",\"call\":1,\"return\":2,\"input\":{\"type\":\"remove\",\"value\":9},\"output\":false}]}",
+      ),
+    ),
+  )
+  assert_eq(
+    fixture_at(result, ["verdict"]),
+    from_json(@json.parse("\"linearizable\"")),
+  )
+}
+
+///|
+test "fixture two-phase set resurrection rejected" {
+  let result = from_json(
+    execute(
+      @json.parse(
+        "{\"model\":\"two_phase_set\",\"initial\":{\"added\":[1],\"removed\":[1]},\"operations\":[{\"id\":\"a\",\"client\":\"a\",\"call\":1,\"return\":2,\"input\":{\"type\":\"add\",\"value\":1},\"output\":\"ok\"},{\"id\":\"c\",\"client\":\"b\",\"call\":3,\"return\":4,\"input\":{\"type\":\"contains\",\"value\":1},\"output\":true}]}",
+      ),
+    ),
+  )
+  assert_eq(
+    fixture_at(result, ["verdict"]),
+    from_json(@json.parse("\"non_linearizable\"")),
+  )
+}
+
+///|
+test "fixture two-phase set wrong contains rejected" {
+  let result = from_json(
+    execute(
+      @json.parse(
+        "{\"model\":\"two_phase_set\",\"initial\":{\"added\":[1],\"removed\":[]},\"operations\":[{\"id\":\"c\",\"client\":\"a\",\"call\":1,\"return\":2,\"input\":{\"type\":\"contains\",\"value\":1},\"output\":false}]}",
+      ),
+    ),
+  )
+  assert_eq(
+    fixture_at(result, ["verdict"]),
+    from_json(@json.parse("\"non_linearizable\"")),
+  )
+}

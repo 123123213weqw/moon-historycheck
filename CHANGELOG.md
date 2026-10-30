@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+Two-phase set sequential model: add is ok but never resurrects a removed element, remove reports and requires membership, contains is added-and-not-removed. Permutation-oracle, closure-audit and golden-case coverage included.
+
 Grow-only set sequential model: add is ok and idempotent, contains observes membership, nothing is ever removed. Permutation-oracle, closure-audit and golden-case coverage included.
 
 Monotonic max-register sequential model: write reports ok only at or above the current value and moves the state to the maximum, read observes exactly. Permutation-oracle, closure-audit and golden-case coverage included.

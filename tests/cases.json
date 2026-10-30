@@ -8569,5 +8569,160 @@
     "expected": {
       "verdict": "linearizable"
     }
+  },
+  {
+    "name": "two-phase set add remove contains",
+    "request": {
+      "model": "two_phase_set",
+      "initial": {
+        "added": [],
+        "removed": []
+      },
+      "operations": [
+        {
+          "id": "a",
+          "client": "a",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "add",
+            "value": 1
+          },
+          "output": "ok"
+        },
+        {
+          "id": "r",
+          "client": "b",
+          "call": 3,
+          "return": 4,
+          "input": {
+            "type": "remove",
+            "value": 1
+          },
+          "output": true
+        },
+        {
+          "id": "c",
+          "client": "c",
+          "call": 5,
+          "return": 6,
+          "input": {
+            "type": "contains",
+            "value": 1
+          },
+          "output": false
+        }
+      ]
+    },
+    "exit": 0,
+    "expected": {
+      "verdict": "linearizable",
+      "final_state": {
+        "added": [
+          1
+        ],
+        "removed": [
+          1
+        ]
+      }
+    }
+  },
+  {
+    "name": "two-phase set remove absent reports false",
+    "request": {
+      "model": "two_phase_set",
+      "initial": {
+        "added": [],
+        "removed": []
+      },
+      "operations": [
+        {
+          "id": "r",
+          "client": "a",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "remove",
+            "value": 9
+          },
+          "output": false
+        }
+      ]
+    },
+    "exit": 0,
+    "expected": {
+      "verdict": "linearizable"
+    }
+  },
+  {
+    "name": "two-phase set resurrection rejected",
+    "request": {
+      "model": "two_phase_set",
+      "initial": {
+        "added": [
+          1
+        ],
+        "removed": [
+          1
+        ]
+      },
+      "operations": [
+        {
+          "id": "a",
+          "client": "a",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "add",
+            "value": 1
+          },
+          "output": "ok"
+        },
+        {
+          "id": "c",
+          "client": "b",
+          "call": 3,
+          "return": 4,
+          "input": {
+            "type": "contains",
+            "value": 1
+          },
+          "output": true
+        }
+      ]
+    },
+    "exit": 2,
+    "expected": {
+      "verdict": "non_linearizable"
+    }
+  },
+  {
+    "name": "two-phase set wrong contains rejected",
+    "request": {
+      "model": "two_phase_set",
+      "initial": {
+        "added": [
+          1
+        ],
+        "removed": []
+      },
+      "operations": [
+        {
+          "id": "c",
+          "client": "a",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "contains",
+            "value": 1
+          },
+          "output": false
+        }
+      ]
+    },
+    "exit": 2,
+    "expected": {
+      "verdict": "non_linearizable"
+    }
   }
 ]

@@ -364,5 +364,59 @@ fn transition(model : Model, state : Value, op : Operation) -> Value? {
           }
         _ => None
       }
+    TwoPhaseSet =>
+      match state {
+        Object(sets) =>
+          match (sets.get("added"), sets.get("removed")) {
+            (Some(Array(added)), Some(Array(removed))) => {
+              let target = field(op.input, "value")
+              match field(op.input, "type") {
+                // Re-adding after a remove cannot resurrect the element: the
+                // removed table only ever grows.
+                String("add") =>
+                  if op.output != String("ok") {
+                    None
+                  } else if added.contains(target) || removed.contains(target) {
+                    Some(state)
+                  } else {
+                    let next_added = added.copy()
+                    next_added.push(target)
+                    let next : Map[String, Value] = Map([])
+                    next["added"] = Array(next_added)
+                    next["removed"] = Array(removed)
+                    Some(Object(next))
+                  }
+                String("remove") => {
+                  let present = added.contains(target) &&
+                    !removed.contains(target)
+                  if op.output != Bool(present) {
+                    None
+                  } else if !present {
+                    Some(state)
+                  } else {
+                    let next_removed = removed.copy()
+                    next_removed.push(target)
+                    let next : Map[String, Value] = Map([])
+                    next["added"] = Array(added)
+                    next["removed"] = Array(next_removed)
+                    Some(Object(next))
+                  }
+                }
+                String("contains") => {
+                  let present = added.contains(target) &&
+                    !removed.contains(target)
+                  if op.output == Bool(present) {
+                    Some(state)
+                  } else {
+                    None
+                  }
+                }
+                _ => None
+              }
+            }
+            _ => None
+          }
+        _ => None
+      }
   }
 }

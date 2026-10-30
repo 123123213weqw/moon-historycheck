@@ -588,3 +588,70 @@ test "grow-only set adds idempotently and never removes" {
   })
   assert_eq(transition(GrowSet, absent.initial, absent.operations[0]), None)
 }
+
+///|
+test "two-phase set never resurrects a removed element" {
+  let remove = parse_history({
+    "model": "two_phase_set",
+    "initial": { "added": ["e"], "removed": [] },
+    "operations": [
+      {
+        "id": "r",
+        "client": "x",
+        "call": 1,
+        "return": 2,
+        "input": { "type": "remove", "value": "e" },
+        "output": true,
+      },
+    ],
+  })
+  assert_eq(
+    transition(TwoPhaseSet, remove.initial, remove.operations[0]),
+    Some(from_json({ "added": ["e"], "removed": ["e"] })),
+  )
+  let readd = parse_history({
+    "model": "two_phase_set",
+    "initial": { "added": ["e"], "removed": ["e"] },
+    "operations": [
+      {
+        "id": "a",
+        "client": "x",
+        "call": 1,
+        "return": 2,
+        "input": { "type": "add", "value": "e" },
+        "output": "ok",
+      },
+      {
+        "id": "c",
+        "client": "x",
+        "call": 3,
+        "return": 4,
+        "input": { "type": "contains", "value": "e" },
+        "output": true,
+      },
+    ],
+  })
+  assert_eq(
+    transition(TwoPhaseSet, readd.initial, readd.operations[0]),
+    Some(readd.initial),
+  )
+  assert_eq(transition(TwoPhaseSet, readd.initial, readd.operations[1]), None)
+  let absent_remove = parse_history({
+    "model": "two_phase_set",
+    "initial": { "added": [], "removed": [] },
+    "operations": [
+      {
+        "id": "r",
+        "client": "x",
+        "call": 1,
+        "return": 2,
+        "input": { "type": "remove", "value": "e" },
+        "output": true,
+      },
+    ],
+  })
+  assert_eq(
+    transition(TwoPhaseSet, absent_remove.initial, absent_remove.operations[0]),
+    None,
+  )
+}

@@ -11,6 +11,7 @@ pub(all) enum Model {
   LwwSet
   MaxRegister
   GrowSet
+  TwoPhaseSet
 } derive(Eq, @debug.Debug)
 
 ///|
@@ -45,6 +46,7 @@ fn model_name(model : Model) -> String {
     LwwSet => "lww_set"
     MaxRegister => "max_register"
     GrowSet => "grow_only_set"
+    TwoPhaseSet => "two_phase_set"
   }
 }
 
@@ -161,6 +163,14 @@ fn validate_input(model : Model, input : Value) -> Unit raise HistoryError {
         }
         _ => raise HistoryError("unsupported grow_only_set operation: " + kind)
       }
+    TwoPhaseSet =>
+      match kind {
+        "add" | "remove" | "contains" => {
+          fields_only(input, ["type", "value"])
+          ignore(required(input, "value"))
+        }
+        _ => raise HistoryError("unsupported two_phase_set operation: " + kind)
+      }
   }
 }
 
@@ -187,6 +197,7 @@ fn parse_history_value(request : Value) -> History raise HistoryError {
     "lww_set" => LwwSet
     "max_register" => MaxRegister
     "grow_only_set" => GrowSet
+    "two_phase_set" => TwoPhaseSet
     name => raise HistoryError("unsupported model: " + name)
   }
   let initial = required(request, "initial")
@@ -222,6 +233,11 @@ fn parse_history_value(request : Value) -> History raise HistoryError {
   }
   if model == GrowSet {
     ignore(array(initial))
+  }
+  if model == TwoPhaseSet {
+    let sets = object(initial)
+    ignore(array(sets.get("added").unwrap_or(Null)))
+    ignore(array(sets.get("removed").unwrap_or(Null)))
   }
   if model == LwwSet {
     let sets = object(initial)
