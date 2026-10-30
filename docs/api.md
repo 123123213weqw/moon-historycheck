@@ -21,6 +21,15 @@ No return/output means pending. Return without output, or output without a known
 
 ## Models
 
+Pick the model by the question the history answers. A value that only changes
+is a `register`; per-key values are `kv_register`; first-in-first-out order is
+a `queue` and last-in-first-out a `stack`; a single holder is a `lock`;
+membership that can be revoked is a `set`; a running total is a `counter`; a
+mapping with removal is a `map`; timestamps deciding visibility are an
+`lww_set`; a value that may only grow is a `max_register`; membership that
+never shrinks is a `grow_only_set`; and removal that is forever is a
+`two_phase_set`. All twelve are documented in the table below.
+
 | Model | Initial state | Inputs | Observed outputs |
 |---|---|---|---|
 | register | Supported JSON value | read; write with value; cas with expected and value | read equals state; write is "ok"; CAS is the correct boolean |
