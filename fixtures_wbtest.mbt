@@ -1601,3 +1601,65 @@ test "fixture max register concurrent maximum" {
   )
   assert_eq(fixture_at(result, ["final_state"]), from_json(@json.parse("9")))
 }
+
+///|
+test "fixture grow-only set add and contains" {
+  let result = from_json(
+    execute(
+      @json.parse(
+        "{\"model\":\"grow_only_set\",\"initial\":[],\"operations\":[{\"id\":\"a\",\"client\":\"a\",\"call\":1,\"return\":2,\"input\":{\"type\":\"add\",\"value\":1},\"output\":\"ok\"},{\"id\":\"c\",\"client\":\"b\",\"call\":3,\"return\":4,\"input\":{\"type\":\"contains\",\"value\":1},\"output\":true}]}",
+      ),
+    ),
+  )
+  assert_eq(
+    fixture_at(result, ["verdict"]),
+    from_json(@json.parse("\"linearizable\"")),
+  )
+  assert_eq(fixture_at(result, ["final_state"]), from_json(@json.parse("[1]")))
+}
+
+///|
+test "fixture grow-only set absent contains false" {
+  let result = from_json(
+    execute(
+      @json.parse(
+        "{\"model\":\"grow_only_set\",\"initial\":[],\"operations\":[{\"id\":\"c\",\"client\":\"a\",\"call\":1,\"return\":2,\"input\":{\"type\":\"contains\",\"value\":9},\"output\":false}]}",
+      ),
+    ),
+  )
+  assert_eq(
+    fixture_at(result, ["verdict"]),
+    from_json(@json.parse("\"linearizable\"")),
+  )
+  assert_eq(fixture_at(result, ["final_state"]), from_json(@json.parse("[]")))
+}
+
+///|
+test "fixture grow-only set wrong membership rejected" {
+  let result = from_json(
+    execute(
+      @json.parse(
+        "{\"model\":\"grow_only_set\",\"initial\":[1],\"operations\":[{\"id\":\"c\",\"client\":\"a\",\"call\":1,\"return\":2,\"input\":{\"type\":\"contains\",\"value\":1},\"output\":false}]}",
+      ),
+    ),
+  )
+  assert_eq(
+    fixture_at(result, ["verdict"]),
+    from_json(@json.parse("\"non_linearizable\"")),
+  )
+}
+
+///|
+test "fixture grow-only set concurrent adds" {
+  let result = from_json(
+    execute(
+      @json.parse(
+        "{\"model\":\"grow_only_set\",\"initial\":[],\"operations\":[{\"id\":\"a1\",\"client\":\"a\",\"call\":1,\"return\":6,\"input\":{\"type\":\"add\",\"value\":1},\"output\":\"ok\"},{\"id\":\"a2\",\"client\":\"b\",\"call\":2,\"return\":5,\"input\":{\"type\":\"add\",\"value\":2},\"output\":\"ok\"},{\"id\":\"c\",\"client\":\"c\",\"call\":7,\"return\":8,\"input\":{\"type\":\"contains\",\"value\":2},\"output\":true}]}",
+      ),
+    ),
+  )
+  assert_eq(
+    fixture_at(result, ["verdict"]),
+    from_json(@json.parse("\"linearizable\"")),
+  )
+}

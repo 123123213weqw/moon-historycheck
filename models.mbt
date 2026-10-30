@@ -340,5 +340,29 @@ fn transition(model : Model, state : Value, op : Operation) -> Value? {
           }
         _ => None
       }
+    GrowSet =>
+      match state {
+        Array(items) =>
+          match field(op.input, "type") {
+            String("add") =>
+              if op.output != String("ok") {
+                None
+              } else if items.contains(field(op.input, "value")) {
+                Some(state)
+              } else {
+                let next = items.copy()
+                next.push(field(op.input, "value"))
+                Some(Array(next))
+              }
+            String("contains") =>
+              if op.output == Bool(items.contains(field(op.input, "value"))) {
+                Some(state)
+              } else {
+                None
+              }
+            _ => None
+          }
+        _ => None
+      }
   }
 }

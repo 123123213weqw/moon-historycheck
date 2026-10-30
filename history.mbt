@@ -10,6 +10,7 @@ pub(all) enum Model {
   Mapping
   LwwSet
   MaxRegister
+  GrowSet
 } derive(Eq, @debug.Debug)
 
 ///|
@@ -43,6 +44,7 @@ fn model_name(model : Model) -> String {
     Mapping => "map"
     LwwSet => "lww_set"
     MaxRegister => "max_register"
+    GrowSet => "grow_only_set"
   }
 }
 
@@ -151,6 +153,14 @@ fn validate_input(model : Model, input : Value) -> Unit raise HistoryError {
         "read" => fields_only(input, ["type"])
         _ => raise HistoryError("unsupported max_register operation: " + kind)
       }
+    GrowSet =>
+      match kind {
+        "add" | "contains" => {
+          fields_only(input, ["type", "value"])
+          ignore(required(input, "value"))
+        }
+        _ => raise HistoryError("unsupported grow_only_set operation: " + kind)
+      }
   }
 }
 
@@ -176,6 +186,7 @@ fn parse_history_value(request : Value) -> History raise HistoryError {
     "map" => Mapping
     "lww_set" => LwwSet
     "max_register" => MaxRegister
+    "grow_only_set" => GrowSet
     name => raise HistoryError("unsupported model: " + name)
   }
   let initial = required(request, "initial")
@@ -208,6 +219,9 @@ fn parse_history_value(request : Value) -> History raise HistoryError {
         }
       _ => raise HistoryError("max_register initial must be a number")
     }
+  }
+  if model == GrowSet {
+    ignore(array(initial))
   }
   if model == LwwSet {
     let sets = object(initial)

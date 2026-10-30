@@ -33,6 +33,7 @@ No return/output means pending. Return without output, or output without a known
 | map | Object of key-value entries | put with key and value; get or remove with key | put is "ok"; get equals the entry or null when missing; remove returns whether the key was present and drops it only then |
 | lww_set | Object with adds and rems timestamp tables | add or remove with string element and at (0..2^53-1); contains with element | add and remove are "ok" and keep the greatest timestamp; contains is add-wins on ties: present iff the add timestamp is at least the remove one |
 | max_register | Finite number | write with value; read | write is "ok" only when the value is at least the current one and moves the state to it; read equals the current value |
+| grow_only_set | Array of distinct values | add or contains with value | add is "ok" and idempotent; contains returns the structural membership boolean; nothing is ever removed |
 
 Failed CAS leaves state unchanged. Reads and failed CAS do not introduce missing keys. Null is not an empty queue or stack. Releasing an unheld lock is a violation. Set membership and removal use structural JSON equality, so true is never 1. Wrong model outputs are violations, not automatically interpreted as network timeouts. The recorder must represent unknown completion as pending.
 

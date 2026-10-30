@@ -515,3 +515,76 @@ test "lww set resolves ties add-wins and honors later removes" {
     Some(older.initial),
   )
 }
+
+///|
+test "grow-only set adds idempotently and never removes" {
+  let add = parse_history({
+    "model": "grow_only_set",
+    "initial": [],
+    "operations": [
+      {
+        "id": "a",
+        "client": "x",
+        "call": 1,
+        "return": 2,
+        "input": { "type": "add", "value": "e" },
+        "output": "ok",
+      },
+    ],
+  })
+  assert_eq(
+    transition(GrowSet, add.initial, add.operations[0]),
+    Some(Array([String("e")])),
+  )
+  let again = parse_history({
+    "model": "grow_only_set",
+    "initial": ["e"],
+    "operations": [
+      {
+        "id": "a",
+        "client": "x",
+        "call": 1,
+        "return": 2,
+        "input": { "type": "add", "value": "e" },
+        "output": "ok",
+      },
+    ],
+  })
+  assert_eq(
+    transition(GrowSet, again.initial, again.operations[0]),
+    Some(Array([String("e")])),
+  )
+  let contains = parse_history({
+    "model": "grow_only_set",
+    "initial": ["e"],
+    "operations": [
+      {
+        "id": "c",
+        "client": "x",
+        "call": 1,
+        "return": 2,
+        "input": { "type": "contains", "value": "e" },
+        "output": true,
+      },
+    ],
+  })
+  assert_eq(
+    transition(GrowSet, contains.initial, contains.operations[0]),
+    Some(Array([String("e")])),
+  )
+  let absent = parse_history({
+    "model": "grow_only_set",
+    "initial": [],
+    "operations": [
+      {
+        "id": "c",
+        "client": "x",
+        "call": 1,
+        "return": 2,
+        "input": { "type": "contains", "value": "e" },
+        "output": true,
+      },
+    ],
+  })
+  assert_eq(transition(GrowSet, absent.initial, absent.operations[0]), None)
+}

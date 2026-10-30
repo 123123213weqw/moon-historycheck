@@ -8434,5 +8434,140 @@
       "verdict": "linearizable",
       "final_state": 9
     }
+  },
+  {
+    "name": "grow-only set add and contains",
+    "request": {
+      "model": "grow_only_set",
+      "initial": [],
+      "operations": [
+        {
+          "id": "a",
+          "client": "a",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "add",
+            "value": 1
+          },
+          "output": "ok"
+        },
+        {
+          "id": "c",
+          "client": "b",
+          "call": 3,
+          "return": 4,
+          "input": {
+            "type": "contains",
+            "value": 1
+          },
+          "output": true
+        }
+      ]
+    },
+    "exit": 0,
+    "expected": {
+      "verdict": "linearizable",
+      "final_state": [
+        1
+      ]
+    }
+  },
+  {
+    "name": "grow-only set absent contains false",
+    "request": {
+      "model": "grow_only_set",
+      "initial": [],
+      "operations": [
+        {
+          "id": "c",
+          "client": "a",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "contains",
+            "value": 9
+          },
+          "output": false
+        }
+      ]
+    },
+    "exit": 0,
+    "expected": {
+      "verdict": "linearizable",
+      "final_state": []
+    }
+  },
+  {
+    "name": "grow-only set wrong membership rejected",
+    "request": {
+      "model": "grow_only_set",
+      "initial": [
+        1
+      ],
+      "operations": [
+        {
+          "id": "c",
+          "client": "a",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "contains",
+            "value": 1
+          },
+          "output": false
+        }
+      ]
+    },
+    "exit": 2,
+    "expected": {
+      "verdict": "non_linearizable"
+    }
+  },
+  {
+    "name": "grow-only set concurrent adds",
+    "request": {
+      "model": "grow_only_set",
+      "initial": [],
+      "operations": [
+        {
+          "id": "a1",
+          "client": "a",
+          "call": 1,
+          "return": 6,
+          "input": {
+            "type": "add",
+            "value": 1
+          },
+          "output": "ok"
+        },
+        {
+          "id": "a2",
+          "client": "b",
+          "call": 2,
+          "return": 5,
+          "input": {
+            "type": "add",
+            "value": 2
+          },
+          "output": "ok"
+        },
+        {
+          "id": "c",
+          "client": "c",
+          "call": 7,
+          "return": 8,
+          "input": {
+            "type": "contains",
+            "value": 2
+          },
+          "output": true
+        }
+      ]
+    },
+    "exit": 0,
+    "expected": {
+      "verdict": "linearizable"
+    }
   }
 ]
