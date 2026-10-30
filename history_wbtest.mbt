@@ -72,7 +72,6 @@ test "model refusals name the operation" {
     },
   ) catch {
     HistoryError(message) => String(message)
-    _ => String("wrong error")
   }
   assert_eq(failed, String("swap-op: unsupported register operation: swap"))
 }
