@@ -6,7 +6,7 @@
       "id": "a",
       "client": "a",
       "call": 1,
-      "return": 6,
+      "return": 2,
       "input": {
         "type": "add",
         "value": 1
@@ -16,8 +16,8 @@
     {
       "id": "c",
       "client": "b",
-      "call": 2,
-      "return": 3,
+      "call": 3,
+      "return": 4,
       "input": {
         "type": "contains",
         "value": 1
@@ -25,15 +25,15 @@
       "output": true
     },
     {
-      "id": "c0",
+      "id": "r",
       "client": "c",
-      "call": 4,
-      "return": 5,
+      "call": 5,
+      "return": 6,
       "input": {
-        "type": "contains",
-        "value": 2
+        "type": "remove",
+        "value": 1
       },
-      "output": false
+      "output": true
     }
   ]
 }

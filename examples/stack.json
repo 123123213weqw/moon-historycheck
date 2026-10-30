@@ -6,7 +6,7 @@
       "id": "p1",
       "client": "a",
       "call": 1,
-      "return": 6,
+      "return": 2,
       "input": {
         "type": "push",
         "value": 1
@@ -16,8 +16,8 @@
     {
       "id": "p2",
       "client": "b",
-      "call": 2,
-      "return": 3,
+      "call": 3,
+      "return": 4,
       "input": {
         "type": "push",
         "value": 2
@@ -25,10 +25,10 @@
       "output": "ok"
     },
     {
-      "id": "d2",
+      "id": "d",
       "client": "c",
-      "call": 4,
-      "return": 5,
+      "call": 5,
+      "return": 6,
       "input": {
         "type": "pop"
       },

@@ -1,0 +1,38 @@
+{
+  "model": "max_register",
+  "initial": 0,
+  "operations": [
+    {
+      "id": "w1",
+      "client": "a",
+      "call": 1,
+      "return": 2,
+      "input": {
+        "type": "write",
+        "value": 5
+      },
+      "output": "ok"
+    },
+    {
+      "id": "w2",
+      "client": "b",
+      "call": 3,
+      "return": 4,
+      "input": {
+        "type": "write",
+        "value": 9
+      },
+      "output": "ok"
+    },
+    {
+      "id": "r",
+      "client": "c",
+      "call": 5,
+      "return": 6,
+      "input": {
+        "type": "read"
+      },
+      "output": 9
+    }
+  ]
+}

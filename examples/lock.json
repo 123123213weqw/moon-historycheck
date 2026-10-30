@@ -6,7 +6,7 @@
       "id": "a1",
       "client": "a",
       "call": 1,
-      "return": 6,
+      "return": 2,
       "input": {
         "type": "acquire"
       },
@@ -15,32 +15,22 @@
     {
       "id": "a2",
       "client": "b",
-      "call": 2,
-      "return": 3,
+      "call": 3,
+      "return": 4,
       "input": {
         "type": "acquire"
       },
       "output": false
     },
     {
-      "id": "r1",
+      "id": "r",
       "client": "a",
       "call": 5,
-      "return": 8,
+      "return": 6,
       "input": {
         "type": "release"
       },
       "output": "ok"
-    },
-    {
-      "id": "a3",
-      "client": "b",
-      "call": 7,
-      "return": 9,
-      "input": {
-        "type": "acquire"
-      },
-      "output": true
     }
   ]
 }

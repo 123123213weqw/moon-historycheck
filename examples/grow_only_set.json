@@ -1,0 +1,39 @@
+{
+  "model": "grow_only_set",
+  "initial": [],
+  "operations": [
+    {
+      "id": "a1",
+      "client": "a",
+      "call": 1,
+      "return": 2,
+      "input": {
+        "type": "add",
+        "value": "x"
+      },
+      "output": "ok"
+    },
+    {
+      "id": "a2",
+      "client": "b",
+      "call": 3,
+      "return": 4,
+      "input": {
+        "type": "add",
+        "value": "x"
+      },
+      "output": "ok"
+    },
+    {
+      "id": "c",
+      "client": "c",
+      "call": 5,
+      "return": 6,
+      "input": {
+        "type": "contains",
+        "value": "x"
+      },
+      "output": true
+    }
+  ]
+}

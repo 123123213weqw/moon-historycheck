@@ -1,0 +1,40 @@
+{
+  "model": "map",
+  "initial": {},
+  "operations": [
+    {
+      "id": "p",
+      "client": "a",
+      "call": 1,
+      "return": 2,
+      "input": {
+        "type": "put",
+        "key": "k",
+        "value": 1
+      },
+      "output": "ok"
+    },
+    {
+      "id": "g",
+      "client": "b",
+      "call": 3,
+      "return": 4,
+      "input": {
+        "type": "get",
+        "key": "k"
+      },
+      "output": 1
+    },
+    {
+      "id": "r",
+      "client": "c",
+      "call": 5,
+      "return": 6,
+      "input": {
+        "type": "remove",
+        "key": "k"
+      },
+      "output": true
+    }
+  ]
+}

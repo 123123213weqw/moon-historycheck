@@ -1,0 +1,47 @@
+{
+  "model": "counter",
+  "initial": 0,
+  "operations": [
+    {
+      "id": "i",
+      "client": "a",
+      "call": 1,
+      "return": 2,
+      "input": {
+        "type": "increment"
+      },
+      "output": "ok"
+    },
+    {
+      "id": "i5",
+      "client": "b",
+      "call": 3,
+      "return": 4,
+      "input": {
+        "type": "increment",
+        "by": 5
+      },
+      "output": "ok"
+    },
+    {
+      "id": "d",
+      "client": "c",
+      "call": 5,
+      "return": 6,
+      "input": {
+        "type": "decrement"
+      },
+      "output": "ok"
+    },
+    {
+      "id": "r",
+      "client": "d",
+      "call": 7,
+      "return": 8,
+      "input": {
+        "type": "read"
+      },
+      "output": 5
+    }
+  ]
+}

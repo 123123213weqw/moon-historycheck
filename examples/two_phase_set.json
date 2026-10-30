@@ -1,0 +1,42 @@
+{
+  "model": "two_phase_set",
+  "initial": {
+    "added": [],
+    "removed": []
+  },
+  "operations": [
+    {
+      "id": "a",
+      "client": "a",
+      "call": 1,
+      "return": 2,
+      "input": {
+        "type": "add",
+        "value": "e"
+      },
+      "output": "ok"
+    },
+    {
+      "id": "r",
+      "client": "b",
+      "call": 3,
+      "return": 4,
+      "input": {
+        "type": "remove",
+        "value": "e"
+      },
+      "output": true
+    },
+    {
+      "id": "c",
+      "client": "c",
+      "call": 5,
+      "return": 6,
+      "input": {
+        "type": "contains",
+        "value": "e"
+      },
+      "output": false
+    }
+  ]
+}
