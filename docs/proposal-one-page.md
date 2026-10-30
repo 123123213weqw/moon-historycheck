@@ -2,7 +2,7 @@
 
 ## 并发历史线性一致性验证与反例证据
 
-GitHub 账号：123123213weqw。仓库：https://github.com/123123213weqw/moon-historycheck 。模块：123123213weqw/moon_historycheck@0.1.0。主要语言 MoonBit，Apache-2.0。用户指定用于替换原 PolicyForge 申报；本文供个人参考。
+GitHub 账号：123123213weqw。仓库：https://github.com/123123213weqw/moon-historycheck 。模块：123123213weqw/moon_historycheck@0.2.0。主要语言 MoonBit，Apache-2.0。用户指定用于替换原 PolicyForge 申报；本文供个人参考。
 
 **项目目标。** 面向并发组件和存储服务测试，检查给定调用返回历史是否存在符合顺序规范、保留实时先后关系的串行解释。已实现寄存器／CAS、独立键值寄存器、FIFO 队列、LIFO 栈、互斥锁、成员集合、整数计数器、键值映射、LWW 元素集合、单调 max 寄存器、只增集合和两阶段集合模型，并提供机器可读判定与可复现输入输出。
 

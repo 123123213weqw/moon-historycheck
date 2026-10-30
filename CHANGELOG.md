@@ -1,6 +1,8 @@
 # Changelog
 
-## Unreleased
+## 0.2.0 — 2026-10-30
+
+Registry version: 0.2.0. Twelve sequential models (register/CAS, keyed register, FIFO queue, LIFO stack, lock, set, counter with optional steps, key-value map, LWW element-set, monotonic max-register, grow-only set, two-phase set); map partitioning; a configurable operation ceiling; randomized differential fuzzing, a 51-case malformed-input sweep, a deterministic search-cost gate, serializer pinning across four backends and a one-command verify ladder.
 
 Two-phase set sequential model: add is ok but never resurrects a removed element, remove reports and requires membership, contains is added-and-not-removed. Permutation-oracle, closure-audit and golden-case coverage included.
 

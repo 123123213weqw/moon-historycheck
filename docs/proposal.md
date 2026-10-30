@@ -4,7 +4,7 @@
 
 账号：123123213weqw。日期：2026 年 10 月 20 日。主要语言：MoonBit。许可：Apache-2.0。  
 GitHub：https://github.com/123123213weqw/moon-historycheck  
-公共模块：123123213weqw/moon_historycheck@0.1.0
+公共模块：123123213weqw/moon_historycheck@0.2.0
 
 本稿供个人参考，按实际实现编写。用户指定以本项目替换原 PolicyForge 申报；公开源码和发布记录不代表报名表替换已经完成，回执状态另附核对表。
 
