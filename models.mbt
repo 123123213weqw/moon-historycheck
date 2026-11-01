@@ -763,5 +763,68 @@ fn transition(model : Model, state : Value, op : Operation) -> Value? {
           }
         _ => None
       }
+    PriorityQueue =>
+      match state {
+        Array(items) =>
+          match field(op.input, "type") {
+            // Push appends in insertion order; pop_min removes the element
+            // with the smallest priority, first-inserted among ties.
+            String("push") => {
+              let priority = match field(op.input, "priority") {
+                Number(n) => n
+                _ => -1.0
+              }
+              if op.output != String("ok") || priority < 0.0 {
+                None
+              } else {
+                let next = items.copy()
+                next.push(
+                  record([
+                    ("value", field(op.input, "value")),
+                    ("priority", Number(priority)),
+                  ]),
+                )
+                Some(Array(next))
+              }
+            }
+            String("pop_min") =>
+              if items.is_empty() {
+                if op.output == record([("empty", Bool(true))]) {
+                  Some(state)
+                } else {
+                  None
+                }
+              } else {
+                let mut best = 0
+                for i in 1..<items.length() {
+                  let best_priority = match field(items[best], "priority") {
+                    Number(n) => n
+                    _ => 0.0
+                  }
+                  let this = match field(items[i], "priority") {
+                    Number(n) => n
+                    _ => 0.0
+                  }
+                  if this < best_priority {
+                    best = i
+                  }
+                }
+                let value = field(items[best], "value")
+                if op.output != record([("value", value)]) {
+                  None
+                } else {
+                  let next : Array[Value] = []
+                  for i in 0..<items.length() {
+                    if i != best {
+                      next.push(items[i])
+                    }
+                  }
+                  Some(Array(next))
+                }
+              }
+            _ => None
+          }
+        _ => None
+      }
   }
 }

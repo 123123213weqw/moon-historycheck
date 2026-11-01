@@ -1133,3 +1133,106 @@ test "multiset counts duplicates and removes exactly one" {
     Some(Array([])),
   )
 }
+
+///|
+test "priority queue pops the smallest priority, first among ties" {
+  let history = parse_history({
+    "model": "priority_queue",
+    "initial": [],
+    "operations": [
+      {
+        "id": "a",
+        "client": "a",
+        "call": 1,
+        "return": 2,
+        "input": { "type": "push", "value": "x", "priority": 2 },
+        "output": "ok",
+      },
+      {
+        "id": "b",
+        "client": "a",
+        "call": 3,
+        "return": 4,
+        "input": { "type": "push", "value": "y", "priority": 1 },
+        "output": "ok",
+      },
+      {
+        "id": "c",
+        "client": "a",
+        "call": 5,
+        "return": 6,
+        "input": { "type": "push", "value": "z", "priority": 2 },
+        "output": "ok",
+      },
+    ],
+  })
+  let mut state = history.initial
+  for op in history.operations {
+    match transition(PriorityQueue, state, op) {
+      Some(next) => state = next
+      None => abort("priority queue push replay failed")
+    }
+  }
+  let pop1 = parse_history({
+    "model": "priority_queue",
+    "initial": state.to_json(),
+    "operations": [
+      {
+        "id": "p",
+        "client": "a",
+        "call": 1,
+        "return": 2,
+        "input": { "type": "pop_min" },
+        "output": { "value": "y" },
+      },
+    ],
+  })
+  assert_eq(
+    transition(PriorityQueue, pop1.initial, pop1.operations[0]),
+    Some(
+      from_json([
+        { "value": "x", "priority": 2 },
+        { "value": "z", "priority": 2 },
+      ]),
+    ),
+  )
+  let pop2 = parse_history({
+    "model": "priority_queue",
+    "initial": [
+      { "value": "x", "priority": 2 },
+      { "value": "z", "priority": 2 },
+    ],
+    "operations": [
+      {
+        "id": "p",
+        "client": "a",
+        "call": 1,
+        "return": 2,
+        "input": { "type": "pop_min" },
+        "output": { "value": "x" },
+      },
+    ],
+  })
+  assert_eq(
+    transition(PriorityQueue, pop2.initial, pop2.operations[0]),
+    Some(from_json([{ "value": "z", "priority": 2 }])),
+  )
+  let empty = parse_history({
+    "model": "priority_queue",
+    "initial": [],
+    "operations": [
+      {
+        "id": "p",
+        "client": "a",
+        "call": 1,
+        "return": 2,
+        "input": { "type": "pop_min" },
+        "output": { "empty": true },
+      },
+    ],
+  })
+  assert_eq(
+    transition(PriorityQueue, empty.initial, empty.operations[0]),
+    Some(Array([])),
+  )
+}

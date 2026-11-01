@@ -1942,3 +1942,52 @@ test "fixture multiset wrong count rejected" {
     from_json(@json.parse("\"non_linearizable\"")),
   )
 }
+
+///|
+test "fixture priority queue pops smallest first" {
+  let result = from_json(
+    execute(
+      @json.parse(
+        "{\"model\":\"priority_queue\",\"initial\":[],\"operations\":[{\"id\":\"a\",\"client\":\"a\",\"call\":1,\"return\":2,\"input\":{\"type\":\"push\",\"value\":\"x\",\"priority\":2},\"output\":\"ok\"},{\"id\":\"b\",\"client\":\"b\",\"call\":3,\"return\":4,\"input\":{\"type\":\"push\",\"value\":\"y\",\"priority\":1},\"output\":\"ok\"},{\"id\":\"c\",\"client\":\"c\",\"call\":5,\"return\":6,\"input\":{\"type\":\"push\",\"value\":\"z\",\"priority\":2},\"output\":\"ok\"},{\"id\":\"p\",\"client\":\"d\",\"call\":7,\"return\":8,\"input\":{\"type\":\"pop_min\"},\"output\":{\"value\":\"y\"}},{\"id\":\"p2\",\"client\":\"d\",\"call\":9,\"return\":10,\"input\":{\"type\":\"pop_min\"},\"output\":{\"value\":\"x\"}}]}",
+      ),
+    ),
+  )
+  assert_eq(
+    fixture_at(result, ["verdict"]),
+    from_json(@json.parse("\"linearizable\"")),
+  )
+  assert_eq(
+    fixture_at(result, ["final_state"]),
+    from_json(@json.parse("[{\"value\":\"z\",\"priority\":2}]")),
+  )
+}
+
+///|
+test "fixture priority queue empty pop" {
+  let result = from_json(
+    execute(
+      @json.parse(
+        "{\"model\":\"priority_queue\",\"initial\":[],\"operations\":[{\"id\":\"p\",\"client\":\"a\",\"call\":1,\"return\":2,\"input\":{\"type\":\"pop_min\"},\"output\":{\"empty\":true}}]}",
+      ),
+    ),
+  )
+  assert_eq(
+    fixture_at(result, ["verdict"]),
+    from_json(@json.parse("\"linearizable\"")),
+  )
+}
+
+///|
+test "fixture priority queue wrong victim rejected" {
+  let result = from_json(
+    execute(
+      @json.parse(
+        "{\"model\":\"priority_queue\",\"initial\":[{\"value\":\"x\",\"priority\":2},{\"value\":\"y\",\"priority\":1}],\"operations\":[{\"id\":\"p\",\"client\":\"a\",\"call\":1,\"return\":2,\"input\":{\"type\":\"pop_min\"},\"output\":{\"value\":\"x\"}}]}",
+      ),
+    ),
+  )
+  assert_eq(
+    fixture_at(result, ["verdict"]),
+    from_json(@json.parse("\"non_linearizable\"")),
+  )
+}

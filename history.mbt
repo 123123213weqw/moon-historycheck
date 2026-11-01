@@ -19,6 +19,7 @@ pub(all) enum Model {
   Semaphore
   RwLock
   MultiSet
+  PriorityQueue
 } derive(Eq, @debug.Debug)
 
 ///|
@@ -61,6 +62,7 @@ fn model_name(model : Model) -> String {
     Semaphore => "semaphore"
     RwLock => "rwlock"
     MultiSet => "multiset"
+    PriorityQueue => "priority_queue"
   }
 }
 
@@ -270,6 +272,19 @@ fn validate_input(
         _ =>
           raise HistoryError(id + ": unsupported multiset operation: " + kind)
       }
+    PriorityQueue =>
+      match kind {
+        "push" => {
+          fields_only(input, ["type", "value", "priority"])
+          ignore(required(input, "value"))
+          ignore(ordinal(required(input, "priority")))
+        }
+        "pop_min" => fields_only(input, ["type"])
+        _ =>
+          raise HistoryError(
+            id + ": unsupported priority_queue operation: " + kind,
+          )
+      }
   }
 }
 
@@ -304,6 +319,7 @@ fn parse_history_value(request : Value) -> History raise HistoryError {
     "semaphore" => Semaphore
     "rwlock" => RwLock
     "multiset" => MultiSet
+    "priority_queue" => PriorityQueue
     name => raise HistoryError("unsupported model: " + name)
   }
   let initial = required(request, "initial")
@@ -361,6 +377,9 @@ fn parse_history_value(request : Value) -> History raise HistoryError {
     ignore(object(initial))
   }
   if model == MultiSet {
+    ignore(array(initial))
+  }
+  if model == PriorityQueue {
     ignore(array(initial))
   }
   if model == LwwRegister && initial != Null {

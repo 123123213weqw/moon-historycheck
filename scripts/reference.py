@@ -343,6 +343,43 @@ def _2p_apply(state, op):
         state['removed'].append(copy.deepcopy(v))
     return True, state
 
+MODELS['priority_queue'] = {
+    'initial': [],
+    'apply': lambda state, op: _pq_apply(state, op),
+    'step': lambda rng, state: _pq_step(rng, state),
+}
+
+def _pq_step(rng, state):
+    if state and rng.random() < 0.5:
+        # Pop the smallest priority, first-inserted among ties.
+        best = 0
+        for i in range(1, len(state)):
+            if state[i]['priority'] < state[best]['priority']:
+                best = i
+        victim = state[best]
+        remaining = [e for j, e in enumerate(state) if j != best]
+        return ({'type': 'pop_min'}, {'value': victim['value']}, remaining)
+    return ({'type': 'push', 'value': rng.choice([None, False, 0, 1, 2]),
+        'priority': rng.randrange(0, 4)}, 'ok',
+        state + [{'value': None, 'priority': 0}])
+
+def _pq_apply(state, op):
+    arg, kind, output = op['input'], op['input']['type'], op['output']
+    if kind == 'push':
+        if not same(output, 'ok'):
+            return False, state
+        return True, state + [{'value': copy.deepcopy(arg['value']),
+            'priority': arg['priority']}]
+    if not state:
+        return same(output, {'empty': True}), state
+    best = 0
+    for i in range(1, len(state)):
+        if state[i]['priority'] < state[best]['priority']:
+            best = i
+    if not same(output, {'value': state[best]['value']}):
+        return False, state
+    return True, [e for j, e in enumerate(state) if j != best]
+
 MODELS['semaphore'] = {
     'initial': {'permits': 2, 'taken': 0},
     'apply': lambda state, op: _sem_apply(state, op),
