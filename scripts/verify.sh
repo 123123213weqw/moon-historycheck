@@ -12,6 +12,12 @@ for target in js wasm wasm-gc native; do
     echo "native: skipped (SKIP_NATIVE=1)"
     continue
   fi
+  # CI runs moon check --deny-warn and fails on any warning, including the
+  # ones in white-box tests that moon build never compiles; the ladder now
+  # says the same thing before testing, so a warning cannot pass locally and
+  # fail only on the push.
+  moon check --deny-warn --target "$target" >/dev/null
+  printf '%s check: 0 warnings\n' "$target"
   printf '%s: ' "$target"
   moon test --target "$target" | tail -1
 done
