@@ -173,3 +173,22 @@ independent Python oracle (permutation brute force), the closure audit
 The matrix is checked by scripts/coverage.py, which names any model missing
 a layer.
 
+## Model evolution
+
+The model family grew from three (register, kv_register, queue) in 0.1.0 to
+twenty-two in 0.5.0. Each addition followed the same pattern: the transition
+semantics are pinned by a wbtest, the oracle table gains an entry, the
+golden CLI cases pin the characteristic behavior, a runnable example ships,
+and the robustness sweep covers the malformed-input shapes. The table-driven
+oracle made additions pure appends, eliminating the shared conditional
+chains where three generator defects were planted and caught.
+
+## Blocked-acquire and dominated-write semantics
+
+Models with a "blocked" verdict (lock, semaphore, rwlock, bounded queue)
+treat a failed acquisition as a legal observation — output false or null —
+rather than a replay failure. Models with a "dominated" verdict (lww_register,
+lww_map) treat a stale or dominated write as acknowledged but not applied.
+Both distinctions were caught by fixtures and wbtests after the first cuts
+got them wrong, and both are documented where they live.
+
