@@ -127,3 +127,13 @@ and lww_map keep the strictly newest write by timestamp over a
 null-initialized or per-key state; a dominated write in lww_map observes
 ok (the client was acknowledged) but leaves the entry intact.
 
+## Priority queue, pncounter and lww_map
+
+The priority queue appends in insertion order and pops the smallest priority,
+first-inserted among ties. The pncounter tracks per-actor tables (p for
+increments, n for decrements) rather than a bare total, which is what makes
+it the mergeable CRDT form: merging two replicas is a per-key max, and the
+sum is derived. The lww_map keeps per-key {value, at} entries and moves one
+only on a strictly newer at; a dominated write observes ok (the client was
+acknowledged) but leaves the entry intact.
+
