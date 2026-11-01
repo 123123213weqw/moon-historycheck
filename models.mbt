@@ -826,5 +826,76 @@ fn transition(model : Model, state : Value, op : Operation) -> Value? {
           }
         _ => None
       }
+    PNCounter =>
+      match state {
+        Object(sets) =>
+          match (sets.get("p"), sets.get("n")) {
+            (Some(Object(p)), Some(Object(n))) => {
+              let who = match field(op.input, "who") {
+                String(name) => name
+                _ => ""
+              }
+              match field(op.input, "type") {
+                String("increment") => {
+                  let by = match field(op.input, "by") {
+                    Number(v) => v
+                    _ => -1.0
+                  }
+                  if op.output != String("ok") || by < 1.0 {
+                    None
+                  } else {
+                    let current = match p.get(who) {
+                      Some(Number(v)) => v
+                      _ => 0.0
+                    }
+                    let next_p = p.copy()
+                    next_p[who] = Number(current + by)
+                    Some(record([("p", Object(next_p)), ("n", Object(n))]))
+                  }
+                }
+                String("decrement") => {
+                  let by = match field(op.input, "by") {
+                    Number(v) => v
+                    _ => -1.0
+                  }
+                  if op.output != String("ok") || by < 1.0 {
+                    None
+                  } else {
+                    let current = match n.get(who) {
+                      Some(Number(v)) => v
+                      _ => 0.0
+                    }
+                    let next_n = n.copy()
+                    next_n[who] = Number(current + by)
+                    Some(record([("p", Object(p)), ("n", Object(next_n))]))
+                  }
+                }
+                String("read") => {
+                  let mut total = 0.0
+                  for _, v in p {
+                    match v {
+                      Number(x) => total += x
+                      _ => ()
+                    }
+                  }
+                  for _, v in n {
+                    match v {
+                      Number(x) => total -= x
+                      _ => ()
+                    }
+                  }
+                  if op.output == Number(total) {
+                    Some(state)
+                  } else {
+                    None
+                  }
+                }
+                _ => None
+              }
+            }
+            _ => None
+          }
+        _ => None
+      }
   }
 }

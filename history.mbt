@@ -20,6 +20,7 @@ pub(all) enum Model {
   RwLock
   MultiSet
   PriorityQueue
+  PNCounter
 } derive(Eq, @debug.Debug)
 
 ///|
@@ -63,6 +64,7 @@ fn model_name(model : Model) -> String {
     RwLock => "rwlock"
     MultiSet => "multiset"
     PriorityQueue => "priority_queue"
+    PNCounter => "pncounter"
   }
 }
 
@@ -285,6 +287,20 @@ fn validate_input(
             id + ": unsupported priority_queue operation: " + kind,
           )
       }
+    PNCounter =>
+      match kind {
+        "increment" | "decrement" => {
+          fields_only(input, ["type", "who", "by"])
+          ignore(identifier(required(input, "who")))
+          let by = ordinal(required(input, "by"))
+          if by < 1.0 {
+            raise HistoryError(id + ": by must be at least 1")
+          }
+        }
+        "read" => fields_only(input, ["type"])
+        _ =>
+          raise HistoryError(id + ": unsupported pncounter operation: " + kind)
+      }
   }
 }
 
@@ -320,6 +336,7 @@ fn parse_history_value(request : Value) -> History raise HistoryError {
     "rwlock" => RwLock
     "multiset" => MultiSet
     "priority_queue" => PriorityQueue
+    "pncounter" => PNCounter
     name => raise HistoryError("unsupported model: " + name)
   }
   let initial = required(request, "initial")
@@ -381,6 +398,11 @@ fn parse_history_value(request : Value) -> History raise HistoryError {
   }
   if model == PriorityQueue {
     ignore(array(initial))
+  }
+  if model == PNCounter {
+    let sets = object(initial)
+    ignore(object(sets.get("p").unwrap_or(Null)))
+    ignore(object(sets.get("n").unwrap_or(Null)))
   }
   if model == LwwRegister && initial != Null {
     let reg = object(initial)

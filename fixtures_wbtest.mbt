@@ -1991,3 +1991,52 @@ test "fixture priority queue wrong victim rejected" {
     from_json(@json.parse("\"non_linearizable\"")),
   )
 }
+
+///|
+test "fixture pncounter merges actors" {
+  let result = from_json(
+    execute(
+      @json.parse(
+        "{\"model\":\"pncounter\",\"initial\":{\"p\":{},\"n\":{}},\"operations\":[{\"id\":\"a\",\"client\":\"a\",\"call\":1,\"return\":2,\"input\":{\"type\":\"increment\",\"who\":\"a\",\"by\":2},\"output\":\"ok\"},{\"id\":\"b\",\"client\":\"b\",\"call\":3,\"return\":4,\"input\":{\"type\":\"increment\",\"who\":\"b\",\"by\":3},\"output\":\"ok\"},{\"id\":\"c\",\"client\":\"a\",\"call\":5,\"return\":6,\"input\":{\"type\":\"decrement\",\"who\":\"a\",\"by\":1},\"output\":\"ok\"},{\"id\":\"r\",\"client\":\"c\",\"call\":7,\"return\":8,\"input\":{\"type\":\"read\"},\"output\":4}]}",
+      ),
+    ),
+  )
+  assert_eq(
+    fixture_at(result, ["verdict"]),
+    from_json(@json.parse("\"linearizable\"")),
+  )
+  assert_eq(
+    fixture_at(result, ["final_state"]),
+    from_json(@json.parse("{\"p\":{\"a\":2,\"b\":3},\"n\":{\"a\":1}}")),
+  )
+}
+
+///|
+test "fixture pncounter wrong read rejected" {
+  let result = from_json(
+    execute(
+      @json.parse(
+        "{\"model\":\"pncounter\",\"initial\":{\"p\":{\"a\":2},\"n\":{}},\"operations\":[{\"id\":\"r\",\"client\":\"a\",\"call\":1,\"return\":2,\"input\":{\"type\":\"read\"},\"output\":5}]}",
+      ),
+    ),
+  )
+  assert_eq(
+    fixture_at(result, ["verdict"]),
+    from_json(@json.parse("\"non_linearizable\"")),
+  )
+}
+
+///|
+test "fixture pncounter zero by refused" {
+  let result = from_json(
+    execute(
+      @json.parse(
+        "{\"model\":\"pncounter\",\"initial\":{\"p\":{},\"n\":{}},\"operations\":[{\"id\":\"a\",\"client\":\"a\",\"call\":1,\"return\":2,\"input\":{\"type\":\"increment\",\"who\":\"a\",\"by\":0},\"output\":\"ok\"}]}",
+      ),
+    ),
+  )
+  assert_eq(
+    fixture_at(result, ["verdict"]),
+    from_json(@json.parse("\"invalid_input\"")),
+  )
+}

@@ -1236,3 +1236,77 @@ test "priority queue pops the smallest priority, first among ties" {
     Some(Array([])),
   )
 }
+
+///|
+test "pncounter merges per-actor increments and decrements" {
+  let history = parse_history({
+    "model": "pncounter",
+    "initial": { "p": {}, "n": {} },
+    "operations": [
+      {
+        "id": "a",
+        "client": "a",
+        "call": 1,
+        "return": 2,
+        "input": { "type": "increment", "who": "a", "by": 2 },
+        "output": "ok",
+      },
+      {
+        "id": "b",
+        "client": "b",
+        "call": 3,
+        "return": 4,
+        "input": { "type": "increment", "who": "b", "by": 3 },
+        "output": "ok",
+      },
+      {
+        "id": "c",
+        "client": "a",
+        "call": 5,
+        "return": 6,
+        "input": { "type": "decrement", "who": "a", "by": 1 },
+        "output": "ok",
+      },
+      {
+        "id": "r",
+        "client": "c",
+        "call": 7,
+        "return": 8,
+        "input": { "type": "read" },
+        "output": 4,
+      },
+    ],
+  })
+  let mut state = history.initial
+  for op in history.operations {
+    match transition(PNCounter, state, op) {
+      Some(next) => state = next
+      None => abort("pncounter replay failed")
+    }
+  }
+  assert_eq(state, from_json({ "p": { "a": 2, "b": 3 }, "n": { "a": 1 } }))
+}
+
+///|
+test "pncounter rejects zero steps at parse time" {
+  let failed : Value = String(
+    match
+      parse_history({
+        "model": "pncounter",
+        "initial": { "p": {}, "n": {} },
+        "operations": [
+          {
+            "id": "a",
+            "client": "a",
+            "call": 1,
+            "input": { "type": "increment", "who": "a", "by": 0 },
+          },
+        ],
+      }) {
+      _ => "no error raised"
+    },
+  ) catch {
+    HistoryError(message) => String(message)
+  }
+  assert_eq(failed, String("a: by must be at least 1"))
+}

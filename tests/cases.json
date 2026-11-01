@@ -9421,5 +9421,132 @@
     "expected": {
       "verdict": "non_linearizable"
     }
+  },
+  {
+    "name": "pncounter merges actors",
+    "request": {
+      "model": "pncounter",
+      "initial": {
+        "p": {},
+        "n": {}
+      },
+      "operations": [
+        {
+          "id": "a",
+          "client": "a",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "increment",
+            "who": "a",
+            "by": 2
+          },
+          "output": "ok"
+        },
+        {
+          "id": "b",
+          "client": "b",
+          "call": 3,
+          "return": 4,
+          "input": {
+            "type": "increment",
+            "who": "b",
+            "by": 3
+          },
+          "output": "ok"
+        },
+        {
+          "id": "c",
+          "client": "a",
+          "call": 5,
+          "return": 6,
+          "input": {
+            "type": "decrement",
+            "who": "a",
+            "by": 1
+          },
+          "output": "ok"
+        },
+        {
+          "id": "r",
+          "client": "c",
+          "call": 7,
+          "return": 8,
+          "input": {
+            "type": "read"
+          },
+          "output": 4
+        }
+      ]
+    },
+    "exit": 0,
+    "expected": {
+      "verdict": "linearizable",
+      "final_state": {
+        "p": {
+          "a": 2,
+          "b": 3
+        },
+        "n": {
+          "a": 1
+        }
+      }
+    }
+  },
+  {
+    "name": "pncounter wrong read rejected",
+    "request": {
+      "model": "pncounter",
+      "initial": {
+        "p": {
+          "a": 2
+        },
+        "n": {}
+      },
+      "operations": [
+        {
+          "id": "r",
+          "client": "a",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "read"
+          },
+          "output": 5
+        }
+      ]
+    },
+    "exit": 2,
+    "expected": {
+      "verdict": "non_linearizable"
+    }
+  },
+  {
+    "name": "pncounter zero by refused",
+    "request": {
+      "model": "pncounter",
+      "initial": {
+        "p": {},
+        "n": {}
+      },
+      "operations": [
+        {
+          "id": "a",
+          "client": "a",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "increment",
+            "who": "a",
+            "by": 0
+          },
+          "output": "ok"
+        }
+      ]
+    },
+    "exit": 64,
+    "expected": {
+      "verdict": "invalid_input"
+    }
   }
 ]

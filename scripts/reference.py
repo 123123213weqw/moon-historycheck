@@ -453,6 +453,34 @@ def _rw_apply(state, op):
         return False, state
     return (same(output, 'ok'), {**state, 'writer': False})
 
+MODELS['pncounter'] = {
+    'initial': {'p': {}, 'n': {}},
+    'apply': lambda state, op: _pnc_apply(state, op),
+    'step': lambda rng, state: _pnc_step(rng, state),
+}
+
+def _pnc_step(rng, state):
+    kind = rng.choice(['increment', 'decrement', 'read'])
+    who = rng.choice(['a', 'b', 'c'])
+    if kind == 'read':
+        total = sum(state['p'].values()) - sum(state['n'].values())
+        return {'type': 'read'}, total, state
+    by = rng.choice([1, 2, 5])
+    table = 'p' if kind == 'increment' else 'n'
+    return ({'type': kind, 'who': who, 'by': by}, 'ok',
+        {**state, table: {**state[table], who: state[table].get(who, 0) + by}})
+
+def _pnc_apply(state, op):
+    arg, kind, output = op['input'], op['input']['type'], op['output']
+    if kind == 'read':
+        total = sum(state['p'].values()) - sum(state['n'].values())
+        return same(output, total), state
+    who, by = arg['who'], arg['by']
+    if not same(output, 'ok'):
+        return False, state
+    table = 'p' if kind == 'increment' else 'n'
+    return True, {**state, table: {**state[table], who: state[table].get(who, 0) + by}}
+
 MODELS['multiset'] = {
     'initial': [],
     'apply': lambda state, op: _ms_apply(state, op),
