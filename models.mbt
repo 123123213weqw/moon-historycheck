@@ -591,5 +591,129 @@ fn transition(model : Model, state : Value, op : Operation) -> Value? {
         }
         _ => None
       }
+    Semaphore =>
+      match (state, field(op.input, "type")) {
+        (Object(sets), String("acquire")) => {
+          let permits = match sets["permits"] {
+            Number(n) => n
+            _ => -1.0
+          }
+          let taken = match sets["taken"] {
+            Number(n) => n
+            _ => -1.0
+          }
+          if permits < 0.0 || taken < 0.0 {
+            None
+          } else if taken < permits {
+            if op.output == Bool(true) {
+              Some(
+                record([
+                  ("permits", Number(permits)),
+                  ("taken", Number(taken + 1.0)),
+                ]),
+              )
+            } else {
+              None
+            }
+          } else if op.output == Bool(false) {
+            Some(state)
+          } else {
+            None
+          }
+        }
+        (Object(sets), String("release")) => {
+          let permits = match sets["permits"] {
+            Number(n) => n
+            _ => -1.0
+          }
+          let taken = match sets["taken"] {
+            Number(n) => n
+            _ => -1.0
+          }
+          if op.output != String("ok") || taken <= 0.0 || taken > permits {
+            None
+          } else {
+            Some(
+              record([
+                ("permits", Number(permits)),
+                ("taken", Number(taken - 1.0)),
+              ]),
+            )
+          }
+        }
+        _ => None
+      }
+    RwLock =>
+      match (state, field(op.input, "type")) {
+        (Object(sets), String("acquire_read")) => {
+          let readers = match sets["readers"] {
+            Number(n) => n
+            _ => -1.0
+          }
+          let writer = sets["writer"] == Bool(true)
+          // Blocked by the writer: observing false is the legal verdict.
+          if writer {
+            if op.output == Bool(false) {
+              Some(state)
+            } else {
+              None
+            }
+          } else if op.output == Bool(true) {
+            Some(
+              record([
+                ("readers", Number(readers + 1.0)),
+                ("writer", Bool(false)),
+              ]),
+            )
+          } else {
+            None
+          }
+        }
+        (Object(sets), String("release_read")) => {
+          let readers = match sets["readers"] {
+            Number(n) => n
+            _ => -1.0
+          }
+          if op.output != String("ok") || readers <= 0 {
+            None
+          } else {
+            Some(
+              record([
+                ("readers", Number(readers - 1.0)),
+                ("writer", Bool(sets["writer"] == Bool(true))),
+              ]),
+            )
+          }
+        }
+        (Object(sets), String("acquire_write")) => {
+          let readers = match sets["readers"] {
+            Number(n) => n
+            _ => -1.0
+          }
+          let writer = sets["writer"] == Bool(true)
+          // Blocked by readers or another writer: observing false is the
+          // legal verdict, not a replay failure.
+          if readers > 0 || writer {
+            if op.output == Bool(false) {
+              Some(state)
+            } else {
+              None
+            }
+          } else if op.output == Bool(true) {
+            Some(record([("readers", Number(0.0)), ("writer", Bool(true))]))
+          } else {
+            None
+          }
+        }
+        (Object(sets), String("release_write")) => {
+          let writer = sets["writer"] == Bool(true)
+          if op.output != String("ok") || !writer {
+            None
+          } else {
+            Some(record([("readers", Number(0.0)), ("writer", Bool(false))]))
+          }
+        }
+        _ => None
+      }
   }
 }

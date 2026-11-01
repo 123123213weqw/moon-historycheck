@@ -897,3 +897,151 @@ test "deque pushes and pops at both ends" {
     Some(Array([])),
   )
 }
+
+///|
+test "semaphore admits up to its permits and reports exhaustion" {
+  let history = parse_history({
+    "model": "semaphore",
+    "initial": { "permits": 2, "taken": 0 },
+    "operations": [
+      {
+        "id": "a1",
+        "client": "a",
+        "call": 1,
+        "return": 2,
+        "input": { "type": "acquire" },
+        "output": true,
+      },
+      {
+        "id": "a2",
+        "client": "b",
+        "call": 3,
+        "return": 4,
+        "input": { "type": "acquire" },
+        "output": true,
+      },
+      {
+        "id": "a3",
+        "client": "c",
+        "call": 5,
+        "return": 6,
+        "input": { "type": "acquire" },
+        "output": false,
+      },
+      {
+        "id": "r",
+        "client": "a",
+        "call": 7,
+        "return": 8,
+        "input": { "type": "release" },
+        "output": "ok",
+      },
+    ],
+  })
+  let mut state = history.initial
+  for op in history.operations {
+    match transition(Semaphore, state, op) {
+      Some(next) => state = next
+      None => abort("semaphore replay failed")
+    }
+  }
+  assert_eq(state, from_json({ "permits": 2, "taken": 1 }))
+  // Releasing without holding cannot replay.
+  let empty = parse_history({
+    "model": "semaphore",
+    "initial": { "permits": 2, "taken": 0 },
+    "operations": [
+      {
+        "id": "r",
+        "client": "a",
+        "call": 1,
+        "return": 2,
+        "input": { "type": "release" },
+        "output": "ok",
+      },
+    ],
+  })
+  assert_eq(transition(Semaphore, empty.initial, empty.operations[0]), None)
+}
+
+///|
+test "rwlock admits many readers or one writer, never both" {
+  let history = parse_history({
+    "model": "rwlock",
+    "initial": { "readers": 0, "writer": false },
+    "operations": [
+      {
+        "id": "r1",
+        "client": "a",
+        "call": 1,
+        "return": 2,
+        "input": { "type": "acquire_read" },
+        "output": true,
+      },
+      {
+        "id": "r2",
+        "client": "b",
+        "call": 3,
+        "return": 4,
+        "input": { "type": "acquire_read" },
+        "output": true,
+      },
+      {
+        "id": "w",
+        "client": "c",
+        "call": 5,
+        "return": 6,
+        "input": { "type": "acquire_write" },
+        "output": false,
+      },
+      {
+        "id": "rr1",
+        "client": "a",
+        "call": 7,
+        "return": 8,
+        "input": { "type": "release_read" },
+        "output": "ok",
+      },
+      {
+        "id": "rr2",
+        "client": "b",
+        "call": 9,
+        "return": 10,
+        "input": { "type": "release_read" },
+        "output": "ok",
+      },
+      {
+        "id": "w2",
+        "client": "c",
+        "call": 11,
+        "return": 12,
+        "input": { "type": "acquire_write" },
+        "output": true,
+      },
+    ],
+  })
+  let mut state = history.initial
+  for op in history.operations {
+    match transition(RwLock, state, op) {
+      Some(next) => state = next
+      None => abort("rwlock replay failed")
+    }
+  }
+  assert_eq(state, from_json({ "readers": 0, "writer": true }))
+  // A reader cannot release what it does not hold.
+  let phantom = parse_history({
+    "model": "rwlock",
+    "initial": { "readers": 0, "writer": false },
+    "operations": [
+      {
+        "id": "rr",
+        "client": "a",
+        "call": 1,
+        "return": 2,
+        "input": { "type": "release_read" },
+        "output": "ok",
+      },
+    ],
+  })
+  assert_eq(transition(RwLock, phantom.initial, phantom.operations[0]), None)
+}

@@ -1857,3 +1857,41 @@ test "fixture deque wrong end rejected" {
     from_json(@json.parse("\"non_linearizable\"")),
   )
 }
+
+///|
+test "fixture semaphore exhaustion and release" {
+  let result = from_json(
+    execute(
+      @json.parse(
+        "{\"model\":\"semaphore\",\"initial\":{\"permits\":1,\"taken\":0},\"operations\":[{\"id\":\"a1\",\"client\":\"a\",\"call\":1,\"return\":2,\"input\":{\"type\":\"acquire\"},\"output\":true},{\"id\":\"a2\",\"client\":\"b\",\"call\":3,\"return\":4,\"input\":{\"type\":\"acquire\"},\"output\":false},{\"id\":\"r\",\"client\":\"a\",\"call\":5,\"return\":6,\"input\":{\"type\":\"release\"},\"output\":\"ok\"},{\"id\":\"a3\",\"client\":\"b\",\"call\":7,\"return\":8,\"input\":{\"type\":\"acquire\"},\"output\":true}]}",
+      ),
+    ),
+  )
+  assert_eq(
+    fixture_at(result, ["verdict"]),
+    from_json(@json.parse("\"linearizable\"")),
+  )
+  assert_eq(
+    fixture_at(result, ["final_state"]),
+    from_json(@json.parse("{\"permits\":1,\"taken\":1}")),
+  )
+}
+
+///|
+test "fixture rwlock writer excludes readers" {
+  let result = from_json(
+    execute(
+      @json.parse(
+        "{\"model\":\"rwlock\",\"initial\":{\"readers\":0,\"writer\":false},\"operations\":[{\"id\":\"w\",\"client\":\"a\",\"call\":1,\"return\":4,\"input\":{\"type\":\"acquire_write\"},\"output\":true},{\"id\":\"r\",\"client\":\"b\",\"call\":2,\"return\":3,\"input\":{\"type\":\"acquire_read\"},\"output\":false},{\"id\":\"rw\",\"client\":\"a\",\"call\":5,\"return\":6,\"input\":{\"type\":\"release_write\"},\"output\":\"ok\"},{\"id\":\"r2\",\"client\":\"b\",\"call\":7,\"return\":8,\"input\":{\"type\":\"acquire_read\"},\"output\":true}]}",
+      ),
+    ),
+  )
+  assert_eq(
+    fixture_at(result, ["verdict"]),
+    from_json(@json.parse("\"linearizable\"")),
+  )
+  assert_eq(
+    fixture_at(result, ["final_state"]),
+    from_json(@json.parse("{\"readers\":1,\"writer\":false}")),
+  )
+}

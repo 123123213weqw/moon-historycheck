@@ -9040,5 +9040,125 @@
     "expected": {
       "verdict": "non_linearizable"
     }
+  },
+  {
+    "name": "semaphore exhaustion and release",
+    "request": {
+      "model": "semaphore",
+      "initial": {
+        "permits": 1,
+        "taken": 0
+      },
+      "operations": [
+        {
+          "id": "a1",
+          "client": "a",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "acquire"
+          },
+          "output": true
+        },
+        {
+          "id": "a2",
+          "client": "b",
+          "call": 3,
+          "return": 4,
+          "input": {
+            "type": "acquire"
+          },
+          "output": false
+        },
+        {
+          "id": "r",
+          "client": "a",
+          "call": 5,
+          "return": 6,
+          "input": {
+            "type": "release"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "a3",
+          "client": "b",
+          "call": 7,
+          "return": 8,
+          "input": {
+            "type": "acquire"
+          },
+          "output": true
+        }
+      ]
+    },
+    "exit": 0,
+    "expected": {
+      "verdict": "linearizable",
+      "final_state": {
+        "permits": 1,
+        "taken": 1
+      }
+    }
+  },
+  {
+    "name": "rwlock writer excludes readers",
+    "request": {
+      "model": "rwlock",
+      "initial": {
+        "readers": 0,
+        "writer": false
+      },
+      "operations": [
+        {
+          "id": "w",
+          "client": "a",
+          "call": 1,
+          "return": 4,
+          "input": {
+            "type": "acquire_write"
+          },
+          "output": true
+        },
+        {
+          "id": "r",
+          "client": "b",
+          "call": 2,
+          "return": 3,
+          "input": {
+            "type": "acquire_read"
+          },
+          "output": false
+        },
+        {
+          "id": "rw",
+          "client": "a",
+          "call": 5,
+          "return": 6,
+          "input": {
+            "type": "release_write"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "r2",
+          "client": "b",
+          "call": 7,
+          "return": 8,
+          "input": {
+            "type": "acquire_read"
+          },
+          "output": true
+        }
+      ]
+    },
+    "exit": 0,
+    "expected": {
+      "verdict": "linearizable",
+      "final_state": {
+        "readers": 1,
+        "writer": false
+      }
+    }
   }
 ]

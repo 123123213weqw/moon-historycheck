@@ -343,6 +343,79 @@ def _2p_apply(state, op):
         state['removed'].append(copy.deepcopy(v))
     return True, state
 
+MODELS['semaphore'] = {
+    'initial': {'permits': 2, 'taken': 0},
+    'apply': lambda state, op: _sem_apply(state, op),
+    'step': lambda rng, state: _sem_step(rng, state),
+}
+
+def _sem_step(rng, state):
+    if state['taken'] < state['permits'] or rng.random() < 0.5:
+        if state['taken'] < state['permits']:
+            return {'type': 'acquire'}, True, {**state,
+                'taken': state['taken'] + 1}
+        return {'type': 'acquire'}, False, state
+    return {'type': 'release'}, 'ok', {**state, 'taken': state['taken'] - 1}
+
+def _sem_apply(state, op):
+    kind, output = op['input']['type'], op['output']
+    if kind == 'acquire':
+        if state['taken'] < state['permits']:
+            return (same(output, True), {**state, 'taken': state['taken'] + 1})
+        return same(output, False), state
+    if not same(output, 'ok') or state['taken'] <= 0:
+        return False, state
+    return True, {**state, 'taken': state['taken'] - 1}
+
+MODELS['rwlock'] = {
+    'initial': {'readers': 0, 'writer': False},
+    'apply': lambda state, op: _rw_apply(state, op),
+    'step': lambda rng, state: _rw_step(rng, state),
+}
+
+def _rw_step(rng, state):
+    kind = rng.choice(['acquire_read', 'release_read', 'acquire_write',
+        'release_write'])
+    if kind == 'acquire_read':
+        blocked = state['writer']
+        return ({'type': kind}, not blocked, ({**state,
+            'readers': state['readers'] + 1} if not blocked else state))
+    if kind == 'release_read':
+        if state['readers'] <= 0:
+            # Nothing to release: an ok there cannot replay, so draw a
+            # different operation instead (the generator must stay legal).
+            return _rw_step(rng, state)
+        return ({'type': kind}, 'ok', {**state,
+            'readers': state['readers'] - 1})
+    if kind == 'acquire_write':
+        blocked = state['writer'] or state['readers'] > 0
+        return ({'type': kind}, not blocked, ({**state, 'writer': True}
+            if not blocked else state))
+    if not state['writer']:
+        return _rw_step(rng, state)
+    return ({'type': kind}, 'ok', {**state, 'writer': False})
+
+def _rw_apply(state, op):
+    kind, output = op['input']['type'], op['output']
+    if kind == 'acquire_read':
+        if state['writer']:
+            return same(output, False), state
+        return (same(output, True), {**state,
+            'readers': state['readers'] + 1})
+    if kind == 'release_read':
+        if state['readers'] <= 0:
+            return False, state
+        return (same(output, 'ok'), {**state,
+            'readers': state['readers'] - 1})
+    if kind == 'acquire_write':
+        blocked = state['writer'] or state['readers'] > 0
+        if blocked:
+            return same(output, False), state
+        return (same(output, True), {**state, 'writer': True})
+    if not state['writer']:
+        return False, state
+    return (same(output, 'ok'), {**state, 'writer': False})
+
 BOUNDED_QUEUE_CAPACITY = 3
 
 MODELS['bounded_queue'] = {

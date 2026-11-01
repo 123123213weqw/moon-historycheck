@@ -16,6 +16,8 @@ pub(all) enum Model {
   LwwRegister
   BoundedQueue
   Deque
+  Semaphore
+  RwLock
 } derive(Eq, @debug.Debug)
 
 ///|
@@ -55,6 +57,8 @@ fn model_name(model : Model) -> String {
     LwwRegister => "lww_register"
     BoundedQueue => "bounded_queue"
     Deque => "deque"
+    Semaphore => "semaphore"
+    RwLock => "rwlock"
   }
 }
 
@@ -239,6 +243,18 @@ fn validate_input(
         "pop_front" | "pop_back" => fields_only(input, ["type"])
         _ => raise HistoryError(id + ": unsupported deque operation: " + kind)
       }
+    Semaphore =>
+      match kind {
+        "acquire" | "release" => fields_only(input, ["type"])
+        _ =>
+          raise HistoryError(id + ": unsupported semaphore operation: " + kind)
+      }
+    RwLock =>
+      match kind {
+        "acquire_read" | "release_read" | "acquire_write" | "release_write" =>
+          fields_only(input, ["type"])
+        _ => raise HistoryError(id + ": unsupported rwlock operation: " + kind)
+      }
   }
 }
 
@@ -270,6 +286,8 @@ fn parse_history_value(request : Value) -> History raise HistoryError {
     "lww_register" => LwwRegister
     "bounded_queue" => BoundedQueue
     "deque" => Deque
+    "semaphore" => Semaphore
+    "rwlock" => RwLock
     name => raise HistoryError("unsupported model: " + name)
   }
   let initial = required(request, "initial")
@@ -322,6 +340,9 @@ fn parse_history_value(request : Value) -> History raise HistoryError {
   }
   if model == BoundedQueue || model == Deque {
     ignore(array(initial))
+  }
+  if model == Semaphore || model == RwLock {
+    ignore(object(initial))
   }
   if model == LwwRegister && initial != Null {
     let reg = object(initial)
