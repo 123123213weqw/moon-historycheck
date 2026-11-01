@@ -1,0 +1,55 @@
+{
+  "model": "pncounter",
+  "initial": {
+    "p": {},
+    "n": {}
+  },
+  "operations": [
+    {
+      "id": "a",
+      "client": "a",
+      "call": 1,
+      "return": 2,
+      "input": {
+        "type": "increment",
+        "who": "a",
+        "by": 2
+      },
+      "output": "ok"
+    },
+    {
+      "id": "b",
+      "client": "b",
+      "call": 3,
+      "return": 4,
+      "input": {
+        "type": "increment",
+        "who": "b",
+        "by": 3
+      },
+      "output": "ok"
+    },
+    {
+      "id": "c",
+      "client": "a",
+      "call": 5,
+      "return": 6,
+      "input": {
+        "type": "decrement",
+        "who": "a",
+        "by": 1
+      },
+      "output": "ok"
+    },
+    {
+      "id": "r",
+      "client": "c",
+      "call": 7,
+      "return": 8,
+      "input": {
+        "type": "read"
+      },
+      "output": 4
+    }
+  ]
+}

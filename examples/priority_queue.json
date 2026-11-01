@@ -1,0 +1,42 @@
+{
+  "model": "priority_queue",
+  "initial": [],
+  "operations": [
+    {
+      "id": "a",
+      "client": "a",
+      "call": 1,
+      "return": 2,
+      "input": {
+        "type": "push",
+        "value": "x",
+        "priority": 2
+      },
+      "output": "ok"
+    },
+    {
+      "id": "b",
+      "client": "b",
+      "call": 3,
+      "return": 4,
+      "input": {
+        "type": "push",
+        "value": "y",
+        "priority": 1
+      },
+      "output": "ok"
+    },
+    {
+      "id": "p",
+      "client": "c",
+      "call": 5,
+      "return": 6,
+      "input": {
+        "type": "pop_min"
+      },
+      "output": {
+        "value": "y"
+      }
+    }
+  ]
+}
