@@ -22,9 +22,13 @@ pub fn run(request : Value) -> Value {
     } else {
       false
     }
-    let partitionable = history.model == KeyValue || history.model == Mapping
+    let partitionable = history.model == KeyValue ||
+      history.model == Mapping ||
+      history.model == LwwMap
     if partitioned && (!partitionable || operation != "check") {
-      raise HistoryError("partition requires check on kv_register or map")
+      raise HistoryError(
+        "partition requires check on kv_register, map or lww_map",
+      )
     }
     match operation {
       "check" =>

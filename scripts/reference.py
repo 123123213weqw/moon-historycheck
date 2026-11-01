@@ -820,7 +820,7 @@ def main():
                     'witness': bad})['valid']
             else:
                 assert result['complete_search']
-            if model in ('kv_register', 'map'):
+            if model in ('kv_register', 'map', 'lww_map'):
                 part = run({**request, 'partition': True})
                 assert part['verdict'] == result['verdict']
                 if expected is not None:

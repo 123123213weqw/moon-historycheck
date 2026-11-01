@@ -2089,3 +2089,38 @@ test "fixture lww map stale get rejected" {
     from_json(@json.parse("\"non_linearizable\"")),
   )
 }
+
+///|
+test "fixture lww map partition witness" {
+  let result = from_json(
+    execute(
+      @json.parse(
+        "{\"model\":\"lww_map\",\"initial\":{},\"operations\":[{\"id\":\"s1\",\"client\":\"a\",\"call\":1,\"return\":2,\"input\":{\"type\":\"set\",\"key\":\"x\",\"value\":1,\"at\":5},\"output\":\"ok\"},{\"id\":\"s2\",\"client\":\"b\",\"call\":3,\"return\":4,\"input\":{\"type\":\"set\",\"key\":\"y\",\"value\":2,\"at\":6},\"output\":\"ok\"},{\"id\":\"g\",\"client\":\"c\",\"call\":5,\"return\":6,\"input\":{\"type\":\"get\",\"key\":\"x\"},\"output\":1},{\"id\":\"g2\",\"client\":\"d\",\"call\":7,\"return\":8,\"input\":{\"type\":\"get\",\"key\":\"y\"},\"output\":2}],\"partition\":true}",
+      ),
+    ),
+  )
+  assert_eq(
+    fixture_at(result, ["verdict"]),
+    from_json(@json.parse("\"linearizable\"")),
+  )
+  assert_eq(
+    fixture_at(result, ["witness_verified"]),
+    from_json(@json.parse("true")),
+  )
+}
+
+///|
+test "fixture lww map partition failing key" {
+  let result = from_json(
+    execute(
+      @json.parse(
+        "{\"model\":\"lww_map\",\"initial\":{},\"operations\":[{\"id\":\"s\",\"client\":\"a\",\"call\":1,\"return\":2,\"input\":{\"type\":\"set\",\"key\":\"y\",\"value\":2,\"at\":6},\"output\":\"ok\"},{\"id\":\"g\",\"client\":\"b\",\"call\":3,\"return\":4,\"input\":{\"type\":\"get\",\"key\":\"y\"},\"output\":9}],\"partition\":true}",
+      ),
+    ),
+  )
+  assert_eq(
+    fixture_at(result, ["verdict"]),
+    from_json(@json.parse("\"non_linearizable\"")),
+  )
+  assert_eq(fixture_at(result, ["failed_key"]), from_json(@json.parse("\"y\"")))
+}

@@ -9670,5 +9670,107 @@
     "expected": {
       "verdict": "non_linearizable"
     }
+  },
+  {
+    "name": "lww map partition witness",
+    "request": {
+      "model": "lww_map",
+      "initial": {},
+      "operations": [
+        {
+          "id": "s1",
+          "client": "a",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "set",
+            "key": "x",
+            "value": 1,
+            "at": 5
+          },
+          "output": "ok"
+        },
+        {
+          "id": "s2",
+          "client": "b",
+          "call": 3,
+          "return": 4,
+          "input": {
+            "type": "set",
+            "key": "y",
+            "value": 2,
+            "at": 6
+          },
+          "output": "ok"
+        },
+        {
+          "id": "g",
+          "client": "c",
+          "call": 5,
+          "return": 6,
+          "input": {
+            "type": "get",
+            "key": "x"
+          },
+          "output": 1
+        },
+        {
+          "id": "g2",
+          "client": "d",
+          "call": 7,
+          "return": 8,
+          "input": {
+            "type": "get",
+            "key": "y"
+          },
+          "output": 2
+        }
+      ],
+      "partition": true
+    },
+    "exit": 0,
+    "expected": {
+      "verdict": "linearizable",
+      "witness_verified": true
+    }
+  },
+  {
+    "name": "lww map partition failing key",
+    "request": {
+      "model": "lww_map",
+      "initial": {},
+      "operations": [
+        {
+          "id": "s",
+          "client": "a",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "set",
+            "key": "y",
+            "value": 2,
+            "at": 6
+          },
+          "output": "ok"
+        },
+        {
+          "id": "g",
+          "client": "b",
+          "call": 3,
+          "return": 4,
+          "input": {
+            "type": "get",
+            "key": "y"
+          },
+          "output": 9
+        }
+      ],
+      "partition": true
+    },
+    "exit": 2,
+    "expected": {
+      "verdict": "non_linearizable",
+      "failed_key": "y"
+    }
   }
 ]

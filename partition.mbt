@@ -3,14 +3,20 @@ fn check_partitioned(
   history : History,
   limits : SearchLimits,
 ) -> Value raise HistoryError {
-  if history.model != KeyValue && history.model != Mapping {
-    raise HistoryError("partition is only supported by kv_register and map")
+  if history.model != KeyValue &&
+    history.model != Mapping &&
+    history.model != LwwMap {
+    raise HistoryError(
+      "partition is only supported by kv_register, map and lww_map",
+    )
   }
   if !pending_ids(history).is_empty() {
     return check_verified(history, limits)
   }
   // kv_register strips the key and checks each object as a plain register;
-  // map keeps the key because its commands name it and missing keys read null.
+  // map and lww_map keep the key because their commands name it and missing
+  // keys read null. Each key is state-independent, which is what makes the
+  // decomposition sound for all three.
   let strip_key = history.model == KeyValue
   let groups : Map[String, Array[Operation]] = Map([])
   let initial = object(history.initial)
@@ -43,6 +49,18 @@ fn check_partitioned(
     }
     let sub_initial = if strip_key {
       initial.get(key).unwrap_or(Null)
+    } else if history.model == Mapping {
+      let seed : Map[String, Value] = Map([])
+      match initial.get(key) {
+        Some(value) => seed[key] = value
+        None => ()
+      }
+      Object(seed)
+    } else if history.model == LwwMap {
+      match initial.get(key) {
+        Some(entry) => entry
+        None => Object(Map([]))
+      }
     } else {
       let seed : Map[String, Value] = Map([])
       match initial.get(key) {
@@ -55,7 +73,7 @@ fn check_partitioned(
       model: if strip_key {
         Register
       } else {
-        Mapping
+        history.model
       },
       initial: sub_initial,
       operations: groups[key],
