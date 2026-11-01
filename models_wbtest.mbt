@@ -759,3 +759,141 @@ test "lww register keeps the strictly newest write" {
     Some(Null),
   )
 }
+
+///|
+test "bounded queue refuses when full and admits after dequeue" {
+  let full = parse_history({
+    "model": "bounded_queue",
+    "initial": [],
+    "operations": [
+      {
+        "id": "e1",
+        "client": "a",
+        "call": 1,
+        "return": 2,
+        "input": { "type": "enqueue", "value": 1 },
+        "output": "ok",
+      },
+      {
+        "id": "e2",
+        "client": "a",
+        "call": 3,
+        "return": 4,
+        "input": { "type": "enqueue", "value": 2 },
+        "output": "ok",
+      },
+      {
+        "id": "e3",
+        "client": "a",
+        "call": 5,
+        "return": 6,
+        "input": { "type": "enqueue", "value": 3 },
+        "output": "ok",
+      },
+      {
+        "id": "e4",
+        "client": "a",
+        "call": 7,
+        "return": 8,
+        "input": { "type": "enqueue", "value": 4 },
+        "output": false,
+      },
+    ],
+  })
+  let mut state = full.initial
+  for op in full.operations {
+    match transition(BoundedQueue, state, op) {
+      Some(next) => state = next
+      None => abort("bounded queue replay failed")
+    }
+  }
+  assert_eq(state, from_json([1, 2, 3]))
+  let dequeue = parse_history({
+    "model": "bounded_queue",
+    "initial": [1, 2, 3],
+    "operations": [
+      {
+        "id": "d",
+        "client": "a",
+        "call": 1,
+        "return": 2,
+        "input": { "type": "dequeue" },
+        "output": { "value": 1 },
+      },
+    ],
+  })
+  assert_eq(
+    transition(BoundedQueue, dequeue.initial, dequeue.operations[0]),
+    Some(Array([Number(2), Number(3)])),
+  )
+}
+
+///|
+test "deque pushes and pops at both ends" {
+  let history = parse_history({
+    "model": "deque",
+    "initial": [],
+    "operations": [
+      {
+        "id": "b",
+        "client": "a",
+        "call": 1,
+        "return": 2,
+        "input": { "type": "push_back", "value": 1 },
+        "output": "ok",
+      },
+      {
+        "id": "f",
+        "client": "a",
+        "call": 3,
+        "return": 4,
+        "input": { "type": "push_front", "value": 2 },
+        "output": "ok",
+      },
+    ],
+  })
+  let mut state = history.initial
+  for op in history.operations {
+    match transition(Deque, state, op) {
+      Some(next) => state = next
+      None => abort("deque push replay failed")
+    }
+  }
+  assert_eq(state, from_json([2, 1]))
+  let front = parse_history({
+    "model": "deque",
+    "initial": [2, 1],
+    "operations": [
+      {
+        "id": "pf",
+        "client": "a",
+        "call": 1,
+        "return": 2,
+        "input": { "type": "pop_front" },
+        "output": { "value": 2 },
+      },
+    ],
+  })
+  assert_eq(
+    transition(Deque, front.initial, front.operations[0]),
+    Some(Array([Number(1)])),
+  )
+  let back = parse_history({
+    "model": "deque",
+    "initial": [1],
+    "operations": [
+      {
+        "id": "pb",
+        "client": "a",
+        "call": 1,
+        "return": 2,
+        "input": { "type": "pop_back" },
+        "output": { "value": 1 },
+      },
+    ],
+  })
+  assert_eq(
+    transition(Deque, back.initial, back.operations[0]),
+    Some(Array([])),
+  )
+}

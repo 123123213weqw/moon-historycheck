@@ -343,6 +343,78 @@ def _2p_apply(state, op):
         state['removed'].append(copy.deepcopy(v))
     return True, state
 
+BOUNDED_QUEUE_CAPACITY = 3
+
+MODELS['bounded_queue'] = {
+    'initial': [],
+    'apply': lambda state, op: _bq_apply(state, op),
+    'step': lambda rng, state: _bq_step(rng, state),
+}
+
+def _bq_step(rng, state):
+    # A full queue observes false on enqueue until a dequeue happens; the
+    # generator must never draw an ok there, because that verdict cannot
+    # replay on the positive path.
+    full = len(state) >= BOUNDED_QUEUE_CAPACITY
+    if not full or rng.random() < 0.5:
+        v = rng.choice([None, False, 0, 1, 2, {'nested': [1, True]}])
+        output = False if full else 'ok'
+        return {'type': 'enqueue', 'value': v}, output, (state if full else state + [v])
+    want, next_state = ({'value': state[0]}, state[1:]) if state else ({'empty': True}, state)
+    return {'type': 'dequeue'}, want, next_state
+
+def _bq_apply(state, op):
+    arg, kind, output = op['input'], op['input']['type'], op['output']
+    if kind == 'enqueue':
+        if len(state) >= BOUNDED_QUEUE_CAPACITY:
+            return same(output, False), state
+        if not same(output, 'ok'):
+            return False, state
+        return True, state + [copy.deepcopy(arg['value'])]
+    want = {'value': state[0]} if state else {'empty': True}
+    if not same(output, want):
+        return False, state
+    return True, state[1:] if state else state
+
+MODELS['deque'] = {
+    'initial': [],
+    'apply': lambda state, op: _deque_apply(state, op),
+    'step': lambda rng, state: _deque_step(rng, state),
+}
+
+def _deque_step(rng, state):
+    push = rng.random() < 0.5
+    v = rng.choice([None, False, 0, 1, 2, {'nested': [1, True]}])
+    if push:
+        front = rng.random() < 0.5
+        kind = 'push_front' if front else 'push_back'
+        arg = {'type': kind, 'value': v}
+        return arg, 'ok', ([v] + state if front else state + [v])
+    if not state:
+        return {'type': 'pop_front'}, {'empty': True}, state
+    front = rng.random() < 0.5
+    kind = 'pop_front' if front else 'pop_back'
+    return {'type': kind}, {'value': state[0] if front else state[-1]}, (
+        state[1:] if front else state[:-1])
+
+def _deque_apply(state, op):
+    arg, kind, output = op['input'], op['input']['type'], op['output']
+    if kind == 'push_front':
+        return (same(output, 'ok'), [copy.deepcopy(arg['value'])] + state)
+    if kind == 'push_back':
+        return (same(output, 'ok'), state + [copy.deepcopy(arg['value'])])
+    if not state:
+        return same(output, {'empty': True}), state
+    if kind == 'pop_front':
+        want = {'value': state[0]}
+        if not same(output, want):
+            return False, state
+        return True, state[1:]
+    want = {'value': state[-1]}
+    if not same(output, want):
+        return False, state
+    return True, state[:-1]
+
 MODELS['min_register'] = {
     'initial': 0,
     'apply': lambda state, op: _minreg_apply(state, op),

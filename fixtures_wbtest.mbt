@@ -1792,3 +1792,68 @@ test "fixture lww register tie rejected" {
     from_json(@json.parse("\"non_linearizable\"")),
   )
 }
+
+///|
+test "fixture bounded queue overflow reports false" {
+  let result = from_json(
+    execute(
+      @json.parse(
+        "{\"model\":\"bounded_queue\",\"initial\":[],\"operations\":[{\"id\":\"e1\",\"client\":\"a\",\"call\":1,\"return\":2,\"input\":{\"type\":\"enqueue\",\"value\":1},\"output\":\"ok\"},{\"id\":\"e2\",\"client\":\"b\",\"call\":3,\"return\":4,\"input\":{\"type\":\"enqueue\",\"value\":2},\"output\":\"ok\"},{\"id\":\"e3\",\"client\":\"c\",\"call\":5,\"return\":6,\"input\":{\"type\":\"enqueue\",\"value\":3},\"output\":\"ok\"},{\"id\":\"e4\",\"client\":\"d\",\"call\":7,\"return\":8,\"input\":{\"type\":\"enqueue\",\"value\":4},\"output\":false}]}",
+      ),
+    ),
+  )
+  assert_eq(
+    fixture_at(result, ["verdict"]),
+    from_json(@json.parse("\"linearizable\"")),
+  )
+  assert_eq(
+    fixture_at(result, ["final_state"]),
+    from_json(@json.parse("[1,2,3]")),
+  )
+}
+
+///|
+test "fixture bounded queue overflow with ok rejected" {
+  let result = from_json(
+    execute(
+      @json.parse(
+        "{\"model\":\"bounded_queue\",\"initial\":[1,2,3],\"operations\":[{\"id\":\"e\",\"client\":\"a\",\"call\":1,\"return\":2,\"input\":{\"type\":\"enqueue\",\"value\":4},\"output\":\"ok\"}]}",
+      ),
+    ),
+  )
+  assert_eq(
+    fixture_at(result, ["verdict"]),
+    from_json(@json.parse("\"non_linearizable\"")),
+  )
+}
+
+///|
+test "fixture deque both ends" {
+  let result = from_json(
+    execute(
+      @json.parse(
+        "{\"model\":\"deque\",\"initial\":[],\"operations\":[{\"id\":\"pb\",\"client\":\"a\",\"call\":1,\"return\":2,\"input\":{\"type\":\"push_back\",\"value\":1},\"output\":\"ok\"},{\"id\":\"pf\",\"client\":\"b\",\"call\":3,\"return\":4,\"input\":{\"type\":\"push_front\",\"value\":2},\"output\":\"ok\"},{\"id\":\"r\",\"client\":\"c\",\"call\":5,\"return\":6,\"input\":{\"type\":\"pop_front\"},\"output\":{\"value\":2}},{\"id\":\"r2\",\"client\":\"d\",\"call\":7,\"return\":8,\"input\":{\"type\":\"pop_back\"},\"output\":{\"value\":1}}]}",
+      ),
+    ),
+  )
+  assert_eq(
+    fixture_at(result, ["verdict"]),
+    from_json(@json.parse("\"linearizable\"")),
+  )
+  assert_eq(fixture_at(result, ["final_state"]), from_json(@json.parse("[]")))
+}
+
+///|
+test "fixture deque wrong end rejected" {
+  let result = from_json(
+    execute(
+      @json.parse(
+        "{\"model\":\"deque\",\"initial\":[2,1],\"operations\":[{\"id\":\"r\",\"client\":\"a\",\"call\":1,\"return\":2,\"input\":{\"type\":\"pop_front\"},\"output\":{\"value\":1}}]}",
+      ),
+    ),
+  )
+  assert_eq(
+    fixture_at(result, ["verdict"]),
+    from_json(@json.parse("\"non_linearizable\"")),
+  )
+}

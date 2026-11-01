@@ -1,4 +1,7 @@
 ///|
+const BOUNDED_QUEUE_CAPACITY : Int32 = 3
+
+///|
 fn register_transition(state : Value, input : Value, output : Value) -> Value? {
   match field(input, "type") {
     String("read") => if output == state { Some(state) } else { None }
@@ -492,6 +495,100 @@ fn transition(model : Model, state : Value, op : Operation) -> Value? {
           } else {
             None
           }
+        _ => None
+      }
+    BoundedQueue =>
+      match state {
+        Array(items) =>
+          match field(op.input, "type") {
+            String("enqueue") =>
+              // A full queue refuses the enqueue with false; nothing else can
+              // be observed, because the element never entered.
+              if items.length() >= BOUNDED_QUEUE_CAPACITY {
+                if op.output == Bool(false) {
+                  Some(state)
+                } else {
+                  None
+                }
+              } else if op.output != String("ok") {
+                None
+              } else {
+                let next = items.copy()
+                next.push(field(op.input, "value"))
+                Some(Array(next))
+              }
+            String("dequeue") => {
+              let want = if items.is_empty() {
+                record([("empty", Bool(true))])
+              } else {
+                record([("value", items[0])])
+              }
+              if op.output == want {
+                if items.is_empty() {
+                  Some(state)
+                } else {
+                  let next : Array[Value] = []
+                  for i in 1..<items.length() {
+                    next.push(items[i])
+                  }
+                  Some(Array(next))
+                }
+              } else {
+                None
+              }
+            }
+            _ => None
+          }
+        _ => None
+      }
+    Deque =>
+      match state {
+        Array(items) => {
+          let kind = field(op.input, "type")
+          let is_push = kind == String("push_front") ||
+            kind == String("push_back")
+          if is_push {
+            if op.output != String("ok") {
+              None
+            } else {
+              let next = items.copy()
+              if kind == String("push_front") {
+                next.insert(0, field(op.input, "value"))
+              } else {
+                next.push(field(op.input, "value"))
+              }
+              Some(Array(next))
+            }
+          } else if items.is_empty() {
+            if op.output == record([("empty", Bool(true))]) {
+              Some(state)
+            } else {
+              None
+            }
+          } else if kind == String("pop_front") {
+            if op.output == record([("value", items[0])]) {
+              let next : Array[Value] = []
+              for i in 1..<items.length() {
+                next.push(items[i])
+              }
+              Some(Array(next))
+            } else {
+              None
+            }
+          } else if kind == String("pop_back") {
+            if op.output == record([("value", items[items.length() - 1])]) {
+              let next : Array[Value] = []
+              for i in 0..<(items.length() - 1) {
+                next.push(items[i])
+              }
+              Some(Array(next))
+            } else {
+              None
+            }
+          } else {
+            None
+          }
+        }
         _ => None
       }
   }

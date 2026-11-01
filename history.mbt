@@ -14,6 +14,8 @@ pub(all) enum Model {
   TwoPhaseSet
   MinRegister
   LwwRegister
+  BoundedQueue
+  Deque
 } derive(Eq, @debug.Debug)
 
 ///|
@@ -51,6 +53,8 @@ fn model_name(model : Model) -> String {
     TwoPhaseSet => "two_phase_set"
     MinRegister => "min_register"
     LwwRegister => "lww_register"
+    BoundedQueue => "bounded_queue"
+    Deque => "deque"
   }
 }
 
@@ -214,6 +218,27 @@ fn validate_input(
             id + ": unsupported lww_register operation: " + kind,
           )
       }
+    BoundedQueue =>
+      match kind {
+        "enqueue" => {
+          fields_only(input, ["type", "value"])
+          ignore(required(input, "value"))
+        }
+        "dequeue" => fields_only(input, ["type"])
+        _ =>
+          raise HistoryError(
+            id + ": unsupported bounded_queue operation: " + kind,
+          )
+      }
+    Deque =>
+      match kind {
+        "push_front" | "push_back" => {
+          fields_only(input, ["type", "value"])
+          ignore(required(input, "value"))
+        }
+        "pop_front" | "pop_back" => fields_only(input, ["type"])
+        _ => raise HistoryError(id + ": unsupported deque operation: " + kind)
+      }
   }
 }
 
@@ -243,6 +268,8 @@ fn parse_history_value(request : Value) -> History raise HistoryError {
     "two_phase_set" => TwoPhaseSet
     "min_register" => MinRegister
     "lww_register" => LwwRegister
+    "bounded_queue" => BoundedQueue
+    "deque" => Deque
     name => raise HistoryError("unsupported model: " + name)
   }
   let initial = required(request, "initial")
@@ -292,6 +319,9 @@ fn parse_history_value(request : Value) -> History raise HistoryError {
         }
       _ => raise HistoryError("min_register initial must be a number")
     }
+  }
+  if model == BoundedQueue || model == Deque {
+    ignore(array(initial))
   }
   if model == LwwRegister && initial != Null {
     let reg = object(initial)
