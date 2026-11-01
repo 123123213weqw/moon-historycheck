@@ -164,3 +164,12 @@ acknowledged) but leaves the entry intact.
 | pncounter | p+n tables | increment (who, by); decrement (who, by); read | per-actor sum |
 | lww_map | key→(value, at) | set (key, value, at); get | strictly newer at per key |
 
+## Oracle coverage matrix
+
+Each of the twenty-two models is exercised by five evidence layers: white-box
+tests (transition calls), CLI fixtures (through the compiled binary), the
+independent Python oracle (permutation brute force), the closure audit
+(breadth-first rejection certificates) and a shipped example (pinned answer).
+The matrix is checked by scripts/coverage.py, which names any model missing
+a layer.
+
