@@ -1310,3 +1310,73 @@ test "pncounter rejects zero steps at parse time" {
   }
   assert_eq(failed, String("a: by must be at least 1"))
 }
+
+///|
+test "lww map keeps the newest write per key and ignores dominated writes" {
+  let history = parse_history({
+    "model": "lww_map",
+    "initial": {},
+    "operations": [
+      {
+        "id": "s1",
+        "client": "a",
+        "call": 1,
+        "return": 2,
+        "input": { "type": "set", "key": "k", "value": 1, "at": 5 },
+        "output": "ok",
+      },
+      {
+        "id": "s2",
+        "client": "b",
+        "call": 3,
+        "return": 4,
+        "input": { "type": "set", "key": "k", "value": 2, "at": 9 },
+        "output": "ok",
+      },
+      {
+        "id": "s3",
+        "client": "c",
+        "call": 5,
+        "return": 6,
+        "input": { "type": "set", "key": "k", "value": 3, "at": 7 },
+        "output": "ok",
+      },
+      {
+        "id": "g",
+        "client": "d",
+        "call": 7,
+        "return": 8,
+        "input": { "type": "get", "key": "k" },
+        "output": 2,
+      },
+    ],
+  })
+  let mut state = history.initial
+  for op in history.operations {
+    match transition(LwwMap, state, op) {
+      Some(next) => state = next
+      None => abort("lww map replay failed")
+    }
+  }
+  // s3 (at 7) is dominated by s2 (at 9): the state keeps s2, and s3's ok is
+  // still legal because the client did get an acknowledgement.
+  assert_eq(state, from_json({ "k": { "value": 2, "at": 9 } }))
+  let missing = parse_history({
+    "model": "lww_map",
+    "initial": {},
+    "operations": [
+      {
+        "id": "g",
+        "client": "a",
+        "call": 1,
+        "return": 2,
+        "input": { "type": "get", "key": "nope" },
+        "output": null,
+      },
+    ],
+  })
+  assert_eq(
+    transition(LwwMap, missing.initial, missing.operations[0]),
+    Some(Object(Map([]))),
+  )
+}

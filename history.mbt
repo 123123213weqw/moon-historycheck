@@ -21,6 +21,7 @@ pub(all) enum Model {
   MultiSet
   PriorityQueue
   PNCounter
+  LwwMap
 } derive(Eq, @debug.Debug)
 
 ///|
@@ -65,6 +66,7 @@ fn model_name(model : Model) -> String {
     MultiSet => "multiset"
     PriorityQueue => "priority_queue"
     PNCounter => "pncounter"
+    LwwMap => "lww_map"
   }
 }
 
@@ -301,6 +303,20 @@ fn validate_input(
         _ =>
           raise HistoryError(id + ": unsupported pncounter operation: " + kind)
       }
+    LwwMap =>
+      match kind {
+        "set" => {
+          fields_only(input, ["type", "key", "value", "at"])
+          ignore(identifier(required(input, "key")))
+          ignore(required(input, "value"))
+          ignore(ordinal(required(input, "at")))
+        }
+        "get" => {
+          fields_only(input, ["type", "key"])
+          ignore(identifier(required(input, "key")))
+        }
+        _ => raise HistoryError(id + ": unsupported lww_map operation: " + kind)
+      }
   }
 }
 
@@ -337,6 +353,7 @@ fn parse_history_value(request : Value) -> History raise HistoryError {
     "multiset" => MultiSet
     "priority_queue" => PriorityQueue
     "pncounter" => PNCounter
+    "lww_map" => LwwMap
     name => raise HistoryError("unsupported model: " + name)
   }
   let initial = required(request, "initial")
@@ -403,6 +420,9 @@ fn parse_history_value(request : Value) -> History raise HistoryError {
     let sets = object(initial)
     ignore(object(sets.get("p").unwrap_or(Null)))
     ignore(object(sets.get("n").unwrap_or(Null)))
+  }
+  if model == LwwMap {
+    ignore(object(initial))
   }
   if model == LwwRegister && initial != Null {
     let reg = object(initial)

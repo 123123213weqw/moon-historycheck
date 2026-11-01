@@ -380,6 +380,41 @@ def _pq_apply(state, op):
         return False, state
     return True, [e for j, e in enumerate(state) if j != best]
 
+MODELS['lww_map'] = {
+    'initial': {},
+    'apply': lambda state, op: _lmap_apply(state, op),
+    'step': lambda rng, state: _lmap_step(rng, state),
+}
+
+def _lmap_step(rng, state):
+    kind = rng.choice(['set', 'get'])
+    key = rng.choice(['k1', 'k2', 'k3'])
+    if kind == 'get':
+        entry = state.get(key)
+        want = entry['value'] if entry else None
+        return {'type': 'get', 'key': key}, want, state
+    at = rng.randrange(0, 10)
+    dominated = key in state and state[key]['at'] >= at
+    arg = {'type': 'set', 'key': key, 'value': rng.choice([None, False, 0, 1, 2]), 'at': at}
+    if dominated:
+        return arg, 'ok', state
+    return arg, 'ok', {**state, key: {'value': arg['value'], 'at': at}}
+
+def _lmap_apply(state, op):
+    arg, kind, output = op['input'], op['input']['type'], op['output']
+    key = arg['key']
+    if kind == 'set':
+        if not same(output, 'ok'):
+            return False, state
+        at = arg['at']
+        dominated = key in state and state[key]['at'] >= at
+        if dominated:
+            return True, state
+        return True, {**state, key: {'value': copy.deepcopy(arg['value']), 'at': at}}
+    entry = state.get(key)
+    want = entry['value'] if entry else None
+    return same(output, want), state
+
 MODELS['semaphore'] = {
     'initial': {'permits': 2, 'taken': 0},
     'apply': lambda state, op: _sem_apply(state, op),

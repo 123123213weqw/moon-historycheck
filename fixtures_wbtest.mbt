@@ -2040,3 +2040,52 @@ test "fixture pncounter zero by refused" {
     from_json(@json.parse("\"invalid_input\"")),
   )
 }
+
+///|
+test "fixture lww map newest write per key wins" {
+  let result = from_json(
+    execute(
+      @json.parse(
+        "{\"model\":\"lww_map\",\"initial\":{},\"operations\":[{\"id\":\"s1\",\"client\":\"a\",\"call\":1,\"return\":2,\"input\":{\"type\":\"set\",\"key\":\"k\",\"value\":1,\"at\":5},\"output\":\"ok\"},{\"id\":\"s2\",\"client\":\"b\",\"call\":3,\"return\":4,\"input\":{\"type\":\"set\",\"key\":\"k\",\"value\":2,\"at\":9},\"output\":\"ok\"},{\"id\":\"s3\",\"client\":\"c\",\"call\":5,\"return\":6,\"input\":{\"type\":\"set\",\"key\":\"k\",\"value\":3,\"at\":7},\"output\":\"ok\"},{\"id\":\"g\",\"client\":\"d\",\"call\":7,\"return\":8,\"input\":{\"type\":\"get\",\"key\":\"k\"},\"output\":2}]}",
+      ),
+    ),
+  )
+  assert_eq(
+    fixture_at(result, ["verdict"]),
+    from_json(@json.parse("\"linearizable\"")),
+  )
+  assert_eq(
+    fixture_at(result, ["final_state"]),
+    from_json(@json.parse("{\"k\":{\"value\":2,\"at\":9}}")),
+  )
+}
+
+///|
+test "fixture lww map missing key reads null" {
+  let result = from_json(
+    execute(
+      @json.parse(
+        "{\"model\":\"lww_map\",\"initial\":{},\"operations\":[{\"id\":\"g\",\"client\":\"a\",\"call\":1,\"return\":2,\"input\":{\"type\":\"get\",\"key\":\"nope\"},\"output\":null}]}",
+      ),
+    ),
+  )
+  assert_eq(
+    fixture_at(result, ["verdict"]),
+    from_json(@json.parse("\"linearizable\"")),
+  )
+}
+
+///|
+test "fixture lww map stale get rejected" {
+  let result = from_json(
+    execute(
+      @json.parse(
+        "{\"model\":\"lww_map\",\"initial\":{\"k\":{\"value\":2,\"at\":9}},\"operations\":[{\"id\":\"g\",\"client\":\"a\",\"call\":1,\"return\":2,\"input\":{\"type\":\"get\",\"key\":\"k\"},\"output\":1}]}",
+      ),
+    ),
+  )
+  assert_eq(
+    fixture_at(result, ["verdict"]),
+    from_json(@json.parse("\"non_linearizable\"")),
+  )
+}

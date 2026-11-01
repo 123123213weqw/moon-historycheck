@@ -9548,5 +9548,127 @@
     "expected": {
       "verdict": "invalid_input"
     }
+  },
+  {
+    "name": "lww map newest write per key wins",
+    "request": {
+      "model": "lww_map",
+      "initial": {},
+      "operations": [
+        {
+          "id": "s1",
+          "client": "a",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "set",
+            "key": "k",
+            "value": 1,
+            "at": 5
+          },
+          "output": "ok"
+        },
+        {
+          "id": "s2",
+          "client": "b",
+          "call": 3,
+          "return": 4,
+          "input": {
+            "type": "set",
+            "key": "k",
+            "value": 2,
+            "at": 9
+          },
+          "output": "ok"
+        },
+        {
+          "id": "s3",
+          "client": "c",
+          "call": 5,
+          "return": 6,
+          "input": {
+            "type": "set",
+            "key": "k",
+            "value": 3,
+            "at": 7
+          },
+          "output": "ok"
+        },
+        {
+          "id": "g",
+          "client": "d",
+          "call": 7,
+          "return": 8,
+          "input": {
+            "type": "get",
+            "key": "k"
+          },
+          "output": 2
+        }
+      ]
+    },
+    "exit": 0,
+    "expected": {
+      "verdict": "linearizable",
+      "final_state": {
+        "k": {
+          "value": 2,
+          "at": 9
+        }
+      }
+    }
+  },
+  {
+    "name": "lww map missing key reads null",
+    "request": {
+      "model": "lww_map",
+      "initial": {},
+      "operations": [
+        {
+          "id": "g",
+          "client": "a",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "get",
+            "key": "nope"
+          },
+          "output": null
+        }
+      ]
+    },
+    "exit": 0,
+    "expected": {
+      "verdict": "linearizable"
+    }
+  },
+  {
+    "name": "lww map stale get rejected",
+    "request": {
+      "model": "lww_map",
+      "initial": {
+        "k": {
+          "value": 2,
+          "at": 9
+        }
+      },
+      "operations": [
+        {
+          "id": "g",
+          "client": "a",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "get",
+            "key": "k"
+          },
+          "output": 1
+        }
+      ]
+    },
+    "exit": 2,
+    "expected": {
+      "verdict": "non_linearizable"
+    }
   }
 ]

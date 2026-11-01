@@ -897,5 +897,63 @@ fn transition(model : Model, state : Value, op : Operation) -> Value? {
           }
         _ => None
       }
+    LwwMap =>
+      match state {
+        Object(entries) =>
+          match field(op.input, "type") {
+            // set is "ok" regardless of the timestamp, but only a strictly
+            // newer at moves the entry: a dominated write leaves the entry
+            // (and the observed ok) intact.
+            String("set") => {
+              let at = match field(op.input, "at") {
+                Number(n) => n
+                _ => -1.0
+              }
+              let key = match field(op.input, "key") {
+                String(k) => k
+                _ => ""
+              }
+              if op.output != String("ok") || key == "" || at < 0.0 {
+                None
+              } else {
+                let dominated = match entries.get(key) {
+                  Some(existing) =>
+                    match field(existing, "at") {
+                      Number(current) => at <= current
+                      _ => false
+                    }
+                  None => false
+                }
+                if dominated {
+                  Some(state)
+                } else {
+                  let next = entries.copy()
+                  next[key] = record([
+                    ("value", field(op.input, "value")),
+                    ("at", Number(at)),
+                  ])
+                  Some(Object(next))
+                }
+              }
+            }
+            String("get") => {
+              let key = match field(op.input, "key") {
+                String(k) => k
+                _ => ""
+              }
+              let want = match entries.get(key) {
+                Some(entry) => field(entry, "value")
+                None => Null
+              }
+              if op.output == want {
+                Some(state)
+              } else {
+                None
+              }
+            }
+            _ => None
+          }
+        _ => None
+      }
   }
 }
