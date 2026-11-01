@@ -27,3 +27,35 @@ Deletion changes the history's possible behavior. Every candidate is solved agai
 history and value validate input; models specifies behavior; precedence derives temporal obligations; search performs bounded DFS; witness verifies positive evidence; partition handles independent objects; reduction shrinks definite failures; certificate constructs and verifies negative closure; api rejects irrelevant options and dispatches. The Node adapter does not replace domain search.
 
 Python enumerates small permutations without production memoization or partitioning, using a separately written transition model. Closure graphs are audited independently in Python. Golden cases exercise both core API and CLI, including negative witnesses, tampered certificates and unknown outcomes.
+
+## Model family
+
+Twenty-two sequential models share one transition interface (state, operation
+-> next state or refusal) and one identity contract (unique ordinals, unique
+IDs). The register family is monotonic (max), anti-monotonic (min) and
+timestamp-ordered (LWW); the collection family covers set, multiset, map,
+priority queue and bounded/unbounded FIFO and LIFO; the coordination family
+covers lock, counting semaphore and reader-writer lock; the counter family
+covers plain, grow-only set, two-phase set, positive-negative and per-key
+last-writer-wins. Each model's semantics are pinned by wbtest, fixture,
+oracle entry and (where applicable) a runnable example.
+
+## Oracle architecture
+
+The independent Python oracle is table-driven per model: each entry supplies
+the initial state, an apply() that answers one operation, and a legal-step
+generator for positive histories. Adding a model is a pure table append — the
+shared conditional chains this replaced were where three generator defects
+were planted and caught. The oracle covers permutation brute force, witness
+replay, partition equivalence (kv_register, map, lww_map) and reduction
+minimality.
+
+## Blocked-acquire semantics
+
+Models with a "blocked" verdict (lock, semaphore, rwlock, bounded queue)
+treat a failed acquisition as a legal observation — output false — rather
+than a replay failure. The distinction matters because a client that was
+told "no" recorded a real event, and the checker must honor it. The first
+cut of rwlock treated blocked acquires as replay failures, which the
+fixture writer-excludes-readers caught immediately.
+
