@@ -44,6 +44,13 @@ never shrinks is a `grow_only_set`; and removal that is forever is a
 | max_register | Finite number | write with value; read | write is "ok" only when the value is at least the current one and moves the state to it; read equals the current value |
 | grow_only_set | Array of distinct values | add or contains with value | add is "ok" and idempotent; contains returns the structural membership boolean; nothing is ever removed |
 | two_phase_set | Object with added and removed arrays | add, remove or contains with value | add is "ok" but cannot resurrect a removed element; remove returns and requires membership; contains is added-and-not-removed |
+| min_register | Finite number | write with value; read | write is "ok" only when the value is at most the current one and moves the state to it; read equals the current value |
+| lww_register | Null or an object with value and at | write with value and at (0..2^53-1); read | write is "ok" only with a strictly newer at and moves value and at; read equals the stored value, null when never written |
+| bounded_queue | Array | enqueue with value; dequeue | capacity 3; enqueue onto a full queue observes false; dequeue is {"value":v} or {"empty":true} |
+| deque | Array | push_front, push_back, pop_front, pop_back | pushes are "ok"; pops are {"value":v} or {"empty":true} at the named end |
+| semaphore | Object with permits and taken | acquire; release | acquire is true while taken < permits, false once exhausted; release is "ok" and requires holding |
+| rwlock | Object with readers and writer | acquire_read, release_read, acquire_write, release_write | readers run concurrently; the writer excludes everyone; blocked acquires observe false |
+| multiset | Array with duplicates | add, remove or count with value | add is "ok"; remove returns the copy count and drops exactly one; count returns the copy count |
 
 Failed CAS leaves state unchanged. Reads and failed CAS do not introduce missing keys. Null is not an empty queue or stack. Releasing an unheld lock is a violation. Set membership and removal use structural JSON equality, so true is never 1. Wrong model outputs are violations, not automatically interpreted as network timeouts. The recorder must represent unknown completion as pending.
 
