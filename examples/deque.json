@@ -1,0 +1,40 @@
+{
+  "model": "deque",
+  "initial": [],
+  "operations": [
+    {
+      "id": "pb",
+      "client": "a",
+      "call": 1,
+      "return": 2,
+      "input": {
+        "type": "push_back",
+        "value": 1
+      },
+      "output": "ok"
+    },
+    {
+      "id": "pf",
+      "client": "b",
+      "call": 3,
+      "return": 4,
+      "input": {
+        "type": "push_front",
+        "value": 2
+      },
+      "output": "ok"
+    },
+    {
+      "id": "r",
+      "client": "c",
+      "call": 5,
+      "return": 6,
+      "input": {
+        "type": "pop_front"
+      },
+      "output": {
+        "value": 2
+      }
+    }
+  ]
+}

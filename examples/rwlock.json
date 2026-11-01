@@ -1,0 +1,49 @@
+{
+  "model": "rwlock",
+  "initial": {
+    "readers": 0,
+    "writer": false
+  },
+  "operations": [
+    {
+      "id": "w",
+      "client": "a",
+      "call": 1,
+      "return": 4,
+      "input": {
+        "type": "acquire_write"
+      },
+      "output": true
+    },
+    {
+      "id": "r",
+      "client": "b",
+      "call": 2,
+      "return": 3,
+      "input": {
+        "type": "acquire_read"
+      },
+      "output": false
+    },
+    {
+      "id": "rw",
+      "client": "a",
+      "call": 5,
+      "return": 6,
+      "input": {
+        "type": "release_write"
+      },
+      "output": "ok"
+    },
+    {
+      "id": "r2",
+      "client": "b",
+      "call": 7,
+      "return": 8,
+      "input": {
+        "type": "acquire_read"
+      },
+      "output": true
+    }
+  ]
+}

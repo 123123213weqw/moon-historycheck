@@ -55,8 +55,10 @@ node _build/js/debug/build/cmd/main/main.js examples/reduce.json
 
 Every sequential model ships a runnable example: `stack.json`, `lock.json`,
 `set.json`, `counter.json`, `map.json`, `lww_set.json`, `max_register.json`,
-`grow_only_set.json` and `two_phase_set.json` join the four original history
-examples, so a model can be tried before its documentation is read.
+`grow_only_set.json`, `two_phase_set.json`, `min_register.json`,
+`lww_register.json`, `bounded_queue.json`, `deque.json`, `semaphore.json`,
+`rwlock.json` and `multiset.json` join the four original history examples, so
+a model can be tried before its documentation is read.
 
 The last two examples deliberately report a counterexample and exit **2**. Status 0 means a positive or analysis result, 2 a definite rejection or invalid witness/certificate, 3 unknown, 64 invalid input.
 

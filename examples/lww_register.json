@@ -1,0 +1,40 @@
+{
+  "model": "lww_register",
+  "initial": null,
+  "operations": [
+    {
+      "id": "w1",
+      "client": "a",
+      "call": 1,
+      "return": 2,
+      "input": {
+        "type": "write",
+        "value": 1,
+        "at": 5
+      },
+      "output": "ok"
+    },
+    {
+      "id": "w2",
+      "client": "b",
+      "call": 3,
+      "return": 4,
+      "input": {
+        "type": "write",
+        "value": 2,
+        "at": 7
+      },
+      "output": "ok"
+    },
+    {
+      "id": "r",
+      "client": "c",
+      "call": 5,
+      "return": 6,
+      "input": {
+        "type": "read"
+      },
+      "output": 2
+    }
+  ]
+}

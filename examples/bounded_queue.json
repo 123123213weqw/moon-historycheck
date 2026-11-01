@@ -1,0 +1,50 @@
+{
+  "model": "bounded_queue",
+  "initial": [],
+  "operations": [
+    {
+      "id": "e1",
+      "client": "a",
+      "call": 1,
+      "return": 2,
+      "input": {
+        "type": "enqueue",
+        "value": 1
+      },
+      "output": "ok"
+    },
+    {
+      "id": "e2",
+      "client": "b",
+      "call": 3,
+      "return": 4,
+      "input": {
+        "type": "enqueue",
+        "value": 2
+      },
+      "output": "ok"
+    },
+    {
+      "id": "e3",
+      "client": "c",
+      "call": 5,
+      "return": 6,
+      "input": {
+        "type": "enqueue",
+        "value": 3
+      },
+      "output": "ok"
+    },
+    {
+      "id": "e4",
+      "client": "d",
+      "call": 7,
+      "return": 8,
+      "input": {
+        "type": "enqueue",
+        "value": 4
+      },
+      "output": false
+    }
+  ]
+}
