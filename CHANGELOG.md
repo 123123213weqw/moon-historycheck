@@ -1,6 +1,10 @@
 # Changelog
 
-## 0.2.0 — 2026-10-30
+## 0.3.0 — 2026-11-01
+
+Registry version: 0.3.0. Sixteen sequential models (register/CAS, keyed register, FIFO queue, LIFO stack, lock, set, counter with optional steps, key-value map, LWW element-set, monotonic max-register, grow-only set, two-phase set, min-register, last-writer-wins register, bounded queue, deque, counting semaphore, reader-writer lock, multiset and priority queue); map partitioning; a configurable operation ceiling; randomized differential fuzzing, a 51-case malformed-input sweep, a deterministic search-cost gate, serializer pinning across four backends, a table-driven per-model oracle and the one-command verify ladder.
+
+## 0.2.0 — 2026-10-30 — 2026-10-30
 
 Registry version: 0.2.0. Twelve sequential models (register/CAS, keyed register, FIFO queue, LIFO stack, lock, set, counter with optional steps, key-value map, LWW element-set, monotonic max-register, grow-only set, two-phase set); map partitioning; a configurable operation ceiling; randomized differential fuzzing, a 51-case malformed-input sweep, a deterministic search-cost gate, serializer pinning across four backends and a one-command verify ladder.
 
