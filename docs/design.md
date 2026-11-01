@@ -137,3 +137,30 @@ sum is derived. The lww_map keeps per-key {value, at} entries and moves one
 only on a strictly newer at; a dominated write observes ok (the client was
 acknowledged) but leaves the entry intact.
 
+## Per-model transition summary
+
+| Model | State | Transitions | Key invariant |
+|---|---|---|---|
+| register | value | read; write; cas | CAS only when equal |
+| kv_register | key→value | per-key register ops | missing keys read null |
+| queue | FIFO array | enqueue; dequeue | oldest first |
+| stack | LIFO array | push; pop | newest first |
+| lock | held bool | acquire; release | mutual exclusion |
+| set | array | add; remove; contains | structural membership |
+| counter | number | increment; decrement; read | by 1..1000000 |
+| map | key→value | put; get; remove | missing keys read null |
+| lww_set | adds+rems | add; remove; contains (at) | add-wins ties |
+| max_register | number | write; read | only grows |
+| grow_only_set | array | add; contains | never removes |
+| two_phase_set | added+removed | add; remove; contains | no resurrection |
+| min_register | number | write; read | only shrinks |
+| lww_register | value+at or null | write (value, at); read | strictly newer at |
+| bounded_queue | array (≤3) | enqueue; dequeue | overflow observes false |
+| deque | array | push_front/back; pop_front/back | both-end ordering |
+| semaphore | permits+taken | acquire; release | taken ≤ permits |
+| rwlock | readers+writer | acquire_read; release_read; acquire_write; release_write | readers xor writer |
+| multiset | array (duplicates) | add; remove; count | copy count |
+| priority_queue | array of (value, priority) | push; pop_min | smallest first |
+| pncounter | p+n tables | increment (who, by); decrement (who, by); read | per-actor sum |
+| lww_map | key→(value, at) | set (key, value, at); get | strictly newer at per key |
+
