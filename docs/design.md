@@ -71,3 +71,33 @@ when never written — the first cut seeded Null, which broke every get on a
 never-written key. The oracle cross-checks 360 partition equivalences
 (120 each for kv_register, map and lww_map).
 
+## Earliest-return-first search ordering
+
+The DFS explores candidate operations by recorder return ordinal instead of
+call order: real-time-consistent linearizations surface early, so typical
+histories need less backtracking. The regression test pins the reduced
+expansion count on a backtracking-prone history — a change that backtracks
+more fails the gate before any human notices a slowdown. Exploration order
+does not affect completeness, exhaustion results or the independently
+verified witness contract.
+
+## Table-driven oracle
+
+The independent Python oracle was originally a pair of shared conditional
+chains (one for apply, one for the legal-step generator). Adding a model
+meant splicing both chains, and three generator defects were planted and
+caught in exactly that way. The oracle is now table-driven per model: each
+entry supplies the initial state, an apply() and a step() generator, and
+adding a model is a pure append. The refactor surfaced two latent issues —
+pending operations have no return field (verify treats a missing return as
++infinity), and the event-ordinal assignment for positive histories had been
+folded into the old chain and went missing in the first cut.
+
+## Partition sub-model dispatch
+
+The partition path strips the key for kv_register (each object becomes a
+plain register) and keeps the key for map and lww_map (their commands name
+it). The first lww_map partition cut dispatched both map and lww_map
+sub-histories as lww_map, which broke every map partition fixture — the sub
+model must be the parent model itself, not a constant.
+
