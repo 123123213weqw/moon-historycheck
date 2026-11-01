@@ -30,7 +30,7 @@ Python enumerates small permutations without production memoization or partition
 
 ## Model family
 
-Twenty-two sequential models share one transition interface (state, operation
+Twenty-two sequential models (22) share one transition interface (state, operation
 -> next state or refusal) and one identity contract (unique ordinals, unique
 IDs). The register family is monotonic (max), anti-monotonic (min) and
 timestamp-ordered (LWW); the collection family covers set, multiset, map,
