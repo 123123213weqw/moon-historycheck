@@ -11,3 +11,4 @@ Design references:
 MoonBit core is a toolchain dependency. Python standard library and Node built-ins are used for independent reference checks, recorders and CLI tests. No runtime dependency on an external checker is required.
 
 - The model-family taxonomy and the blocked-acquire semantics draw on the open literature: the reader-writer lock and counting semaphore contracts are textbook; the bounded-queue boundary flaw is a classic (see the token bucket / GCRA literature); the LWW and CRDT family references the Azure Cosmos DB confict-resolution documentation. No third-party source code was consulted for any of the twenty-two models.
+- The table-driven oracle design and the blocked-acquire semantics distinction are original to this project; the algorithm-level references are as disclosed above.

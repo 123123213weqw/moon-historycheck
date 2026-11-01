@@ -101,3 +101,29 @@ it). The first lww_map partition cut dispatched both map and lww_map
 sub-histories as lww_map, which broke every map partition fixture — the sub
 model must be the parent model itself, not a constant.
 
+## Counter family
+
+The plain counter steps by 1..1000000 and replays until 2^53-1, beyond which
+increment and decrement are unverifiable. The positive-negative counter
+tracks per-actor tables rather than a bare total, which is what makes it the
+mergeable CRDT form rather than a plain register: merging two replicas'
+tables is a per-key max, and the sum is derived.
+
+## Collection family
+
+The set, grow-only set, two-phase set and multiset differ in their removal
+semantics: the set removes exactly one copy and reports membership; the
+grow-only set never removes; the two-phase set removes forever (an add
+after remove cannot resurrect); the multiset counts duplicates and drops
+exactly one copy per remove. The map and bounded queue extend the same
+principle with keys and capacity respectively.
+
+## Register family
+
+The plain register has CAS; the kv_register adds per-key independence; the
+min and max registers are anti-monotonic and monotonic respectively (a
+write in the wrong direction is a refusal, not a no-op); the lww_register
+and lww_map keep the strictly newest write by timestamp over a
+null-initialized or per-key state; a dominated write in lww_map observes
+ok (the client was acknowledged) but leaves the entry intact.
+
