@@ -15,3 +15,7 @@
 - The bounded queue's capacity is a compile-time constant (3), not a request parameter.
 - The counter's by amount is bounded to 1..1000000; the safe-integer replay boundary (2^53-1) is where increment and decrement stop being verifiable.
 
+- The bounded queue's capacity is a compile-time constant (3), not a request parameter. The lww_register ties and the lww_map dominated writes observe ok but leave the entry intact.
+- The counter's by amount is bounded to 1..1000000; the safe-integer replay boundary (2^53-1) is where increment and decrement stop being verifiable.
+- The oracle is table-driven per model; the shared conditional chains it replaced are gone. Closure-audit counts shift by a handful when the per-model step functions draw randomness in a different order; the evidence documents are synced per release.
+- lww_register and lww_map treat a tied timestamp as "cannot replay": only a strictly newer at moves the state. A dominated write in lww_map observes ok (the client was acknowledged) but leaves the entry intact.
