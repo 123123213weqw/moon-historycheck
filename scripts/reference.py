@@ -1,227 +1,521 @@
-"""Independent permutation oracle and witness replay; Python stdlib only."""
-import copy,itertools,json,random,subprocess
+"""Independent permutation oracle and witness replay; Python stdlib only.
+
+Every model is a table entry: the initial state, a legal-step generator for
+positive histories, and an apply() that answers one operation against one
+state. Adding a model means adding a table entry - the shared conditional
+chains this replaces were where three generator defects were planted and
+caught, so the dispatch is now structural instead of textual.
+"""
+import copy, itertools, json, random, subprocess
 from pathlib import Path
-ROOT=Path(__file__).resolve().parents[1]
-CLI=ROOT/'_build/js/debug/build/cmd/main/main.js'
+ROOT = Path(__file__).resolve().parents[1]
+CLI = ROOT / '_build/js/debug/build/cmd/main/main.js'
 
-def same(a,b):
-    if isinstance(a,bool) or isinstance(b,bool):return type(a) is type(b) and a==b
-    if isinstance(a,(int,float)) and isinstance(b,(int,float)):return a==b
-    if type(a) is not type(b):return False
-    if isinstance(a,list):return len(a)==len(b) and all(same(x,y) for x,y in zip(a,b))
-    if isinstance(a,dict):return a.keys()==b.keys() and all(same(a[k],b[k]) for k in a)
-    return a==b
+def same(a, b):
+    if isinstance(a, bool) or isinstance(b, bool):
+        return type(a) is type(b) and a == b
+    if isinstance(a, (int, float)) and isinstance(b, (int, float)):
+        return a == b
+    if type(a) is not type(b):
+        return False
+    if isinstance(a, list):
+        return len(a) == len(b) and all(same(x, y) for x, y in zip(a, b))
+    if isinstance(a, dict):
+        return a.keys() == b.keys() and all(same(a[k], b[k]) for k in a)
+    return a == b
 
-def member(items,v):
-    # Structural membership: Python's == would conflate True and 1.
-    return any(same(x,v) for x in items)
+def member(items, v):
+    return any(same(x, v) for x in items)
 
-def without_first(items,v):
-    out=[];skipped=False
+def without_first(items, v):
+    out, skipped = [], False
     for x in items:
-        if not skipped and same(x,v):skipped=True
-        else:out.append(x)
+        if not skipped and same(x, v):
+            skipped = True
+        else:
+            out.append(x)
     return out
 
-def apply(model,state,op):
-    state=copy.deepcopy(state);arg=op['input'];kind=arg['type'];output=op['output']
-    if model=='queue':
-        if kind=='enqueue':
-            if not same(output,'ok'):return False,state
-            state.append(arg['value']);return True,state
-        expected={'value':state[0]} if state else {'empty':True}
-        if not same(output,expected):return False,state
-        return True,state[1:] if state else state
-    if model=='stack':
-        if kind=='push':
-            if not same(output,'ok'):return False,state
-            state.append(arg['value']);return True,state
-        expected={'value':state[-1]} if state else {'empty':True}
-        if not same(output,expected):return False,state
-        return True,state[:-1] if state else state
-    if model=='lock':
-        if kind=='acquire':
-            if not same(output,not state):return False,state
-            return True,True
-        if not same(output,'ok'):return False,state
-        return (True,not state) if state else (False,state)
-    if model=='set':
-        v=arg['value']
-        if kind=='add':
-            if not same(output,'ok'):return False,state
-            if not member(state,v):state=state+[copy.deepcopy(v)]
-            return True,state
-        present=member(state,v)
-        if not same(output,present):return False,state
-        if kind=='remove' and present:state=without_first(state,v)
-        return True,state
-    if model=='two_phase_set':
-        v=arg['value']
-        if kind=='add':
-            if not same(output,'ok'):return False,state
-            if not member(state['added'],v):state['added'].append(copy.deepcopy(v))
-            return True,state
-        present=member(state['added'],v) and not member(state['removed'],v)
-        if not same(output,present):return False,state
-        if kind=='remove' and present:state['removed'].append(copy.deepcopy(v))
-        return True,state
-    if model=='grow_only_set':
-        v=arg['value']
-        if kind=='add':
-            if not same(output,'ok'):return False,state
-            if not member(state,v):state=state+[copy.deepcopy(v)]
-            return True,state
-        if not same(output,member(state,v)):return False,state
-        return True,state
-    if model=='max_register':
-        if kind=='write':
-            if not same(output,'ok'):return False,state
-            v=arg['value']
-            if not isinstance(v,(int,float)) or isinstance(v,bool):return False,state
-            if v>state:return True,v
-            if v==state:return True,state
-            return False,state
-        if not same(output,state):return False,state
-        return True,state
-    if model=='lww_set':
-        e=arg['element'];t=arg.get('at')
-        if kind in ('add','remove'):
-            if not same(output,'ok'):return False,state
-            table='adds' if kind=='add' else 'rems'
-            cur=state[table].get(e)
-            if cur is None or t>=cur:state[table][e]=t
-            return True,state
-        a=state['adds'].get(e);r=state['rems'].get(e)
-        expected=a is not None and (r is None or a>=r)
-        if not same(output,expected):return False,state
-        return True,state
-    if model=='map':
-        key=arg['key'];present=key in state
-        if kind=='put':
-            if not same(output,'ok'):return False,state
-            state[key]=copy.deepcopy(arg['value']);return True,state
-        if kind=='get':
-            expected=copy.deepcopy(state[key]) if present else None
-            if not same(output,expected):return False,state
-            return True,state
-        if not same(output,present):return False,state
-        if present:del state[key]
-        return True,state
-    if model=='counter':
-        if kind in ('increment','decrement'):
-            if not same(output,'ok'):return False,state
-            step=arg.get('by',1)
-            return True,state+(step if kind=='increment' else -step)
-        if not same(output,state):return False,state
-        return True,state
-    key=arg.get('key');current=state.get(key) if model=='kv_register' else state
-    next_value=current
-    if kind=='read':legal=same(output,current)
-    elif kind=='write':legal=same(output,'ok');next_value=arg['value']
-    else:
-        succeeds=same(current,arg['expected']);legal=same(output,succeeds)
-        if succeeds:next_value=arg['value']
-    if model=='kv_register':
-        if not same(current,next_value):state[key]=next_value
-    else:state=next_value
-    return legal,state
+# --- per-model tables ------------------------------------------------------
+# Each entry: initial state, apply(state, op) -> (legal, next_state), and
+# step(rng, state) -> (arg, output, next_state) drawing one legal operation.
 
-def verify(request,ids):
-    ops=request['operations'];by_id={op['id']:op for op in ops}
-    if len(ids)!=len(ops) or set(ids)!=set(by_id):return False
-    order={id:i for i,id in enumerate(ids)}
-    if any(a['return']<b['call'] and order[a['id']]>=order[b['id']] for a in ops for b in ops):return False
-    state=copy.deepcopy(request['initial'])
+def _reg_step(current, rng, value_pool):
+    kind = rng.choice(['read', 'write', 'cas'])
+    arg = {'type': kind}
+    if kind == 'read':
+        return arg, current, current
+    if kind == 'write':
+        v = rng.choice(value_pool)
+        arg['value'] = v
+        return arg, 'ok', v
+    expected = rng.choice([None, False, True, 0, 1])
+    arg['expected'] = expected
+    v = rng.choice(value_pool)
+    arg['value'] = v
+    succeeds = same(current, expected)
+    return arg, succeeds, (v if succeeds else current)
+
+def _queue_pop(state):
+    return ({'value': state[0]}, state[1:]) if state else ({'empty': True}, state)
+
+def _stack_pop(state):
+    return ({'value': state[-1]}, state[:-1]) if state else ({'empty': True}, state)
+
+MODELS = {}
+
+MODELS['register'] = {
+    'initial': 0,
+    'apply': lambda state, op: _reg_apply_kv(state, op, keyed=False),
+    'step': lambda rng, state: _reg_step(state, rng, [None, False, 0, 1, 2, {'nested': [1, True]}]),
+}
+
+def _reg_apply_kv(state, op, keyed):
+    arg, kind, output = op['input'], op['input']['type'], op['output']
+    if kind == 'read':
+        return same(output, state), state
+    if kind == 'write':
+        return (same(output, 'ok'), arg['value'])
+    succeeds = same(state, arg['expected'])
+    if not same(output, succeeds):
+        return False, state
+    return True, (arg['value'] if succeeds else state)
+
+MODELS['kv_register'] = {
+    'initial': {'x': 0, 'y': 0},
+    'apply': lambda state, op: _kv_apply(state, op),
+    'step': lambda rng, state: _kv_step(rng, state),
+}
+
+def _kv_step(rng, state):
+    key = rng.choice(['x', 'y'])
+    kind = rng.choice(['read', 'write', 'cas'])
+    arg = {'type': kind, 'key': key}
+    current = state.get(key)
+    if kind == 'read':
+        return arg, current, state
+    if kind == 'write':
+        v = rng.choice([None, False, 0, 1, 2, {'nested': [1, True]}])
+        arg['value'] = v
+        return arg, 'ok', {**state, key: v}
+    expected = rng.choice([None, False, True, 0, 1])
+    arg['expected'] = expected
+    v = rng.choice([None, False, 0, 1, 2])
+    arg['value'] = v
+    succeeds = same(current, expected)
+    return arg, succeeds, ({**state, key: v} if succeeds else state)
+
+def _kv_apply(state, op):
+    arg, kind, output = op['input'], op['input']['type'], op['output']
+    key, current = arg['key'], state.get(arg['key'])
+    if kind == 'read':
+        return same(output, current), state
+    if kind == 'write':
+        return (same(output, 'ok'), {**state, key: arg['value']})
+    succeeds = same(current, arg['expected'])
+    if not same(output, succeeds):
+        return False, state
+    return True, ({**state, key: arg['value']} if succeeds else state)
+
+MODELS['map'] = {
+    'initial': {},
+    'apply': lambda state, op: _map_apply(state, op),
+    'step': lambda rng, state: _map_step(rng, state),
+}
+
+def _map_step(rng, state):
+    kind = rng.choice(['put', 'get', 'remove'])
+    arg = {'type': kind, 'key': rng.choice(['x', 'y', 'z'])}
+    if kind == 'put':
+        arg['value'] = rng.choice([None, False, 0, 1, 2, {'nested': [1, True]}])
+        return arg, 'ok', {**state, arg['key']: arg['value']}
+    present = arg['key'] in state
+    if kind == 'get':
+        return arg, state.get(arg['key']) if present else None, state
+    return arg, present, ({k: v for k, v in state.items() if k != arg['key']}
+        if present else state)
+
+def _map_apply(state, op):
+    arg, kind, output = op['input'], op['input']['type'], op['output']
+    key = arg['key']
+    if kind == 'put':
+        return (same(output, 'ok'), {**state, key: arg['value']})
+    present = key in state
+    if kind == 'get':
+        want = state.get(key) if present else None
+        return same(output, want), state
+    if not same(output, present):
+        return False, state
+    return True, ({k: v for k, v in state.items() if k != key} if present else state)
+
+MODELS['counter'] = {
+    'initial': 0,
+    'apply': lambda state, op: _counter_apply(state, op),
+    'step': lambda rng, state: _counter_step(rng, state),
+}
+
+def _counter_step(rng, state):
+    kind = rng.choice(['increment', 'decrement', 'read'])
+    if kind == 'read':
+        return {'type': 'read'}, state, state
+    arg = {'type': kind, 'by': rng.choice([1, 1, 5])}
+    return arg, 'ok', state + arg['by'] * (1 if kind == 'increment' else -1)
+
+def _counter_apply(state, op):
+    arg, kind, output = op['input'], op['input']['type'], op['output']
+    if kind in ('increment', 'decrement'):
+        if not same(output, 'ok'):
+            return False, state
+        return True, state + arg.get('by', 1) * (1 if kind == 'increment' else -1)
+    return same(output, state), state
+
+MODELS['max_register'] = {
+    'initial': 0,
+    'apply': lambda state, op: _max_apply(state, op),
+    'step': lambda rng, state: _max_step(rng, state),
+}
+
+def _max_step(rng, state):
+    kind = rng.choice(['read', 'write'])
+    if kind == 'read':
+        return {'type': 'read'}, state, state
+    pool = [v for v in [0, 3, 5, 9] if v >= state] or [state]
+    v = rng.choice(pool)
+    return {'type': 'write', 'value': v}, 'ok', max(state, v)
+
+def _max_apply(state, op):
+    arg, kind, output = op['input'], op['input']['type'], op['output']
+    if kind == 'write':
+        if not same(output, 'ok'):
+            return False, state
+        v = arg['value']
+        if v > state:
+            return True, v
+        if v == state:
+            return True, state
+        return False, state
+    return same(output, state), state
+
+MODELS['lock'] = {
+    'initial': False,
+    'apply': lambda state, op: _lock_apply(state, op),
+    'step': lambda rng, state: _lock_step(rng, state),
+}
+
+def _lock_step(rng, state):
+    if state:
+        return {'type': 'release'}, 'ok', False
+    return {'type': 'acquire'}, True, True
+
+def _lock_apply(state, op):
+    kind, output = op['input']['type'], op['output']
+    if kind == 'acquire':
+        return (same(output, not state), True)
+    if not same(output, 'ok'):
+        return False, state
+    return (True, False) if state else (False, state)
+
+MODELS['queue'] = {
+    'initial': [],
+    'apply': lambda state, op: _queue_apply(state, op),
+    'step': lambda rng, state: _queue_step(rng, state),
+}
+
+def _queue_step(rng, state):
+    if not state or rng.random() < 0.5:
+        v = rng.choice([None, False, 0, 1, 2, {'nested': [1, True]}])
+        return {'type': 'enqueue', 'value': v}, 'ok', state + [v]
+    output, next_state = _queue_pop(state)
+    return {'type': 'dequeue'}, output, next_state
+
+def _queue_apply(state, op):
+    arg, kind, output = op['input'], op['input']['type'], op['output']
+    if kind == 'enqueue':
+        if not same(output, 'ok'):
+            return False, state
+        return True, state + [arg['value']]
+    want, next_state = _queue_pop(state)
+    return (same(output, want), next_state)
+
+MODELS['stack'] = {
+    'initial': [],
+    'apply': lambda state, op: _stack_apply(state, op),
+    'step': lambda rng, state: _stack_step(rng, state),
+}
+
+def _stack_step(rng, state):
+    if not state or rng.random() < 0.5:
+        v = rng.choice([None, False, 0, 1, 2, {'nested': [1, True]}])
+        return {'type': 'push', 'value': v}, 'ok', state + [v]
+    output, next_state = _stack_pop(state)
+    return {'type': 'pop'}, output, next_state
+
+def _stack_apply(state, op):
+    arg, kind, output = op['input'], op['input']['type'], op['output']
+    if kind == 'push':
+        if not same(output, 'ok'):
+            return False, state
+        return True, state + [arg['value']]
+    want, next_state = _stack_pop(state)
+    return (same(output, want), next_state)
+
+MODELS['set'] = {
+    'initial': [],
+    'apply': lambda state, op: _set_apply(state, op),
+    'step': lambda rng, state: _set_step(rng, state),
+}
+
+def _set_step(rng, state):
+    kind = rng.choice(['add', 'remove', 'contains'])
+    arg = {'type': kind, 'value': rng.choice([None, False, 0, 1, 2, {'nested': [1, True]}])}
+    present = member(state, arg['value'])
+    if kind == 'add':
+        return arg, 'ok', state if present else state + [arg['value']]
+    if kind == 'remove':
+        return arg, present, (without_first(state, arg['value']) if present else state)
+    return arg, present, state
+
+def _set_apply(state, op):
+    arg, kind, output = op['input'], op['input']['type'], op['output']
+    v = arg['value']
+    if kind == 'add':
+        if not same(output, 'ok'):
+            return False, state
+        return True, state if member(state, v) else state + [copy.deepcopy(v)]
+    present = member(state, v)
+    if not same(output, present):
+        return False, state
+    return True, (without_first(state, v) if kind == 'remove' and present else state)
+
+MODELS['grow_only_set'] = {
+    'initial': [],
+    'apply': lambda state, op: _gset_apply(state, op),
+    'step': lambda rng, state: _gset_step(rng, state),
+}
+
+def _gset_step(rng, state):
+    kind = rng.choice(['add', 'contains'])
+    arg = {'type': kind, 'value': rng.choice([None, False, 0, 1, 2, {'nested': [1, True]}])}
+    present = member(state, arg['value'])
+    if kind == 'add':
+        return arg, 'ok', state if present else state + [arg['value']]
+    return arg, present, state
+
+def _gset_apply(state, op):
+    arg, kind, output = op['input'], op['input']['type'], op['output']
+    v = arg['value']
+    if kind == 'add':
+        if not same(output, 'ok'):
+            return False, state
+        return True, state if member(state, v) else state + [copy.deepcopy(v)]
+    return same(output, member(state, v)), state
+
+MODELS['two_phase_set'] = {
+    'initial': {'added': [], 'removed': []},
+    'apply': lambda state, op: _2p_apply(state, op),
+    'step': lambda rng, state: _2p_step(rng, state),
+}
+
+def _2p_step(rng, state):
+    kind = rng.choice(['add', 'remove', 'contains'])
+    arg = {'type': kind, 'value': rng.choice([None, False, 0, 1, 2, {'nested': [1, True]}])}
+    present = member(state['added'], arg['value']) and not member(state['removed'], arg['value'])
+    if kind == 'add':
+        return arg, 'ok', state
+    if kind == 'remove':
+        return arg, present, ({**state, 'removed': state['removed'] + [arg['value']]}
+            if present else state)
+    return arg, present, state
+
+def _2p_apply(state, op):
+    arg, kind, output = op['input'], op['input']['type'], op['output']
+    v = arg['value']
+    if kind == 'add':
+        if not same(output, 'ok'):
+            return False, state
+        if not member(state['added'], v):
+            state['added'].append(copy.deepcopy(v))
+        return True, state
+    present = member(state['added'], v) and not member(state['removed'], v)
+    if not same(output, present):
+        return False, state
+    if kind == 'remove' and present:
+        state['removed'].append(copy.deepcopy(v))
+    return True, state
+
+MODELS['lww_set'] = {
+    'initial': {'adds': {}, 'rems': {}},
+    'apply': lambda state, op: _lww_apply(state, op),
+    'step': lambda rng, state: _lww_step(rng, state),
+}
+
+def _lww_step(rng, state):
+    kind = rng.choice(['add', 'remove', 'contains'])
+    arg = {'type': kind, 'element': rng.choice(['a', 'b', 'c'])}
+    if kind != 'contains':
+        arg['at'] = rng.randrange(0, 8)
+    table = 'adds' if kind == 'add' else 'rems'
+    if kind == 'contains':
+        a, r = state['adds'].get(arg['element']), state['rems'].get(arg['element'])
+        return arg, a is not None and (r is None or a >= r), state
+    cur = state[table].get(arg['element'])
+    newer = cur is None or arg['at'] >= cur
+    return arg, 'ok', ({**state, table: {**state[table], arg['element']: arg['at']}}
+        if newer else state)
+
+def _lww_apply(state, op):
+    arg, kind, output = op['input'], op['input']['type'], op['output']
+    e, t = arg['element'], arg.get('at')
+    if kind in ('add', 'remove'):
+        if not same(output, 'ok'):
+            return False, state
+        table = 'adds' if kind == 'add' else 'rems'
+        cur = state[table].get(e)
+        if cur is None or t >= cur:
+            state[table][e] = t
+        return True, state
+    a, r = state['adds'].get(e), state['rems'].get(e)
+    return same(output, a is not None and (r is None or a >= r)), state
+
+# --- shared entry points -----------------------------------------------------
+
+def apply(model, state, op):
+    """One operation against one state; the table dispatches."""
+    return MODELS[model]['apply'](copy.deepcopy(state), op)
+
+def run(request):
+    process = subprocess.run(['node', str(CLI), '-'],
+        input=json.dumps(request), capture_output=True, text=True,
+        encoding='utf-8', timeout=60)
+    if not process.stdout:
+        raise AssertionError(process.stderr)
+    result = json.loads(process.stdout)
+    expected = {'non_linearizable': 2, 'invalid_witness': 2, 'invalid_certificate': 2,
+        'unknown': 3, 'invalid_input': 64}.get(result.get('verdict'), 0)
+    assert process.returncode == expected, (process.returncode, result, process.stderr)
+    return result
+
+def verify(request, ids):
+    ops = request['operations']
+    by_id = {op['id']: op for op in ops}
+    if len(ids) != len(ops) or set(ids) != set(by_id):
+        return False
+    order = {id: i for i, id in enumerate(ids)}
+    if any(a.get('return', 1 << 53) < b['call'] and order[a['id']] >= order[b['id']]
+           for a in ops for b in ops):
+        return False
+    state = copy.deepcopy(request['initial'])
     for id in ids:
-        legal,state=apply(request['model'],state,by_id[id])
-        if not legal:return False
+        legal, state = apply(request['model'], state, by_id[id])
+        if not legal:
+            return False
     return True
 
 def oracle(request):
     # No memoization, partitioning, or production predecessor code.
-    return next((list(p) for p in itertools.permutations(op['id'] for op in request['operations']) if verify(request,p)),None)
+    return next((list(p) for p in itertools.permutations(op['id'] for op in
+        request['operations']) if verify(request, p)), None)
 
-def run(request):
-    process=subprocess.run(['node',str(CLI),'-'],input=json.dumps(request),capture_output=True,text=True,encoding='utf-8',timeout=60)
-    if not process.stdout:raise AssertionError(process.stderr)
-    result=json.loads(process.stdout)
-    expected={'non_linearizable':2,'invalid_witness':2,'invalid_certificate':2,'unknown':3,'invalid_input':64}.get(result.get('verdict'),0)
-    assert process.returncode==expected,(process.returncode,result,process.stderr)
-    return result
-
-def generated(rng,model,index):
-    n=rng.randrange(1,7);positive=index%2==0
-    state=False if model=='lock' else ([] if model in ('queue','stack','set','grow_only_set') else ({'x':0,'y':0} if model=='kv_register' else ({} if model=='map' else ({'adds':{},'rems':{}} if model=='lww_set' else ({'added':[],'removed':[]} if model=='two_phase_set' else 0)))))
-    initial=copy.deepcopy(state);ops=[]
+def generated(rng, model, index):
+    n = rng.randrange(1, 7)
+    positive = index % 2 == 0
+    state = copy.deepcopy(MODELS[model]['initial'])
+    initial = copy.deepcopy(state)
+    ops = []
     for i in range(n):
-        kind=rng.choice(['enqueue','dequeue'] if model=='queue' else ['push','pop'] if model=='stack' else ['acquire','release'] if model=='lock' else ['add','remove','contains'] if model=='set' else ['increment','decrement','read'] if model=='counter' else ['put','get','remove'] if model=='map' else ['add','remove','contains'] if model=='lww_set' else ['write','read'] if model=='max_register' else ['add','contains'] if model=='grow_only_set' else ['add','remove','contains'] if model=='two_phase_set' else ['read','write','cas'])
-        if model=='lock' and kind=='release' and not state:kind='acquire'
-        arg={'type':kind}
-        if model=='kv_register':arg['key']=rng.choice(['x','y'])
-        if model=='map':arg['key']=rng.choice(['x','y','z'])
-        if model=='lww_set':arg['element']=rng.choice(['a','b','c'])
-        if model=='lww_set' and kind in ('add','remove'):arg['at']=rng.randrange(0,10)
-        if model not in ('lww_set','max_register') and (kind in ['write','cas','enqueue','push','add','contains','put'] or (kind=='remove' and model in ('set','two_phase_set')) or (model=='two_phase_set' and kind=='contains')):arg['value']=rng.choice([None,False,0,1,2,{'nested':[1,True]}])
-        if model=='max_register' and kind=='write':arg['value']=rng.choice([v for v in [0,1,3,5,9] if v>=state] or [state])
-        if model=='counter' and kind in ('increment','decrement') and rng.random()<0.5:arg['by']=rng.choice([1,2,5,100,1000000])
-        if kind=='cas':arg['expected']=rng.choice([None,False,0,1,2])
-        current=state.get(arg.get('key')) if model=='kv_register' else state
-        if kind in ['write','enqueue','push','release','add','increment','decrement','put'] and model!='max_register' or (model=='lww_set' and kind in ('add','remove')) or (model=='max_register' and kind=='write') or (model=='grow_only_set' and kind=='add') or (model=='two_phase_set' and kind=='add'):output='ok'
-        elif kind=='acquire':output=not current
-        elif kind=='cas':output=same(current,arg['expected'])
-        elif model=='two_phase_set' and kind in ('remove','contains'):output=member(state['added'],arg['value']) and not member(state['removed'],arg['value'])
-        elif model=='grow_only_set' and kind=='contains':output=member(state,arg['value'])
-        elif model=='max_register' and kind=='read':output=copy.deepcopy(state)
-        elif model=='lww_set' and kind=='contains':
-            e=arg['element'];a=state['adds'].get(e);r=state['rems'].get(e)
-            output=a is not None and (r is None or a>=r)
-        elif model=='map' and kind=='get':output=copy.deepcopy(state[arg['key']]) if arg['key'] in state else None
-        elif kind in ['remove','contains']:output=member(state,arg['value']) if model!='map' else (arg['key'] in state)
-        elif kind=='read':output=copy.deepcopy(current)
-        else:output={'value':copy.deepcopy(state[-1] if model=='stack' else state[0])} if state else {'empty':True}
-        if not positive and rng.random()<0.65:
-            output=99 if kind in ['read','get'] or (model=='max_register' and kind=='read') or (model=='lww_set' and kind=='contains' and False) else (not output if kind in ['cas','acquire','remove','contains'] or (model=='lww_set' and kind=='contains') or (model=='grow_only_set' and kind=='contains') or (model=='two_phase_set' and kind in ('remove','contains')) else ('wrong' if kind in ['write','enqueue','push','release','add','increment','decrement','put'] or (model=='lww_set' and kind in ('add','remove')) or (model=='max_register' and kind=='write') else {'value':99}))
-        concurrent=index%3!=0
-        op={'id':str(i),'client':'c'+str(i%3),'call':i+1 if concurrent else 2*i+1,'return':n+i+1 if concurrent else 2*i+2,'input':arg,'output':output}
+        arg, output, next_state = MODELS[model]['step'](rng, state)
+        if not positive and rng.random() < 0.65:
+            kind = arg['type']
+            if kind in ('read', 'get'):
+                output = 99
+            elif isinstance(output, bool):
+                output = not output
+            elif kind == 'cas':
+                output = not output
+            else:
+                output = 'wrong'
+        op = {'id': str(i), 'client': 'c' + str(i % 3), 'input': arg,
+            'output': output}
         if positive:
-            legal,state=apply(model,state,op);assert legal
+            legal, state = apply(model, state, op)
+            assert legal, (model, op)
         ops.append(op)
-    if not positive and index%3==1:
-        events=[];unstarted=list(range(n));active=[];ordinal=0
+    # Event ordinals: every third negative history gets its call/return pairs
+    # redrawn as an interleaved legal schedule; everything else keeps the
+    # concurrent (overlapping) or serial pattern the old generator used.
+    for i, op in enumerate(ops):
+        if index % 3 != 0:
+            op["call"] = i + 1
+            op["return"] = n + i + 1
+        else:
+            op["call"] = 2 * i + 1
+            op["return"] = 2 * i + 2
+    if not positive and index % 3 == 1:
+        events = []
+        unstarted = list(range(n))
+        active = []
+        ordinal = 0
         while unstarted or active:
-            ordinal+=1
-            if unstarted and (not active or rng.random()<0.5):
-                i=unstarted.pop(rng.randrange(len(unstarted)));active.append(i);ops[i]['call']=ordinal
-            else:i=active.pop(rng.randrange(len(active)));ops[i]['return']=ordinal
+            ordinal += 1
+            if unstarted and (not active or rng.random() < 0.5):
+                i = unstarted.pop(rng.randrange(len(unstarted)))
+                active.append(i)
+                ops[i]['call'] = ordinal
+            else:
+                i = active.pop(rng.randrange(len(active)))
+                ops[i]['return'] = ordinal
     rng.shuffle(ops)
-    return {'model':model,'initial':initial,'operations':ops}
+    return {'model': model, 'initial': initial, 'operations': ops}
 
 def main():
-    rng=random.Random(20261020);checked=0;partitioned=0
-    for model in ['register','kv_register','queue','stack','lock','set','counter','map','lww_set','max_register','grow_only_set','two_phase_set']:
+    rng = random.Random(20261020)
+    checked = 0
+    partitioned = 0
+    for model in sorted(MODELS):
         for index in range(120):
-            request=generated(rng,model,index);expected=oracle(request);result=run(request)
-            assert result['verdict']==('linearizable' if expected is not None else 'non_linearizable'),(request,result,expected)
+            request = generated(rng, model, index)
+            expected = oracle(request)
+            result = run(request)
+            assert result['verdict'] == ('linearizable' if expected is not None
+                else 'non_linearizable'), (request, result, expected)
             if expected is not None:
-                assert verify(request,result['witness']) and result['witness_verified']
-                assert run({**request,'operation':'verify','witness':result['witness']})['valid']
-                bad=result['witness'][:-1]
-                assert not run({**request,'operation':'verify','witness':bad})['valid']
-            else:assert result['complete_search']
-            if model in ('kv_register','map'):
-                part=run({**request,'partition':True});assert part['verdict']==result['verdict']
-                if expected is not None:assert verify(request,part['witness'])
-                partitioned+=1
-            checked+=1
-        print(model,'120 independent permutation checks passed',flush=True)
-    reductions=0
+                assert verify(request, result['witness']) and result['witness_verified']
+                assert run({**request, 'operation': 'verify',
+                    'witness': result['witness']})['valid']
+                bad = result['witness'][:-1]
+                assert not run({**request, 'operation': 'verify',
+                    'witness': bad})['valid']
+            else:
+                assert result['complete_search']
+            if model in ('kv_register', 'map'):
+                part = run({**request, 'partition': True})
+                assert part['verdict'] == result['verdict']
+                if expected is not None:
+                    assert verify(request, part['witness'])
+                partitioned += 1
+            checked += 1
+        print(model, '120 independent permutation checks passed', flush=True)
+    reductions = 0
     for index in range(20):
-        ops=[]
-        for i in range(3):ops.append({'id':'noise'+str(i),'client':'a','call':i*2+1,'return':i*2+2,'input':{'type':'read'},'output':0})
-        ops += [{'id':'write','client':'a','call':7,'return':8,'input':{'type':'write','value':index+1},'output':'ok'},{'id':'stale','client':'b','call':9,'return':10,'input':{'type':'read'},'output':0}]
-        request={'model':'register','initial':0,'operations':ops};result=run({**request,'operation':'reduce'})
-        reduced=result['history'];assert oracle(reduced) is None and result['reduction_complete']
-        for i in range(len(reduced['operations'])):assert oracle({**reduced,'operations':reduced['operations'][:i]+reduced['operations'][i+1:]}) is not None
-        reductions+=1
-    print(f'Oracle totals: {checked} histories, {partitioned} partition equivalence checks, 20 sound 1-minimal reductions; returned witnesses and omitted witnesses checked',flush=True)
-if __name__=='__main__':main()
+        ops = []
+        for i in range(3):
+            ops.append({'id': 'noise' + str(i), 'client': 'a', 'call': i * 2 + 1,
+                'return': i * 2 + 2, 'input': {'type': 'read'}, 'output': 0})
+        ops += [{'id': 'write', 'client': 'a', 'call': 7, 'return': 8,
+            'input': {'type': 'write', 'value': index + 1}, 'output': 'ok'},
+            {'id': 'stale', 'client': 'b', 'call': 9, 'return': 10,
+            'input': {'type': 'read'}, 'output': 0}]
+        request = {'model': 'register', 'initial': 0, 'operations': ops}
+        result = run({**request, 'operation': 'reduce'})
+        reduced = result['history']
+        assert oracle(reduced) is None and result['reduction_complete']
+        for i in range(len(reduced['operations'])):
+            assert oracle({**reduced, 'operations': reduced['operations'][:i]
+                + reduced['operations'][i + 1:]}) is not None
+        reductions += 1
+    print(f'Oracle totals: {checked} histories, {partitioned} partition '
+        + 'equivalence checks, 20 sound 1-minimal reductions; returned '
+        + 'witnesses and omitted witnesses checked', flush=True)
+
+if __name__ == '__main__':
+    main()
