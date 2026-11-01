@@ -418,5 +418,81 @@ fn transition(model : Model, state : Value, op : Operation) -> Value? {
           }
         _ => None
       }
+    MinRegister =>
+      match (state, field(op.input, "type")) {
+        (Number(current), String("write")) => {
+          // Anti-monotonic: a write above the current value cannot replay,
+          // an equal one leaves the state where it was.
+          let value = field(op.input, "value")
+          match value {
+            Number(next) =>
+              if op.output != String("ok") || next.is_nan() || next.is_inf() {
+                None
+              } else if next < current {
+                Some(Number(next))
+              } else if next == current {
+                Some(state)
+              } else {
+                None
+              }
+            _ => None
+          }
+        }
+        (Number(current), String("read")) =>
+          if op.output == Number(current) {
+            Some(state)
+          } else {
+            None
+          }
+        _ => None
+      }
+    LwwRegister =>
+      match (state, field(op.input, "type")) {
+        (Null, String("write")) => {
+          let at = match field(op.input, "at") {
+            Number(n) => n
+            _ => -1.0
+          }
+          if op.output == String("ok") && at >= 0.0 {
+            Some(
+              record([("value", field(op.input, "value")), ("at", Number(at))]),
+            )
+          } else {
+            None
+          }
+        }
+        (Object(reg), String("write")) => {
+          let at = match field(op.input, "at") {
+            Number(n) => n
+            _ => -1.0
+          }
+          let current_at = match reg["at"] {
+            Number(n) => n
+            _ => -1.0
+          }
+          // Strictly newer timestamps move the register; a tie cannot replay.
+          if op.output == String("ok") && at > current_at {
+            Some(
+              record([("value", field(op.input, "value")), ("at", Number(at))]),
+            )
+          } else {
+            None
+          }
+        }
+        (Null, String("read")) =>
+          // An unwritten register reads as null.
+          if op.output == Null {
+            Some(state)
+          } else {
+            None
+          }
+        (Object(reg), String("read")) =>
+          if op.output == reg["value"] {
+            Some(state)
+          } else {
+            None
+          }
+        _ => None
+      }
   }
 }

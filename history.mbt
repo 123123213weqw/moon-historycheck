@@ -12,6 +12,8 @@ pub(all) enum Model {
   MaxRegister
   GrowSet
   TwoPhaseSet
+  MinRegister
+  LwwRegister
 } derive(Eq, @debug.Debug)
 
 ///|
@@ -47,6 +49,8 @@ fn model_name(model : Model) -> String {
     MaxRegister => "max_register"
     GrowSet => "grow_only_set"
     TwoPhaseSet => "two_phase_set"
+    MinRegister => "min_register"
+    LwwRegister => "lww_register"
   }
 }
 
@@ -185,6 +189,31 @@ fn validate_input(
             id + ": unsupported two_phase_set operation: " + kind,
           )
       }
+    MinRegister =>
+      match kind {
+        "write" => {
+          fields_only(input, ["type", "value"])
+          ignore(required(input, "value"))
+        }
+        "read" => fields_only(input, ["type"])
+        _ =>
+          raise HistoryError(
+            id + ": unsupported min_register operation: " + kind,
+          )
+      }
+    LwwRegister =>
+      match kind {
+        "write" => {
+          fields_only(input, ["type", "value", "at"])
+          ignore(required(input, "value"))
+          ignore(ordinal(required(input, "at")))
+        }
+        "read" => fields_only(input, ["type"])
+        _ =>
+          raise HistoryError(
+            id + ": unsupported lww_register operation: " + kind,
+          )
+      }
   }
 }
 
@@ -212,6 +241,8 @@ fn parse_history_value(request : Value) -> History raise HistoryError {
     "max_register" => MaxRegister
     "grow_only_set" => GrowSet
     "two_phase_set" => TwoPhaseSet
+    "min_register" => MinRegister
+    "lww_register" => LwwRegister
     name => raise HistoryError("unsupported model: " + name)
   }
   let initial = required(request, "initial")
@@ -252,6 +283,20 @@ fn parse_history_value(request : Value) -> History raise HistoryError {
     let sets = object(initial)
     ignore(array(sets.get("added").unwrap_or(Null)))
     ignore(array(sets.get("removed").unwrap_or(Null)))
+  }
+  if model == MinRegister {
+    match initial {
+      Number(n) =>
+        if n.is_nan() || n.is_inf() {
+          raise HistoryError("min_register initial must be finite")
+        }
+      _ => raise HistoryError("min_register initial must be a number")
+    }
+  }
+  if model == LwwRegister && initial != Null {
+    let reg = object(initial)
+    ignore(reg.get("value").unwrap_or(Null))
+    ignore(ordinal(reg["at"]))
   }
   if model == LwwSet {
     let sets = object(initial)

@@ -45,6 +45,8 @@ pub(all) enum Model {
   MaxRegister
   GrowSet
   TwoPhaseSet
+  MinRegister
+  LwwRegister
 } derive(Eq, @debug.Debug)
 pub fn Model::equal(Self, Self) -> Bool
 pub fn Model::not_equal(Self, Self) -> Bool

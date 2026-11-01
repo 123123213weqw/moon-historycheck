@@ -655,3 +655,107 @@ test "two-phase set never resurrects a removed element" {
     None,
   )
 }
+
+///|
+test "min register refuses to move upwards" {
+  let grow = parse_history({
+    "model": "min_register",
+    "initial": 7,
+    "operations": [
+      {
+        "id": "w",
+        "client": "a",
+        "call": 1,
+        "return": 2,
+        "input": { "type": "write", "value": 3 },
+        "output": "ok",
+      },
+    ],
+  })
+  assert_eq(
+    transition(MinRegister, grow.initial, grow.operations[0]),
+    Some(Number(3)),
+  )
+  let rise = parse_history({
+    "model": "min_register",
+    "initial": 3,
+    "operations": [
+      {
+        "id": "w",
+        "client": "a",
+        "call": 1,
+        "return": 2,
+        "input": { "type": "write", "value": 9 },
+        "output": "ok",
+      },
+    ],
+  })
+  assert_eq(transition(MinRegister, rise.initial, rise.operations[0]), None)
+}
+
+///|
+test "lww register keeps the strictly newest write" {
+  let newer = parse_history({
+    "model": "lww_register",
+    "initial": null,
+    "operations": [
+      {
+        "id": "w1",
+        "client": "a",
+        "call": 1,
+        "return": 2,
+        "input": { "type": "write", "value": 1, "at": 5 },
+        "output": "ok",
+      },
+      {
+        "id": "w2",
+        "client": "a",
+        "call": 3,
+        "return": 4,
+        "input": { "type": "write", "value": 2, "at": 7 },
+        "output": "ok",
+      },
+    ],
+  })
+  let mut state = newer.initial
+  for op in newer.operations {
+    match transition(LwwRegister, state, op) {
+      Some(next) => state = next
+      None => abort("lww register replay failed")
+    }
+  }
+  assert_eq(state, from_json({ "value": 2, "at": 7 }))
+  let stale = parse_history({
+    "model": "lww_register",
+    "initial": { "value": 2, "at": 7 },
+    "operations": [
+      {
+        "id": "w",
+        "client": "a",
+        "call": 1,
+        "return": 2,
+        "input": { "type": "write", "value": 9, "at": 7 },
+        "output": "ok",
+      },
+    ],
+  })
+  assert_eq(transition(LwwRegister, stale.initial, stale.operations[0]), None)
+  let read = parse_history({
+    "model": "lww_register",
+    "initial": null,
+    "operations": [
+      {
+        "id": "r",
+        "client": "a",
+        "call": 1,
+        "return": 2,
+        "input": { "type": "read" },
+        "output": null,
+      },
+    ],
+  })
+  assert_eq(
+    transition(LwwRegister, read.initial, read.operations[0]),
+    Some(Null),
+  )
+}

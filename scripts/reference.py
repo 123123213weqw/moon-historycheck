@@ -343,6 +343,63 @@ def _2p_apply(state, op):
         state['removed'].append(copy.deepcopy(v))
     return True, state
 
+MODELS['min_register'] = {
+    'initial': 0,
+    'apply': lambda state, op: _minreg_apply(state, op),
+    'step': lambda rng, state: _minreg_step(rng, state),
+}
+
+def _minreg_step(rng, state):
+    kind = rng.choice(['read', 'write'])
+    if kind == 'read':
+        return {'type': 'read'}, state, state
+    pool = [v for v in [0, 3, 5, 9] if v <= state] or [state]
+    v = rng.choice(pool)
+    return {'type': 'write', 'value': v}, 'ok', min(state, v)
+
+def _minreg_apply(state, op):
+    arg, kind, output = op['input'], op['input']['type'], op['output']
+    if kind == 'write':
+        if not same(output, 'ok'):
+            return False, state
+        v = arg['value']
+        if v < state:
+            return True, v
+        if v == state:
+            return True, state
+        return False, state
+    return same(output, state), state
+
+MODELS['lww_register'] = {
+    'initial': None,
+    'apply': lambda state, op: _lwwreg_apply(state, op),
+    'step': lambda rng, state: _lwwreg_step(rng, state),
+}
+
+def _lwwreg_step(rng, state):
+    kind = rng.choice(['read', 'write'])
+    if kind == 'read':
+        current_at = -1.0 if state is None else state['at']
+        return {'type': 'read'}, (state['value'] if state is not None else None), state
+    at = rng.randrange(0, 10)
+    # Only strictly newer timestamps can replay, so draw above the current one.
+    floor = 0 if state is None else state['at'] + 1
+    at = rng.randrange(floor, max(floor + 1, 11))
+    v = rng.choice([None, False, 0, 1, 2, {'nested': [1, True]}])
+    return {'type': 'write', 'value': v, 'at': at}, 'ok', {'value': v, 'at': at}
+
+def _lwwreg_apply(state, op):
+    arg, kind, output = op['input'], op['input']['type'], op['output']
+    if kind == 'write':
+        if not same(output, 'ok'):
+            return False, state
+        at = arg['at']
+        if state is None or at > state['at']:
+            return True, {'value': copy.deepcopy(arg['value']), 'at': at}
+        return False, state
+    want = state['value'] if state is not None else None
+    return same(output, want), state
+
 MODELS['lww_set'] = {
     'initial': {'adds': {}, 'rems': {}},
     'apply': lambda state, op: _lww_apply(state, op),

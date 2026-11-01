@@ -1727,3 +1727,68 @@ test "fixture two-phase set wrong contains rejected" {
     from_json(@json.parse("\"non_linearizable\"")),
   )
 }
+
+///|
+test "fixture min register descends" {
+  let result = from_json(
+    execute(
+      @json.parse(
+        "{\"model\":\"min_register\",\"initial\":9,\"operations\":[{\"id\":\"w1\",\"client\":\"a\",\"call\":1,\"return\":2,\"input\":{\"type\":\"write\",\"value\":5},\"output\":\"ok\"},{\"id\":\"r\",\"client\":\"b\",\"call\":3,\"return\":4,\"input\":{\"type\":\"read\"},\"output\":5}]}",
+      ),
+    ),
+  )
+  assert_eq(
+    fixture_at(result, ["verdict"]),
+    from_json(@json.parse("\"linearizable\"")),
+  )
+  assert_eq(fixture_at(result, ["final_state"]), from_json(@json.parse("5")))
+}
+
+///|
+test "fixture min register upwards write rejected" {
+  let result = from_json(
+    execute(
+      @json.parse(
+        "{\"model\":\"min_register\",\"initial\":2,\"operations\":[{\"id\":\"w1\",\"client\":\"a\",\"call\":1,\"return\":2,\"input\":{\"type\":\"write\",\"value\":8},\"output\":\"ok\"}]}",
+      ),
+    ),
+  )
+  assert_eq(
+    fixture_at(result, ["verdict"]),
+    from_json(@json.parse("\"non_linearizable\"")),
+  )
+}
+
+///|
+test "fixture lww register newest write wins" {
+  let result = from_json(
+    execute(
+      @json.parse(
+        "{\"model\":\"lww_register\",\"initial\":null,\"operations\":[{\"id\":\"w1\",\"client\":\"a\",\"call\":1,\"return\":2,\"input\":{\"type\":\"write\",\"value\":1,\"at\":5},\"output\":\"ok\"},{\"id\":\"w2\",\"client\":\"b\",\"call\":3,\"return\":4,\"input\":{\"type\":\"write\",\"value\":2,\"at\":7},\"output\":\"ok\"},{\"id\":\"r\",\"client\":\"c\",\"call\":5,\"return\":6,\"input\":{\"type\":\"read\"},\"output\":2}]}",
+      ),
+    ),
+  )
+  assert_eq(
+    fixture_at(result, ["verdict"]),
+    from_json(@json.parse("\"linearizable\"")),
+  )
+  assert_eq(
+    fixture_at(result, ["final_state"]),
+    from_json(@json.parse("{\"value\":2,\"at\":7}")),
+  )
+}
+
+///|
+test "fixture lww register tie rejected" {
+  let result = from_json(
+    execute(
+      @json.parse(
+        "{\"model\":\"lww_register\",\"initial\":{\"value\":1,\"at\":7},\"operations\":[{\"id\":\"w\",\"client\":\"a\",\"call\":1,\"return\":2,\"input\":{\"type\":\"write\",\"value\":9,\"at\":7},\"output\":\"ok\"}]}",
+      ),
+    ),
+  )
+  assert_eq(
+    fixture_at(result, ["verdict"]),
+    from_json(@json.parse("\"non_linearizable\"")),
+  )
+}
