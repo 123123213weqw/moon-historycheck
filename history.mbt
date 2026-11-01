@@ -18,6 +18,7 @@ pub(all) enum Model {
   Deque
   Semaphore
   RwLock
+  MultiSet
 } derive(Eq, @debug.Debug)
 
 ///|
@@ -59,6 +60,7 @@ fn model_name(model : Model) -> String {
     Deque => "deque"
     Semaphore => "semaphore"
     RwLock => "rwlock"
+    MultiSet => "multiset"
   }
 }
 
@@ -255,6 +257,19 @@ fn validate_input(
           fields_only(input, ["type"])
         _ => raise HistoryError(id + ": unsupported rwlock operation: " + kind)
       }
+    MultiSet =>
+      match kind {
+        "add" => {
+          fields_only(input, ["type", "value"])
+          ignore(required(input, "value"))
+        }
+        "remove" | "count" => {
+          fields_only(input, ["type", "value"])
+          ignore(required(input, "value"))
+        }
+        _ =>
+          raise HistoryError(id + ": unsupported multiset operation: " + kind)
+      }
   }
 }
 
@@ -288,6 +303,7 @@ fn parse_history_value(request : Value) -> History raise HistoryError {
     "deque" => Deque
     "semaphore" => Semaphore
     "rwlock" => RwLock
+    "multiset" => MultiSet
     name => raise HistoryError("unsupported model: " + name)
   }
   let initial = required(request, "initial")
@@ -343,6 +359,9 @@ fn parse_history_value(request : Value) -> History raise HistoryError {
   }
   if model == Semaphore || model == RwLock {
     ignore(object(initial))
+  }
+  if model == MultiSet {
+    ignore(array(initial))
   }
   if model == LwwRegister && initial != Null {
     let reg = object(initial)

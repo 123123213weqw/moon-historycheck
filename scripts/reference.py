@@ -416,6 +416,37 @@ def _rw_apply(state, op):
         return False, state
     return (same(output, 'ok'), {**state, 'writer': False})
 
+MODELS['multiset'] = {
+    'initial': [],
+    'apply': lambda state, op: _ms_apply(state, op),
+    'step': lambda rng, state: _ms_step(rng, state),
+}
+
+def _ms_step(rng, state):
+    kind = rng.choice(['add', 'remove', 'count'])
+    v = rng.choice([None, False, 0, 1, 2, {'nested': [1, True]}])
+    copies = sum(1 for x in state if same(x, v))
+    if kind == 'add':
+        return {'type': 'add', 'value': v}, 'ok', state + [copy.deepcopy(v)]
+    if kind == 'remove':
+        return ({'type': 'remove', 'value': v}, copies,
+            [x for x in state if not same(x, v)] if copies else state)
+    return {'type': 'count', 'value': v}, copies, state
+
+def _ms_apply(state, op):
+    arg, kind, output = op['input'], op['input']['type'], op['output']
+    v = arg['value']
+    copies = sum(1 for x in state if same(x, v))
+    if kind == 'add':
+        if not same(output, 'ok'):
+            return False, state
+        return True, state + [copy.deepcopy(v)]
+    if not same(output, copies):
+        return False, state
+    if kind == 'remove' and copies:
+        return True, [x for x in state if not same(x, v)]
+    return True, state
+
 BOUNDED_QUEUE_CAPACITY = 3
 
 MODELS['bounded_queue'] = {

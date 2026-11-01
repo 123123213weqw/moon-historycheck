@@ -9160,5 +9160,128 @@
         "writer": false
       }
     }
+  },
+  {
+    "name": "multiset counts and removes one copy",
+    "request": {
+      "model": "multiset",
+      "initial": [],
+      "operations": [
+        {
+          "id": "a1",
+          "client": "a",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "add",
+            "value": 5
+          },
+          "output": "ok"
+        },
+        {
+          "id": "a2",
+          "client": "b",
+          "call": 3,
+          "return": 4,
+          "input": {
+            "type": "add",
+            "value": 5
+          },
+          "output": "ok"
+        },
+        {
+          "id": "c",
+          "client": "c",
+          "call": 5,
+          "return": 6,
+          "input": {
+            "type": "count",
+            "value": 5
+          },
+          "output": 2
+        },
+        {
+          "id": "r",
+          "client": "d",
+          "call": 7,
+          "return": 8,
+          "input": {
+            "type": "remove",
+            "value": 5
+          },
+          "output": 2
+        },
+        {
+          "id": "c2",
+          "client": "e",
+          "call": 9,
+          "return": 10,
+          "input": {
+            "type": "count",
+            "value": 5
+          },
+          "output": 1
+        }
+      ]
+    },
+    "exit": 0,
+    "expected": {
+      "verdict": "linearizable",
+      "final_state": [
+        5
+      ]
+    }
+  },
+  {
+    "name": "multiset remove from empty reports zero",
+    "request": {
+      "model": "multiset",
+      "initial": [],
+      "operations": [
+        {
+          "id": "r",
+          "client": "a",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "remove",
+            "value": 1
+          },
+          "output": 0
+        }
+      ]
+    },
+    "exit": 0,
+    "expected": {
+      "verdict": "linearizable",
+      "final_state": []
+    }
+  },
+  {
+    "name": "multiset wrong count rejected",
+    "request": {
+      "model": "multiset",
+      "initial": [
+        5,
+        5
+      ],
+      "operations": [
+        {
+          "id": "c",
+          "client": "a",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "count",
+            "value": 5
+          },
+          "output": 3
+        }
+      ]
+    },
+    "exit": 2,
+    "expected": {
+      "verdict": "non_linearizable"
+    }
   }
 ]

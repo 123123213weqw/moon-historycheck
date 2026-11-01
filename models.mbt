@@ -715,5 +715,53 @@ fn transition(model : Model, state : Value, op : Operation) -> Value? {
         }
         _ => None
       }
+    MultiSet =>
+      match state {
+        Array(items) =>
+          match field(op.input, "type") {
+            // A multiset counts duplicates: remove drops exactly one copy
+            // and reports whether one existed; count reports the number of
+            // copies present.
+            String("add") =>
+              if op.output != String("ok") {
+                None
+              } else {
+                let next = items.copy()
+                next.push(field(op.input, "value"))
+                Some(Array(next))
+              }
+            String("remove") => {
+              let target = field(op.input, "value")
+              let copies = items.iter().filter(fn(x) { x == target }).count()
+              if op.output != Number(copies.to_double()) {
+                None
+              } else if copies == 0 {
+                Some(state)
+              } else {
+                let next : Array[Value] = []
+                let mut skipped = 0
+                for item in items {
+                  if item == target && skipped < 1 {
+                    skipped += 1
+                  } else {
+                    next.push(item)
+                  }
+                }
+                Some(Array(next))
+              }
+            }
+            String("count") => {
+              let target = field(op.input, "value")
+              let copies = items.iter().filter(fn(x) { x == target }).count()
+              if op.output == Number(copies.to_double()) {
+                Some(state)
+              } else {
+                None
+              }
+            }
+            _ => None
+          }
+        _ => None
+      }
   }
 }

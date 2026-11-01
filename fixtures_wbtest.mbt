@@ -1895,3 +1895,50 @@ test "fixture rwlock writer excludes readers" {
     from_json(@json.parse("{\"readers\":1,\"writer\":false}")),
   )
 }
+
+///|
+test "fixture multiset counts and removes one copy" {
+  let result = from_json(
+    execute(
+      @json.parse(
+        "{\"model\":\"multiset\",\"initial\":[],\"operations\":[{\"id\":\"a1\",\"client\":\"a\",\"call\":1,\"return\":2,\"input\":{\"type\":\"add\",\"value\":5},\"output\":\"ok\"},{\"id\":\"a2\",\"client\":\"b\",\"call\":3,\"return\":4,\"input\":{\"type\":\"add\",\"value\":5},\"output\":\"ok\"},{\"id\":\"c\",\"client\":\"c\",\"call\":5,\"return\":6,\"input\":{\"type\":\"count\",\"value\":5},\"output\":2},{\"id\":\"r\",\"client\":\"d\",\"call\":7,\"return\":8,\"input\":{\"type\":\"remove\",\"value\":5},\"output\":2},{\"id\":\"c2\",\"client\":\"e\",\"call\":9,\"return\":10,\"input\":{\"type\":\"count\",\"value\":5},\"output\":1}]}",
+      ),
+    ),
+  )
+  assert_eq(
+    fixture_at(result, ["verdict"]),
+    from_json(@json.parse("\"linearizable\"")),
+  )
+  assert_eq(fixture_at(result, ["final_state"]), from_json(@json.parse("[5]")))
+}
+
+///|
+test "fixture multiset remove from empty reports zero" {
+  let result = from_json(
+    execute(
+      @json.parse(
+        "{\"model\":\"multiset\",\"initial\":[],\"operations\":[{\"id\":\"r\",\"client\":\"a\",\"call\":1,\"return\":2,\"input\":{\"type\":\"remove\",\"value\":1},\"output\":0}]}",
+      ),
+    ),
+  )
+  assert_eq(
+    fixture_at(result, ["verdict"]),
+    from_json(@json.parse("\"linearizable\"")),
+  )
+  assert_eq(fixture_at(result, ["final_state"]), from_json(@json.parse("[]")))
+}
+
+///|
+test "fixture multiset wrong count rejected" {
+  let result = from_json(
+    execute(
+      @json.parse(
+        "{\"model\":\"multiset\",\"initial\":[5,5],\"operations\":[{\"id\":\"c\",\"client\":\"a\",\"call\":1,\"return\":2,\"input\":{\"type\":\"count\",\"value\":5},\"output\":3}]}",
+      ),
+    ),
+  )
+  assert_eq(
+    fixture_at(result, ["verdict"]),
+    from_json(@json.parse("\"non_linearizable\"")),
+  )
+}

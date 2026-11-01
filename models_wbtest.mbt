@@ -1045,3 +1045,91 @@ test "rwlock admits many readers or one writer, never both" {
   })
   assert_eq(transition(RwLock, phantom.initial, phantom.operations[0]), None)
 }
+
+///|
+test "multiset counts duplicates and removes exactly one" {
+  let add = parse_history({
+    "model": "multiset",
+    "initial": [],
+    "operations": [
+      {
+        "id": "a1",
+        "client": "a",
+        "call": 1,
+        "return": 2,
+        "input": { "type": "add", "value": 5 },
+        "output": "ok",
+      },
+      {
+        "id": "a2",
+        "client": "a",
+        "call": 3,
+        "return": 4,
+        "input": { "type": "add", "value": 5 },
+        "output": "ok",
+      },
+    ],
+  })
+  let mut state = add.initial
+  for op in add.operations {
+    match transition(MultiSet, state, op) {
+      Some(next) => state = next
+      None => abort("multiset add replay failed")
+    }
+  }
+  assert_eq(state, from_json([5, 5]))
+  let count = parse_history({
+    "model": "multiset",
+    "initial": [5, 5],
+    "operations": [
+      {
+        "id": "c",
+        "client": "a",
+        "call": 1,
+        "return": 2,
+        "input": { "type": "count", "value": 5 },
+        "output": 2,
+      },
+    ],
+  })
+  assert_eq(
+    transition(MultiSet, count.initial, count.operations[0]),
+    Some(Array([Number(5), Number(5)])),
+  )
+  let remove = parse_history({
+    "model": "multiset",
+    "initial": [5, 5],
+    "operations": [
+      {
+        "id": "r",
+        "client": "a",
+        "call": 1,
+        "return": 2,
+        "input": { "type": "remove", "value": 5 },
+        "output": 2,
+      },
+    ],
+  })
+  assert_eq(
+    transition(MultiSet, remove.initial, remove.operations[0]),
+    Some(Array([Number(5)])),
+  )
+  let remove0 = parse_history({
+    "model": "multiset",
+    "initial": [],
+    "operations": [
+      {
+        "id": "r",
+        "client": "a",
+        "call": 1,
+        "return": 2,
+        "input": { "type": "remove", "value": 5 },
+        "output": 0,
+      },
+    ],
+  })
+  assert_eq(
+    transition(MultiSet, remove0.initial, remove0.operations[0]),
+    Some(Array([])),
+  )
+}
