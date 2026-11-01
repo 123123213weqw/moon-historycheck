@@ -130,6 +130,50 @@ verdict('pncounter', {'p': {}, 'n': {}}, [
     {'id': 'r', 'client': 'c', 'call': 5, 'return': 6,
      'input': {'type': 'read'}, 'output': 5},
 ], 'linearizable')
+verdict('bounded_queue', [], [
+    {'id': 'e', 'client': 'a', 'call': 1, 'return': 2,
+     'input': {'type': 'enqueue', 'value': 1}, 'output': 'ok'},
+    {'id': 'd', 'client': 'a', 'call': 3, 'return': 4,
+     'input': {'type': 'dequeue'}, 'output': {'value': 1}},
+], 'linearizable')
+verdict('deque', [], [
+    {'id': 'pf', 'client': 'a', 'call': 1, 'return': 2,
+     'input': {'type': 'push_front', 'value': 1}, 'output': 'ok'},
+    {'id': 'pb', 'client': 'a', 'call': 3, 'return': 4,
+     'input': {'type': 'push_back', 'value': 2}, 'output': 'ok'},
+    {'id': 'p', 'client': 'a', 'call': 5, 'return': 6,
+     'input': {'type': 'pop_front'}, 'output': {'value': 1}},
+], 'linearizable')
+verdict('multiset', [], [
+    {'id': 'a', 'client': 'a', 'call': 1, 'return': 2,
+     'input': {'type': 'add', 'value': 5}, 'output': 'ok'},
+    {'id': 'a2', 'client': 'a', 'call': 3, 'return': 4,
+     'input': {'type': 'add', 'value': 5}, 'output': 'ok'},
+    {'id': 'c', 'client': 'a', 'call': 5, 'return': 6,
+     'input': {'type': 'count', 'value': 5}, 'output': 2},
+    {'id': 'r', 'client': 'a', 'call': 7, 'return': 8,
+     'input': {'type': 'remove', 'value': 5}, 'output': 2},
+    {'id': 'c2', 'client': 'a', 'call': 9, 'return': 10,
+     'input': {'type': 'count', 'value': 5}, 'output': 1},
+], 'linearizable')
+verdict('grow_only_set', [], [
+    {'id': 'a', 'client': 'a', 'call': 1, 'return': 2,
+     'input': {'type': 'add', 'value': 1}, 'output': 'ok'},
+    {'id': 'a2', 'client': 'a', 'call': 3, 'return': 4,
+     'input': {'type': 'add', 'value': 1}, 'output': 'ok'},
+    {'id': 'c', 'client': 'a', 'call': 5, 'return': 6,
+     'input': {'type': 'contains', 'value': 1}, 'output': True},
+], 'linearizable')
+verdict('two_phase_set', {'added': [], 'removed': []}, [
+    {'id': 'a', 'client': 'a', 'call': 1, 'return': 2,
+     'input': {'type': 'add', 'value': 1}, 'output': 'ok'},
+    {'id': 'r', 'client': 'a', 'call': 3, 'return': 4,
+     'input': {'type': 'remove', 'value': 1}, 'output': True},
+    {'id': 'a2', 'client': 'a', 'call': 5, 'return': 6,
+     'input': {'type': 'add', 'value': 1}, 'output': 'ok'},
+    {'id': 'c', 'client': 'a', 'call': 7, 'return': 8,
+     'input': {'type': 'contains', 'value': 1}, 'output': False},
+], 'linearizable')
 verdict('lww_map', {}, [
     {'id': 's1', 'client': 'a', 'call': 1, 'return': 2,
      'input': {'type': 'set', 'key': 'k', 'value': 1, 'at': 5}, 'output': 'ok'},
