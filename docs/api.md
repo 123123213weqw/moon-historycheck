@@ -90,3 +90,32 @@ Certificates bind to full normalized history_canonical text, not an unchecked ha
 Shared history, operation verify_certificate and certificate. Checks binding, root state, every enabled legal branch, exact successor selection/state, no terminal node, and reachability. Temporal obligations are recomputed directly rather than trusting generator arrays.
 
 Valid results contain verdict valid_certificate, valid=true, proved_verdict=non_linearizable and verified_nodes. Semantic defects return invalid_certificate; malformed structures return invalid_input. Limits are 4,096 nodes and 16,000,000 state-key units, and each model state is validated before recursive comparisons.
+
+
+## multiset
+
+add is "ok"; count returns the structural copy count; remove returns the copy count and drops exactly one copy. Duplicates are real: [5, 5] and [5] are different states.
+
+## priority_queue
+
+push appends (value, priority); pop_min removes the smallest priority, first-inserted among ties, observing {"value": v} or {"empty": true}.
+
+## pncounter
+
+increment/decrement carry an explicit actor (who) and a by amount (1..2^53-1); read observes sum(p) - sum(n). The per-actor tables are what makes this the mergeable CRDT form rather than a plain register.
+
+## rwlock
+
+Readers run concurrently, the writer excludes everyone, and a blocked acquire observes false as the legal verdict - not a replay failure.
+
+## semaphore
+
+acquire is true while taken < permits and false once exhausted; release is "ok" and requires holding.
+
+## lww_register / lww_map / min_register / deque / bounded_queue
+
+- lww_register: write (value, at) is "ok" only with a strictly newer at over a null-initialized state; read observes the stored value or null.
+- lww_map: per-key lww_register - set is "ok" even for dominated writes (the client was acknowledged) but only strictly newer at moves the entry; get reads the stored value or null.
+- min_register: the anti-monotonic register - write is "ok" only at or below the current value.
+- deque: push_front / push_back / pop_front / pop_back over the queue empty contract.
+- bounded_queue: queue with capacity 3; an enqueue onto a full queue observes false.
