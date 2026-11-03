@@ -79,3 +79,39 @@ test "canonical forms of representative initial values are pinned" {
     "{\"a\":1,\"b\":[2]}",
   )
 }
+
+///|
+test "the serialization is pinned across the newest model reports" {
+  // A one-operation pncounter report's canonical form is stable: it must
+  // survive a write-parse-write cycle, which is what certificate bindings
+  // and fixtures rely on.
+  let report = run(
+    record([
+      ("model", String("pncounter")),
+      ("initial", record([("p", from_json({})), ("n", from_json({}))])),
+      (
+        "operations",
+        Array([
+          record([
+            ("id", String("a")),
+            ("client", String("c")),
+            ("call", Number(1)),
+            ("return", Number(2)),
+            (
+              "input",
+              record([
+                ("type", String("increment")),
+                ("who", String("a")),
+                ("by", Number(2)),
+              ]),
+            ),
+            ("output", String("ok")),
+          ]),
+        ]),
+      ),
+    ]),
+  )
+  let text = report.canonical()
+  let reparsed = from_json(@json.parse(text))
+  assert_eq(reparsed.canonical(), text)
+}
