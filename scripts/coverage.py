@@ -35,8 +35,11 @@ def check():
         missing = set(["wbtest", "fixture", "oracle"]) - set(layers)
         if missing:
             print(f"  {model}: missing {', '.join(sorted(missing))}")
+    fixture_names = [c['name'] for c in json.loads(
+        (ROOT / 'tests/cases.json').read_text())]
+    assert len(fixture_names) == len(set(fixture_names)), 'duplicate fixtures'
     print(f"Coverage: {len(MODELS)} models, {sum(len(l) for _, l in rows)} "
-        + "model-layer pairs")
+        + f"model-layer pairs, {len(fixture_names)} unique fixtures")
     return rows
 
 if __name__ == "__main__":
