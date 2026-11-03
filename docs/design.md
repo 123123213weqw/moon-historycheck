@@ -233,3 +233,12 @@ check was added after a patch applied twice produced a duplicate fixture,
 which the regenerated white-box file then failed as a duplicate test
 declaration.
 
+## Partition sub-model dispatch (corrected)
+
+The partition path must dispatch each sub-history to the parent model
+itself. The first lww_map partition cut dispatched both map and lww_map
+sub-histories as lww_map, which broke every map partition fixture: the sub
+model is the parent model, not a constant. The second cut seeded a
+never-written lww_map key as Null, which broke every get on that key: the
+seed must be an empty object.
+
