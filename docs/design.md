@@ -226,3 +226,10 @@ branch, exact successor selection and state, node reachability, and the
 absence of a terminal node. It recomputes temporal obligations directly
 rather than trusting the generator's predecessor arrays.
 
+## Fixture uniqueness
+
+The oracle asserts every fixture case name is unique before running. The
+check was added after a patch applied twice produced a duplicate fixture,
+which the regenerated white-box file then failed as a duplicate test
+declaration.
+

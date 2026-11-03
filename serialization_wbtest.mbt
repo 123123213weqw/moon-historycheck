@@ -68,3 +68,14 @@ test "all twenty-two model names round-trip through the canonical form" {
     assert_eq(reparsed.canonical(), canonical_text)
   }
 }
+
+///|
+test "canonical forms of representative initial values are pinned" {
+  assert_eq(Number(0).canonical(), "0")
+  assert_eq(Bool(false).canonical(), "false")
+  assert_eq(Array([]).canonical(), "[]")
+  assert_eq(
+    record([("a", Number(1)), ("b", Array([Number(2)]))]).canonical(),
+    "{\"a\":1,\"b\":[2]}",
+  )
+}
