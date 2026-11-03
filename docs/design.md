@@ -201,3 +201,12 @@ cover serial linearity, concurrent maxima, memoized exhaustion, partition
 sums and per-model verdicts. A search-order change that backtracks more
 fails the gate on every backend before any human notices a slowdown.
 
+## Delta-debugging reduction
+
+Trials delete contiguous chunks of operations, refining granularity after
+each accepted chunk and restarting; the final pass always deletes single
+operations, so a complete result still proves 1-minimality under single
+operation deletion and unknown subresults still block minimality claims.
+Grouped noise shrinks with fewer solver checks — 5 instead of 8 on the
+regression history.
+
