@@ -22,6 +22,7 @@ pub(all) enum Model {
   PriorityQueue
   PNCounter
   LwwMap
+  OrSet
 } derive(Eq, @debug.Debug)
 
 ///|
@@ -67,6 +68,7 @@ fn model_name(model : Model) -> String {
     PriorityQueue => "priority_queue"
     PNCounter => "pncounter"
     LwwMap => "lww_map"
+    OrSet => "or_set"
   }
 }
 
@@ -317,6 +319,15 @@ fn validate_input(
         }
         _ => raise HistoryError(id + ": unsupported lww_map operation: " + kind)
       }
+    OrSet =>
+      match kind {
+        "add" | "remove" | "contains" => {
+          fields_only(input, ["type", "value", "tag"])
+          ignore(required(input, "value"))
+          ignore(identifier(required(input, "tag")))
+        }
+        _ => raise HistoryError(id + ": unsupported or_set operation: " + kind)
+      }
   }
 }
 
@@ -354,6 +365,7 @@ fn parse_history_value(request : Value) -> History raise HistoryError {
     "priority_queue" => PriorityQueue
     "pncounter" => PNCounter
     "lww_map" => LwwMap
+    "or_set" => OrSet
     name => raise HistoryError("unsupported model: " + name)
   }
   let initial = required(request, "initial")
@@ -423,6 +435,11 @@ fn parse_history_value(request : Value) -> History raise HistoryError {
   }
   if model == LwwMap {
     ignore(object(initial))
+  }
+  if model == OrSet {
+    let sets = object(initial)
+    ignore(array(sets.get("adds").unwrap_or(Null)))
+    ignore(array(sets.get("removes").unwrap_or(Null)))
   }
   if model == LwwRegister && initial != Null {
     let reg = object(initial)

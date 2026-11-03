@@ -955,5 +955,69 @@ fn transition(model : Model, state : Value, op : Operation) -> Value? {
           }
         _ => None
       }
+    OrSet =>
+      match state {
+        Object(sets) =>
+          match (sets.get("adds"), sets.get("removes")) {
+            (Some(Array(adds)), Some(Array(removes))) => {
+              let target = field(op.input, "value")
+              let tag = field(op.input, "tag")
+              // Every add carries a unique tag; a remove names the tag it
+              // observed. The element is present iff it has a tag not in
+              // the removes set (add-wins per tag).
+              let tagged = adds.any(fn(entry) {
+                field(entry, "value") == target && field(entry, "tag") == tag
+              })
+              let tombstoned = removes.contains(tag)
+              match field(op.input, "type") {
+                String("add") =>
+                  if op.output != String("ok") {
+                    None
+                  } else {
+                    let next_adds = adds.copy()
+                    next_adds.push(record([("value", target), ("tag", tag)]))
+                    Some(
+                      record([
+                        ("adds", Array(next_adds)),
+                        ("removes", Array(removes)),
+                      ]),
+                    )
+                  }
+                String("remove") => {
+                  let present = tagged && !tombstoned
+                  if op.output != Bool(present) {
+                    None
+                  } else if tagged && !tombstoned {
+                    let next_removes = removes.copy()
+                    next_removes.push(tag)
+                    Some(
+                      record([
+                        ("adds", Array(adds)),
+                        ("removes", Array(next_removes)),
+                      ]),
+                    )
+                  } else {
+                    Some(state)
+                  }
+                }
+                String("contains") => {
+                  // Present iff any tag for this value is not tombstoned.
+                  let present = adds.any(fn(entry) {
+                    field(entry, "value") == target &&
+                    !removes.contains(field(entry, "tag"))
+                  })
+                  if op.output == Bool(present) {
+                    Some(state)
+                  } else {
+                    None
+                  }
+                }
+                _ => None
+              }
+            }
+            _ => None
+          }
+        _ => None
+      }
   }
 }

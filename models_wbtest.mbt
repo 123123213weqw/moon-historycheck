@@ -1380,3 +1380,113 @@ test "lww map keeps the newest write per key and ignores dominated writes" {
     Some(Object(Map([]))),
   )
 }
+
+///|
+test "or set add-wins per tag, remove tombstones the tag it saw" {
+  let history = parse_history({
+    "model": "or_set",
+    "initial": { "adds": [], "removes": [] },
+    "operations": [
+      {
+        "id": "a1",
+        "client": "a",
+        "call": 1,
+        "return": 2,
+        "input": { "type": "add", "value": "x", "tag": "t1" },
+        "output": "ok",
+      },
+      {
+        "id": "r",
+        "client": "b",
+        "call": 3,
+        "return": 4,
+        "input": { "type": "remove", "value": "x", "tag": "t1" },
+        "output": true,
+      },
+      {
+        "id": "c1",
+        "client": "c",
+        "call": 5,
+        "return": 6,
+        "input": { "type": "contains", "value": "x", "tag": "unused" },
+        "output": false,
+      },
+      {
+        "id": "a2",
+        "client": "d",
+        "call": 7,
+        "return": 8,
+        "input": { "type": "add", "value": "x", "tag": "t2" },
+        "output": "ok",
+      },
+      {
+        "id": "c2",
+        "client": "e",
+        "call": 9,
+        "return": 10,
+        "input": { "type": "contains", "value": "x", "tag": "unused" },
+        "output": true,
+      },
+    ],
+  })
+  let mut state = history.initial
+  for op in history.operations {
+    match transition(OrSet, state, op) {
+      Some(next) => state = next
+      None => abort("or set replay failed")
+    }
+  }
+  assert_eq(
+    state,
+    from_json({
+      "adds": [{ "value": "x", "tag": "t1" }, { "value": "x", "tag": "t2" }],
+      "removes": ["t1"],
+    }),
+  )
+}
+
+///|
+test "or set concurrent add-wins over a stale remove" {
+  // A remove that did not observe this add tag cannot tombstone it.
+  let history = parse_history({
+    "model": "or_set",
+    "initial": { "adds": [], "removes": [] },
+    "operations": [
+      {
+        "id": "a1",
+        "client": "a",
+        "call": 1,
+        "return": 4,
+        "input": { "type": "add", "value": "x", "tag": "t1" },
+        "output": "ok",
+      },
+      {
+        "id": "r0",
+        "client": "b",
+        "call": 2,
+        "return": 3,
+        "input": { "type": "remove", "value": "x", "tag": "t0" },
+        "output": false,
+      },
+      {
+        "id": "c",
+        "client": "c",
+        "call": 5,
+        "return": 6,
+        "input": { "type": "contains", "value": "x", "tag": "unused" },
+        "output": true,
+      },
+    ],
+  })
+  let mut state = history.initial
+  for op in history.operations {
+    match transition(OrSet, state, op) {
+      Some(next) => state = next
+      None => abort("or set concurrent replay failed")
+    }
+  }
+  assert_eq(
+    state,
+    from_json({ "adds": [{ "value": "x", "tag": "t1" }], "removes": [] }),
+  )
+}

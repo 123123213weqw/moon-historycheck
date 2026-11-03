@@ -2154,3 +2154,56 @@ test "fixture max_operations on queue" {
     from_json(@json.parse("\"linearizable\"")),
   )
 }
+
+///|
+test "fixture or set add remove re-add" {
+  let result = from_json(
+    execute(
+      @json.parse(
+        "{\"model\":\"or_set\",\"initial\":{\"adds\":[],\"removes\":[]},\"operations\":[{\"id\":\"a1\",\"client\":\"a\",\"call\":1,\"return\":2,\"input\":{\"type\":\"add\",\"value\":\"x\",\"tag\":\"t1\"},\"output\":\"ok\"},{\"id\":\"r\",\"client\":\"b\",\"call\":3,\"return\":4,\"input\":{\"type\":\"remove\",\"value\":\"x\",\"tag\":\"t1\"},\"output\":true},{\"id\":\"c1\",\"client\":\"c\",\"call\":5,\"return\":6,\"input\":{\"type\":\"contains\",\"value\":\"x\",\"tag\":\"u\"},\"output\":false},{\"id\":\"a2\",\"client\":\"d\",\"call\":7,\"return\":8,\"input\":{\"type\":\"add\",\"value\":\"x\",\"tag\":\"t2\"},\"output\":\"ok\"},{\"id\":\"c2\",\"client\":\"e\",\"call\":9,\"return\":10,\"input\":{\"type\":\"contains\",\"value\":\"x\",\"tag\":\"u\"},\"output\":true}]}",
+      ),
+    ),
+  )
+  assert_eq(
+    fixture_at(result, ["verdict"]),
+    from_json(@json.parse("\"linearizable\"")),
+  )
+  assert_eq(
+    fixture_at(result, ["final_state"]),
+    from_json(
+      @json.parse(
+        "{\"adds\":[{\"value\":\"x\",\"tag\":\"t1\"},{\"value\":\"x\",\"tag\":\"t2\"}],\"removes\":[\"t1\"]}",
+      ),
+    ),
+  )
+}
+
+///|
+test "fixture or set stale remove reports false" {
+  let result = from_json(
+    execute(
+      @json.parse(
+        "{\"model\":\"or_set\",\"initial\":{\"adds\":[],\"removes\":[]},\"operations\":[{\"id\":\"r0\",\"client\":\"b\",\"call\":1,\"return\":2,\"input\":{\"type\":\"remove\",\"value\":\"x\",\"tag\":\"t0\"},\"output\":false}]}",
+      ),
+    ),
+  )
+  assert_eq(
+    fixture_at(result, ["verdict"]),
+    from_json(@json.parse("\"linearizable\"")),
+  )
+}
+
+///|
+test "fixture or set wrong contains rejected" {
+  let result = from_json(
+    execute(
+      @json.parse(
+        "{\"model\":\"or_set\",\"initial\":{\"adds\":[{\"value\":\"x\",\"tag\":\"t1\"}],\"removes\":[]},\"operations\":[{\"id\":\"c\",\"client\":\"a\",\"call\":1,\"return\":2,\"input\":{\"type\":\"contains\",\"value\":\"x\",\"tag\":\"u\"},\"output\":false}]}",
+      ),
+    ),
+  )
+  assert_eq(
+    fixture_at(result, ["verdict"]),
+    from_json(@json.parse("\"non_linearizable\"")),
+  )
+}

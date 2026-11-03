@@ -415,6 +415,82 @@ def _lmap_apply(state, op):
     want = entry['value'] if entry else None
     return same(output, want), state
 
+MODELS['or_set'] = {
+    'initial': {'adds': [], 'removes': []},
+    'apply': lambda state, op: _ors_apply(state, op),
+    'step': lambda rng, state: _ors_step(rng, state),
+}
+
+def _ors_step(rng, state):
+    kind = rng.choice(['add', 'remove', 'contains'])
+    v = rng.choice([None, False, 0, 1, 2, {'nested': [1, True]}])
+    tag_counter = [0]
+    def fresh_tag():
+        tag_counter[0] += 1
+        return f't{tag_counter[0]}'
+    if kind == 'add':
+        tag = f't{sum(1 for _ in state["adds"]) + 1}'
+        arg = {'type': 'add', 'value': v, 'tag': tag}
+        return arg, 'ok', {
+            'adds': state['adds'] + [{'value': v, 'tag': tag}],
+            'removes': state['removes'],
+        }
+    # For remove/contains, find a tag that actually exists
+    tags_for_value = [e['tag'] for e in state['adds']
+        if same(e['value'], v)]
+    if kind == 'remove':
+        if tags_for_value and rng.random() < 0.7:
+            tag = rng.choice(tags_for_value)
+            present = not any(same(t, tag) for t in state['removes'])
+            arg = {'type': 'remove', 'value': v, 'tag': tag}
+            if present:
+                return arg, True, {
+                    'adds': state['adds'],
+                    'removes': state['removes'] + [tag],
+                }
+            return arg, False, state
+        # Removing a tag that does not exist for this value
+        arg = {'type': 'remove', 'value': v, 'tag': 'nonexistent'}
+        return arg, False, state
+    # contains
+    arg = {'type': 'contains', 'value': v, 'tag': 'unused'}
+    present = any(
+        same(e['value'], v) and not any(same(t, e['tag'])
+            for t in state['removes'])
+        for e in state['adds'])
+    return arg, present, state
+
+def _ors_apply(state, op):
+    arg, kind, output = op['input'], op['input']['type'], op['output']
+    v = arg['value']
+    tag = arg['tag']
+    if kind == 'add':
+        if not same(output, 'ok'):
+            return False, state
+        return True, {
+            'adds': state['adds'] + [{'value': copy.deepcopy(v), 'tag': tag}],
+            'removes': state['removes'],
+        }
+    tagged = any(e['tag'] == tag and same(e['value'], v)
+        for e in state['adds'])
+    tombstoned = any(t == tag for t in state['removes'])
+    present = tagged and not tombstoned
+    if kind == 'remove':
+        if not same(output, present):
+            return False, state
+        if present:
+            return True, {
+                'adds': state['adds'],
+                'removes': state['removes'] + [tag],
+            }
+        return True, state
+    # contains: present iff any tag for this value is not tombstoned
+    is_present = any(
+        same(e['value'], v) and not any(t == e['tag']
+            for t in state['removes'])
+        for e in state['adds'])
+    return (same(output, is_present), state)
+
 MODELS['semaphore'] = {
     'initial': {'permits': 2, 'taken': 0},
     'apply': lambda state, op: _sem_apply(state, op),
