@@ -16351,5 +16351,96 @@
     "expected": {
       "verdict": "non_linearizable"
     }
+  },
+  {
+    "name": "flag sets once",
+    "request": {
+      "model": "flag",
+      "initial": false,
+      "operations": [
+        {
+          "id": "s",
+          "client": "a",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "set"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "r",
+          "client": "b",
+          "call": 3,
+          "return": 4,
+          "input": {
+            "type": "read"
+          },
+          "output": true
+        }
+      ]
+    },
+    "exit": 0,
+    "expected": {
+      "verdict": "linearizable",
+      "final_state": true
+    }
+  },
+  {
+    "name": "flag concurrent set and read",
+    "request": {
+      "model": "flag",
+      "initial": false,
+      "operations": [
+        {
+          "id": "s",
+          "client": "a",
+          "call": 1,
+          "return": 4,
+          "input": {
+            "type": "set"
+          },
+          "output": "ok"
+        },
+        {
+          "id": "r",
+          "client": "b",
+          "call": 2,
+          "return": 3,
+          "input": {
+            "type": "read"
+          },
+          "output": false
+        }
+      ]
+    },
+    "exit": 0,
+    "expected": {
+      "verdict": "linearizable",
+      "final_state": true
+    }
+  },
+  {
+    "name": "flag stale read rejected",
+    "request": {
+      "model": "flag",
+      "initial": true,
+      "operations": [
+        {
+          "id": "r",
+          "client": "a",
+          "call": 1,
+          "return": 2,
+          "input": {
+            "type": "read"
+          },
+          "output": false
+        }
+      ]
+    },
+    "exit": 2,
+    "expected": {
+      "verdict": "non_linearizable"
+    }
   }
 ]

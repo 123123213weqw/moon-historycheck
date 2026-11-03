@@ -1490,3 +1490,55 @@ test "or set concurrent add-wins over a stale remove" {
     from_json({ "adds": [{ "value": "x", "tag": "t1" }], "removes": [] }),
   )
 }
+
+///|
+test "flag sets once and stays set" {
+  let set = parse_history({
+    "model": "flag",
+    "initial": false,
+    "operations": [
+      {
+        "id": "s",
+        "client": "a",
+        "call": 1,
+        "return": 2,
+        "input": { "type": "set" },
+        "output": "ok",
+      },
+    ],
+  })
+  assert_eq(transition(Flag, set.initial, set.operations[0]), Some(Bool(true)))
+  let again = parse_history({
+    "model": "flag",
+    "initial": true,
+    "operations": [
+      {
+        "id": "s",
+        "client": "a",
+        "call": 1,
+        "return": 2,
+        "input": { "type": "set" },
+        "output": "ok",
+      },
+    ],
+  })
+  assert_eq(
+    transition(Flag, again.initial, again.operations[0]),
+    Some(Bool(true)),
+  )
+  let read_true = parse_history({
+    "model": "flag",
+    "initial": true,
+    "operations": [
+      {
+        "id": "r",
+        "client": "a",
+        "call": 1,
+        "return": 2,
+        "input": { "type": "read" },
+        "output": false,
+      },
+    ],
+  })
+  assert_eq(transition(Flag, read_true.initial, read_true.operations[0]), None)
+}

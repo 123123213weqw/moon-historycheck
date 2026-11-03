@@ -415,6 +415,24 @@ def _lmap_apply(state, op):
     want = entry['value'] if entry else None
     return same(output, want), state
 
+MODELS['flag'] = {
+    'initial': False,
+    'apply': lambda state, op: _flag_apply(state, op),
+    'step': lambda rng, state: _flag_step(rng, state),
+}
+
+def _flag_step(rng, state):
+    kind = rng.choice(['set', 'read'])
+    if kind == 'read':
+        return {'type': 'read'}, state, state
+    return {'type': 'set'}, 'ok', True
+
+def _flag_apply(state, op):
+    kind, output = op['input']['type'], op['output']
+    if kind == 'set':
+        return (same(output, 'ok'), True)
+    return same(output, state), state
+
 MODELS['or_set'] = {
     'initial': {'adds': [], 'removes': []},
     'apply': lambda state, op: _ors_apply(state, op),

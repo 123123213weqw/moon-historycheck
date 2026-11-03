@@ -56,6 +56,7 @@ pub(all) enum Model {
   PNCounter
   LwwMap
   OrSet
+  Flag
 } derive(Eq, @debug.Debug)
 pub fn Model::equal(Self, Self) -> Bool
 pub fn Model::not_equal(Self, Self) -> Bool

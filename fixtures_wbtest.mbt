@@ -2207,3 +2207,50 @@ test "fixture or set wrong contains rejected" {
     from_json(@json.parse("\"non_linearizable\"")),
   )
 }
+
+///|
+test "fixture flag sets once" {
+  let result = from_json(
+    execute(
+      @json.parse(
+        "{\"model\":\"flag\",\"initial\":false,\"operations\":[{\"id\":\"s\",\"client\":\"a\",\"call\":1,\"return\":2,\"input\":{\"type\":\"set\"},\"output\":\"ok\"},{\"id\":\"r\",\"client\":\"b\",\"call\":3,\"return\":4,\"input\":{\"type\":\"read\"},\"output\":true}]}",
+      ),
+    ),
+  )
+  assert_eq(
+    fixture_at(result, ["verdict"]),
+    from_json(@json.parse("\"linearizable\"")),
+  )
+  assert_eq(fixture_at(result, ["final_state"]), from_json(@json.parse("true")))
+}
+
+///|
+test "fixture flag concurrent set and read" {
+  let result = from_json(
+    execute(
+      @json.parse(
+        "{\"model\":\"flag\",\"initial\":false,\"operations\":[{\"id\":\"s\",\"client\":\"a\",\"call\":1,\"return\":4,\"input\":{\"type\":\"set\"},\"output\":\"ok\"},{\"id\":\"r\",\"client\":\"b\",\"call\":2,\"return\":3,\"input\":{\"type\":\"read\"},\"output\":false}]}",
+      ),
+    ),
+  )
+  assert_eq(
+    fixture_at(result, ["verdict"]),
+    from_json(@json.parse("\"linearizable\"")),
+  )
+  assert_eq(fixture_at(result, ["final_state"]), from_json(@json.parse("true")))
+}
+
+///|
+test "fixture flag stale read rejected" {
+  let result = from_json(
+    execute(
+      @json.parse(
+        "{\"model\":\"flag\",\"initial\":true,\"operations\":[{\"id\":\"r\",\"client\":\"a\",\"call\":1,\"return\":2,\"input\":{\"type\":\"read\"},\"output\":false}]}",
+      ),
+    ),
+  )
+  assert_eq(
+    fixture_at(result, ["verdict"]),
+    from_json(@json.parse("\"non_linearizable\"")),
+  )
+}

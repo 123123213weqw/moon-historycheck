@@ -23,6 +23,7 @@ pub(all) enum Model {
   PNCounter
   LwwMap
   OrSet
+  Flag
 } derive(Eq, @debug.Debug)
 
 ///|
@@ -69,6 +70,7 @@ fn model_name(model : Model) -> String {
     PNCounter => "pncounter"
     LwwMap => "lww_map"
     OrSet => "or_set"
+    Flag => "flag"
   }
 }
 
@@ -328,6 +330,12 @@ fn validate_input(
         }
         _ => raise HistoryError(id + ": unsupported or_set operation: " + kind)
       }
+    Flag =>
+      match kind {
+        "set" => fields_only(input, ["type"])
+        "read" => fields_only(input, ["type"])
+        _ => raise HistoryError(id + ": unsupported flag operation: " + kind)
+      }
   }
 }
 
@@ -366,6 +374,7 @@ fn parse_history_value(request : Value) -> History raise HistoryError {
     "pncounter" => PNCounter
     "lww_map" => LwwMap
     "or_set" => OrSet
+    "flag" => Flag
     name => raise HistoryError("unsupported model: " + name)
   }
   let initial = required(request, "initial")
@@ -440,6 +449,9 @@ fn parse_history_value(request : Value) -> History raise HistoryError {
     let sets = object(initial)
     ignore(array(sets.get("adds").unwrap_or(Null)))
     ignore(array(sets.get("removes").unwrap_or(Null)))
+  }
+  if model == Flag {
+    ignore(boolean(initial))
   }
   if model == LwwRegister && initial != Null {
     let reg = object(initial)

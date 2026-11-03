@@ -1019,5 +1019,22 @@ fn transition(model : Model, state : Value, op : Operation) -> Value? {
           }
         _ => None
       }
+    Flag =>
+      match (state, field(op.input, "type")) {
+        // One-way: set moves false to true and is idempotent; read observes.
+        (Bool(_), String("set")) =>
+          if op.output == String("ok") {
+            Some(Bool(true))
+          } else {
+            None
+          }
+        (Bool(current), String("read")) =>
+          if op.output == Bool(current) {
+            Some(state)
+          } else {
+            None
+          }
+        _ => None
+      }
   }
 }
