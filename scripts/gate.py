@@ -195,6 +195,15 @@ report = run(request)
 gate.append(('pncounter_258: raised ceiling admits 258 operations',
     report['verdict'] == 'linearizable', report))
 
+
+ops_300 = [{'id': 'e' + str(i), 'client': 'c', 'call': 2 * i + 1,
+    'return': 2 * i + 2, 'input': {'type': 'enqueue', 'value': i},
+    'output': 'ok'} for i in range(300)]
+report = run({'model': 'queue', 'initial': [], 'operations': ops_300,
+    'max_operations': 300})
+gate.append(('queue_300: raised ceiling admits 300 operations',
+    report['verdict'] == 'linearizable', report))
+
 failures = []
 for label, held, detail in gate:
     if not held:

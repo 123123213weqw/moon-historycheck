@@ -20,3 +20,4 @@
 - The oracle is table-driven per model; the shared conditional chains it replaced are gone. Closure-audit counts shift by a handful when the per-model step functions draw randomness in a different order; the evidence documents are synced per release.
 - lww_register and lww_map treat a tied timestamp as "cannot replay": only a strictly newer at moves the state. A dominated write in lww_map observes ok (the client was acknowledged) but leaves the entry intact.
 - Randomized differential testing (scripts/fuzz.py) generates random models, operation mixes and event orderings across all twenty-two models and compares against a permutation brute force. Seeds are taken from argv so a failure reproduces.
+- Every model name round-trips through the canonical form, guarding the certificate binding against serializer mangling.
