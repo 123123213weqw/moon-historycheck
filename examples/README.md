@@ -33,3 +33,5 @@ Every model ships one. The four original history examples cover the core check f
 | priority_queue.json | smallest-priority-first pop |
 | pncounter.json | per-actor merge |
 | lww_map.json | per-key newest-wins |
+| `or_set.json` | per-tag add-wins with observed removes |
+| `flag.json` | the one-way boolean barrier |

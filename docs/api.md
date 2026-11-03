@@ -119,3 +119,11 @@ acquire is true while taken < permits and false once exhausted; release is "ok" 
 - min_register: the anti-monotonic register - write is "ok" only at or below the current value.
 - deque: push_front / push_back / pop_front / pop_back over the queue empty contract.
 - bounded_queue: queue with capacity 3; an enqueue onto a full queue observes false.
+
+## or_set
+
+Every add carries a unique tag; a remove names the tag it observed. The element is present iff it has a tag not in the tombstones. A concurrent add with a fresh tag always wins over a remove that saw a different tag.
+
+## flag
+
+A one-way boolean: set is always ok (idempotent), and read observes exactly. The simplest monotonic model.

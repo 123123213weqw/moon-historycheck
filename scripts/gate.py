@@ -184,6 +184,21 @@ verdict('lww_map', {}, [
 ], 'linearizable')
 
 
+verdict('or_set', {'adds': [], 'removes': []}, [
+    {'id': 'a', 'client': 'a', 'call': 1, 'return': 2,
+     'input': {'type': 'add', 'value': 'x', 'tag': 't1'}, 'output': 'ok'},
+    {'id': 'r', 'client': 'b', 'call': 3, 'return': 4,
+     'input': {'type': 'remove', 'value': 'x', 'tag': 't1'}, 'output': True},
+    {'id': 'c', 'client': 'c', 'call': 5, 'return': 6,
+     'input': {'type': 'contains', 'value': 'x', 'tag': 'u'}, 'output': False},
+], 'linearizable')
+verdict('flag', False, [
+    {'id': 's', 'client': 'a', 'call': 1, 'return': 2,
+     'input': {'type': 'set'}, 'output': 'ok'},
+    {'id': 'r', 'client': 'b', 'call': 3, 'return': 4,
+     'input': {'type': 'read'}, 'output': True},
+], 'linearizable')
+
 # The configurable operation ceiling works across models.
 ops_258 = [{'id': 'o' + str(i), 'client': 'c' + str(i % 5),
     'call': 2 * i + 1, 'return': 2 * i + 2,

@@ -1,0 +1,69 @@
+{
+  "model": "or_set",
+  "initial": {
+    "adds": [],
+    "removes": []
+  },
+  "operations": [
+    {
+      "id": "a1",
+      "client": "a",
+      "call": 1,
+      "return": 2,
+      "input": {
+        "type": "add",
+        "value": "x",
+        "tag": "t1"
+      },
+      "output": "ok"
+    },
+    {
+      "id": "r",
+      "client": "b",
+      "call": 3,
+      "return": 4,
+      "input": {
+        "type": "remove",
+        "value": "x",
+        "tag": "t1"
+      },
+      "output": true
+    },
+    {
+      "id": "c1",
+      "client": "c",
+      "call": 5,
+      "return": 6,
+      "input": {
+        "type": "contains",
+        "value": "x",
+        "tag": "u"
+      },
+      "output": false
+    },
+    {
+      "id": "a2",
+      "client": "d",
+      "call": 7,
+      "return": 8,
+      "input": {
+        "type": "add",
+        "value": "x",
+        "tag": "t2"
+      },
+      "output": "ok"
+    },
+    {
+      "id": "c2",
+      "client": "e",
+      "call": 9,
+      "return": 10,
+      "input": {
+        "type": "contains",
+        "value": "x",
+        "tag": "u"
+      },
+      "output": true
+    }
+  ]
+}

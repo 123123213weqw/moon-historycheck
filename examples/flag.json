@@ -1,0 +1,26 @@
+{
+  "model": "flag",
+  "initial": false,
+  "operations": [
+    {
+      "id": "s",
+      "client": "a",
+      "call": 1,
+      "return": 4,
+      "input": {
+        "type": "set"
+      },
+      "output": "ok"
+    },
+    {
+      "id": "r",
+      "client": "b",
+      "call": 2,
+      "return": 3,
+      "input": {
+        "type": "read"
+      },
+      "output": false
+    }
+  ]
+}

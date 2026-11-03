@@ -12,6 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 MODELS = ["register", "kv_register", "queue", "stack", "lock", "set",
     "counter", "map", "lww_set", "max_register", "grow_only_set",
+    "or_set", "flag",
     "two_phase_set", "min_register", "lww_register", "bounded_queue", "deque",
     "semaphore", "rwlock", "multiset", "priority_queue", "pncounter", "lww_map"]
 
