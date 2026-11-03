@@ -800,7 +800,14 @@ def generated(rng, model, index):
     rng.shuffle(ops)
     return {'model': model, 'initial': initial, 'operations': ops}
 
+def check_fixture_uniqueness():
+    import json as _json
+    cases = _json.loads((ROOT / 'tests/cases.json').read_text())
+    names = [c['name'] for c in cases]
+    assert len(names) == len(set(names)), 'duplicate fixture names'
+
 def main():
+    check_fixture_uniqueness()
     rng = random.Random(20261020)
     checked = 0
     partitioned = 0
