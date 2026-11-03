@@ -210,3 +210,12 @@ operation deletion and unknown subresults still block minimality claims.
 Grouped noise shrinks with fewer solver checks — 5 instead of 8 on the
 regression history.
 
+## Witness verifier
+
+The witness verifier does not trust the searcher's predecessor arrays: it
+recomputes every pairwise return-before-call obligation directly and replays
+the model at each step. A witness that passes is a statement about the
+complete history, not about the search path that found it. The partition
+merge reuses this verifier on the global history after combining per-key
+chains.
+
