@@ -192,3 +192,12 @@ lww_map) treat a stale or dominated write as acknowledged but not applied.
 Both distinctions were caught by fixtures and wbtests after the first cuts
 got them wrong, and both are documented where they live.
 
+## Gate architecture
+
+The gate (scripts/gate.py) asserts deterministic properties — expansion
+counts and verdicts — rather than timings, because timings vary by machine
+and a strict check would be turned off within a week. Eighteen relations
+cover serial linearity, concurrent maxima, memoized exhaustion, partition
+sums and per-model verdicts. A search-order change that backtracks more
+fails the gate on every backend before any human notices a slowdown.
+
