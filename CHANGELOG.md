@@ -1,6 +1,10 @@
 # Changelog
 
-## 0.5.0 — 2026-11-01
+## 0.6.0 — 2026-11-03
+
+Registry version: 0.6.0. Twenty-two sequential models; the table-driven per-model oracle; randomized differential fuzzing; the 72-case malformed-input sweep; the twenty-relation deterministic search-cost gate; serializer pinning; executed examples for every model; lww_map partitioning; the verification coverage matrix; and the deny-warn-aligned verify ladder.
+
+## 0.5.0 — 2026-11-01 — 2026-11-01
 
 Registry version: 0.5.0. Twenty-two sequential models; the table-driven per-model oracle; randomized differential fuzzing; the 62-case malformed-input sweep; the eighteen-relation deterministic search-cost gate; serializer pinning; executed examples for every model; lww_map partitioning; and the deny-warn-aligned verify ladder.
 
