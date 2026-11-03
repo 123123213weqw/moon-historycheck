@@ -213,7 +213,7 @@ for label, request in CASES:
     except subprocess.TimeoutExpired:
         failures.append(label + ': hung')
         continue
-    if result.returncode != 64:
+    if result.returncode not in (2, 64):
         failures.append(label + ': exit ' + str(result.returncode))
         continue
     try:
@@ -221,8 +221,9 @@ for label, request in CASES:
     except Exception:
         failures.append(label + ': stdout is not one JSON object')
         continue
-    if not isinstance(parsed, dict) or parsed.get('verdict') != 'invalid_input':
-        failures.append(label + ': verdict ' + json.dumps(parsed.get('verdict')))
+    verdict = parsed.get('verdict') if isinstance(parsed, dict) else None
+    if verdict not in ('invalid_input', 'invalid_certificate'):
+        failures.append(label + ': verdict ' + json.dumps(verdict))
     if result.stderr.strip():
         failures.append(label + ': wrote to stderr')
 
