@@ -52,3 +52,19 @@ test "the canonical history body is pinned" {
     "{\"initial\":0,\"model\":\"register\",\"operations\":[{\"call\":1,\"client\":\"c\",\"id\":\"a\",\"input\":{\"type\":\"read\"},\"output\":0,\"return\":2}]}",
   )
 }
+
+///|
+test "all twenty-two model names round-trip through the canonical form" {
+  for
+    name in [
+      "register", "kv_register", "queue", "stack", "lock", "set", "counter", "map",
+      "lww_set", "max_register", "grow_only_set", "two_phase_set", "min_register",
+      "lww_register", "bounded_queue", "deque", "semaphore", "rwlock", "multiset",
+      "priority_queue", "pncounter", "lww_map",
+    ] {
+    let value = record([("model", String(name)), ("operations", Array([]))])
+    let canonical_text = value.canonical()
+    let reparsed = from_json(@json.parse(canonical_text))
+    assert_eq(reparsed.canonical(), canonical_text)
+  }
+}
