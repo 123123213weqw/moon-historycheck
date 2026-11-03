@@ -183,6 +183,18 @@ verdict('lww_map', {}, [
      'input': {'type': 'get', 'key': 'k'}, 'output': 2},
 ], 'linearizable')
 
+
+# The configurable operation ceiling works across models.
+ops_258 = [{'id': 'o' + str(i), 'client': 'c' + str(i % 5),
+    'call': 2 * i + 1, 'return': 2 * i + 2,
+    'input': {'type': 'increment', 'who': 'a', 'by': 1}, 'output': 'ok'}
+    for i in range(258)]
+request = {'model': 'pncounter', 'initial': {'p': {}, 'n': {}},
+    'operations': ops_258, 'max_operations': 258}
+report = run(request)
+gate.append(('pncounter_258: raised ceiling admits 258 operations',
+    report['verdict'] == 'linearizable', report))
+
 failures = []
 for label, held, detail in gate:
     if not held:

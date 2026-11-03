@@ -219,3 +219,10 @@ complete history, not about the search path that found it. The partition
 merge reuses this verifier on the global history after combining per-key
 chains.
 
+## Certificate verifier
+
+The certificate verifier checks the initial binding, every enabled legal
+branch, exact successor selection and state, node reachability, and the
+absence of a terminal node. It recomputes temporal obligations directly
+rather than trusting the generator's predecessor arrays.
+
