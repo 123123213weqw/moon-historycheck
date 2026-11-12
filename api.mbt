@@ -145,6 +145,11 @@ pub fn list_models() -> Array[ModelInfo] {
       description: "register with per-write version numbers",
       supports_partition: false,
     },
+    {
+      name: "rw_register",
+      description: "register with concurrent reads and exclusive writes",
+      supports_partition: false,
+    },
   ]
 }
 

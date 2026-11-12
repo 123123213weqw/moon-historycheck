@@ -83,7 +83,7 @@ test "models operation lists every model with partition flags" {
     Array(list) => list
     _ => abort("models did not answer an array")
   }
-  assert_eq(items.length(), 27)
+  assert_eq(items.length(), 28)
   // Partition-capable models are exactly the three.
   let partitionable = items.filter(entry => {
     match field(entry, "supports_partition") {
@@ -114,6 +114,7 @@ test "models catalog matches the enum's model_name spellings" {
   assert_eq(catalog[24], "ticket_lock")
   assert_eq(catalog[25], "barrier")
   assert_eq(catalog[26], "versioned_register")
+  assert_eq(catalog[27], "rw_register")
   assert_eq(catalog.contains("kv_register"), true)
   assert_eq(catalog.contains("lww_map"), true)
   assert_eq(catalog.contains("map"), true)
@@ -243,4 +244,58 @@ test "versioned_register hands out each version exactly once" {
     _ => "bad"
   }
   assert_eq(verdict3, "non_linearizable")
+}
+
+///|
+test "rw_register allows concurrent reads but exclusive writes" {
+  // Two reads straddle a write and both observe the old value: reads
+  // never change state, so any number of them may overlap.
+  let shared = run(
+    from_json(
+      @json.parse(
+        "{\"model\":\"rw_register\",\"initial\":0,\"operations\":[" +
+        "{\"id\":\"r1\",\"client\":\"a\",\"call\":1,\"return\":5,\"input\":{\"type\":\"read\"},\"output\":0}," +
+        "{\"id\":\"r2\",\"client\":\"b\",\"call\":2,\"return\":6,\"input\":{\"type\":\"read\"},\"output\":0}," +
+        "{\"id\":\"w\",\"client\":\"c\",\"call\":3,\"return\":4,\"input\":{\"type\":\"write\",\"value\":5},\"output\":0}]}",
+      ),
+    ),
+  )
+  let verdict = match field(shared, "verdict") {
+    String(s) => s
+    _ => "bad"
+  }
+  assert_eq(verdict, "linearizable")
+
+  // Two overlapping writes that both report the same pre-state cannot
+  // serialize: whoever goes second must observe the first one's value.
+  let collided = run(
+    from_json(
+      @json.parse(
+        "{\"model\":\"rw_register\",\"initial\":0,\"operations\":[" +
+        "{\"id\":\"w1\",\"client\":\"a\",\"call\":1,\"return\":10,\"input\":{\"type\":\"write\",\"value\":5},\"output\":0}," +
+        "{\"id\":\"w2\",\"client\":\"b\",\"call\":2,\"return\":9,\"input\":{\"type\":\"write\",\"value\":7},\"output\":0}]}",
+      ),
+    ),
+  )
+  let verdict2 = match field(collided, "verdict") {
+    String(s) => s
+    _ => "bad"
+  }
+  assert_eq(verdict2, "non_linearizable")
+
+  // The same overlap is legal when the second writer observes the first.
+  let serialized = run(
+    from_json(
+      @json.parse(
+        "{\"model\":\"rw_register\",\"initial\":0,\"operations\":[" +
+        "{\"id\":\"w1\",\"client\":\"a\",\"call\":1,\"return\":10,\"input\":{\"type\":\"write\",\"value\":5},\"output\":0}," +
+        "{\"id\":\"w2\",\"client\":\"b\",\"call\":2,\"return\":9,\"input\":{\"type\":\"write\",\"value\":7},\"output\":5}]}",
+      ),
+    ),
+  )
+  let verdict3 = match field(serialized, "verdict") {
+    String(s) => s
+    _ => "bad"
+  }
+  assert_eq(verdict3, "linearizable")
 }

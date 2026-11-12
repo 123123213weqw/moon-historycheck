@@ -28,6 +28,7 @@ pub(all) enum Model {
   TicketLock
   Barrier
   VersionedRegister
+  RwRegister
 }
 
 ///|
@@ -80,6 +81,7 @@ fn model_name(model : Model) -> String {
     TicketLock => "ticket_lock"
     Barrier => "barrier"
     VersionedRegister => "versioned_register"
+    RwRegister => "rw_register"
   }
 }
 
@@ -372,6 +374,18 @@ fn validate_input(
             id + ": unsupported versioned_register operation: " + kind,
           )
       }
+    RwRegister =>
+      match kind {
+        "read" => fields_only(input, ["type"])
+        "write" => {
+          fields_only(input, ["type", "value"])
+          ignore(required(input, "value"))
+        }
+        _ =>
+          raise HistoryError(
+            id + ": unsupported rw_register operation: " + kind,
+          )
+      }
   }
 }
 
@@ -414,6 +428,7 @@ fn parse_history_value(request : Value) -> History raise HistoryError {
     "ticket_lock" => TicketLock
     "barrier" => Barrier
     "versioned_register" => VersionedRegister
+    "rw_register" => RwRegister
     name => raise HistoryError("unsupported model: " + name)
   }
   let initial = required(request, "initial")

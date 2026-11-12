@@ -1131,5 +1131,20 @@ fn transition(model : Model, state : Value, op : Operation) -> Value? {
         }
         _ => None
       }
+    RwRegister =>
+      match field(op.input, "type") {
+        // Reads are pure: any number of them may overlap. A write reports
+        // the exact pre-state it replaced, so two writes can never both
+        // observe the same pre-state - writer mutual exclusion made
+        // observable in the outputs.
+        String("read") => if op.output == state { Some(state) } else { None }
+        String("write") =>
+          if op.output == state {
+            Some(field(op.input, "value"))
+          } else {
+            None
+          }
+        _ => None
+      }
   }
 }
