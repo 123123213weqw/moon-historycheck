@@ -13,6 +13,8 @@ pub fn execute(@json.Json) -> @json.Json
 
 pub fn from_json(@json.Json) -> Value
 
+pub fn list_models() -> Array[ModelInfo]
+
 pub fn parse_history(@json.Json) -> History raise HistoryError
 
 pub fn run(Value) -> Value
@@ -65,6 +67,14 @@ pub(all) enum Model {
 pub fn Model::equal(Self, Self) -> Bool
 pub fn Model::not_equal(Self, Self) -> Bool
 pub fn Model::to_repr(Self) -> @debug.Repr
+
+#derive(@debug.Debug)
+pub(all) struct ModelInfo {
+  name : String
+  description : String
+  supports_partition : Bool
+}
+pub fn ModelInfo::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) struct Operation {

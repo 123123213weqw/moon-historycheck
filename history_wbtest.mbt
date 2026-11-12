@@ -75,3 +75,43 @@ test "model refusals name the operation" {
   }
   assert_eq(failed, String("swap-op: unsupported register operation: swap"))
 }
+
+///|
+test "models operation lists all 24 with partition flags" {
+  let result = run(record([("operation", String("models"))]))
+  let items = match result {
+    Array(list) => list
+    _ => abort("models did not answer an array")
+  }
+  assert_eq(items.length(), 24)
+  // Partition-capable models are exactly the three.
+  let partitionable = items.filter(entry => {
+    match field(entry, "supports_partition") {
+      Bool(true) => true
+      _ => false
+    }
+  })
+  assert_eq(partitionable.length(), 3)
+  // Every name is unique.
+  let seen : Map[String, Bool] = Map([])
+  for entry in items {
+    let name = match field(entry, "name") {
+      String(n) => n
+      _ => "bad"
+    }
+    assert_eq(seen.contains(name), false)
+    seen[name] = true
+  }
+}
+
+///|
+test "models catalog matches the enum's model_name spellings" {
+  let catalog = list_models().map(info => info.name)
+  // The enum's own spellings are the ground truth; spot-check both ends
+  // and the partition-marked ones.
+  assert_eq(catalog[0], "register")
+  assert_eq(catalog[23], "flag")
+  assert_eq(catalog.contains("kv_register"), true)
+  assert_eq(catalog.contains("lww_map"), true)
+  assert_eq(catalog.contains("map"), true)
+}
