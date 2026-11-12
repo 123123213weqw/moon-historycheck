@@ -25,6 +25,7 @@ pub(all) enum Model {
   LwwMap
   OrSet
   Flag
+  TicketLock
 }
 
 ///|
@@ -74,6 +75,7 @@ fn model_name(model : Model) -> String {
     LwwMap => "lww_map"
     OrSet => "or_set"
     Flag => "flag"
+    TicketLock => "ticket_lock"
   }
 }
 
@@ -339,6 +341,15 @@ fn validate_input(
         "read" => fields_only(input, ["type"])
         _ => raise HistoryError(id + ": unsupported flag operation: " + kind)
       }
+    TicketLock =>
+      match kind {
+        "acquire" => fields_only(input, ["type", "ticket"])
+        "release" => fields_only(input, ["type", "ticket"])
+        _ =>
+          raise HistoryError(
+            id + ": unsupported ticket_lock operation: " + kind,
+          )
+      }
   }
 }
 
@@ -378,6 +389,7 @@ fn parse_history_value(request : Value) -> History raise HistoryError {
     "lww_map" => LwwMap
     "or_set" => OrSet
     "flag" => Flag
+    "ticket_lock" => TicketLock
     name => raise HistoryError("unsupported model: " + name)
   }
   let initial = required(request, "initial")
@@ -455,6 +467,17 @@ fn parse_history_value(request : Value) -> History raise HistoryError {
   }
   if model == Flag {
     ignore(boolean(initial))
+  }
+  if model == TicketLock {
+    match initial {
+      Number(n) =>
+        if n.is_nan() || n.is_inf() || n < -1.0 {
+          raise HistoryError(
+            "ticket_lock initial must be -1 or a ticket number",
+          )
+        }
+      _ => raise HistoryError("ticket_lock initial must be a number")
+    }
   }
   if model == LwwRegister && initial != Null {
     let reg = object(initial)

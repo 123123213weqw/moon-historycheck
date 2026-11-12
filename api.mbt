@@ -130,6 +130,11 @@ pub fn list_models() -> Array[ModelInfo] {
       description: "one-way boolean flag",
       supports_partition: false,
     },
+    {
+      name: "ticket_lock",
+      description: "ticket-based mutual exclusion lock",
+      supports_partition: false,
+    },
   ]
 }
 

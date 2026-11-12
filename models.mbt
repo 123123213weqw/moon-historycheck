@@ -1036,5 +1036,42 @@ fn transition(model : Model, state : Value, op : Operation) -> Value? {
           }
         _ => None
       }
+    TicketLock =>
+      match (state, field(op.input, "type")) {
+        // Ticket lock: state is the currently-held ticket number (or
+        // -1 for free). Acquire(n) succeeds only when free or when n is
+        // the next ticket (n == held + 1); release(n) succeeds only
+        // from the holder.
+        (Number(held), String("acquire")) => {
+          let ticket = match field(op.input, "ticket") {
+            Number(t) => t
+            _ => -999.0
+          }
+          if op.output == String("ok") {
+            if held < 0.0 || ticket == held + 1.0 {
+              Some(Number(ticket))
+            } else {
+              None
+            }
+          } else if op.output == String("blocked") {
+            // Blocked acquire leaves state unchanged.
+            Some(state)
+          } else {
+            None
+          }
+        }
+        (Number(held), String("release")) => {
+          let ticket = match field(op.input, "ticket") {
+            Number(t) => t
+            _ => -999.0
+          }
+          if op.output == String("ok") && ticket == held {
+            Some(Number(-1.0))
+          } else {
+            None
+          }
+        }
+        _ => None
+      }
   }
 }

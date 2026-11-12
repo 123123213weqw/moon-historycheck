@@ -83,7 +83,7 @@ test "models operation lists all 24 with partition flags" {
     Array(list) => list
     _ => abort("models did not answer an array")
   }
-  assert_eq(items.length(), 24)
+  assert_eq(items.length(), 25)
   // Partition-capable models are exactly the three.
   let partitionable = items.filter(entry => {
     match field(entry, "supports_partition") {
@@ -111,7 +111,45 @@ test "models catalog matches the enum's model_name spellings" {
   // and the partition-marked ones.
   assert_eq(catalog[0], "register")
   assert_eq(catalog[23], "flag")
+  assert_eq(catalog[24], "ticket_lock")
   assert_eq(catalog.contains("kv_register"), true)
   assert_eq(catalog.contains("lww_map"), true)
   assert_eq(catalog.contains("map"), true)
+}
+
+///|
+test "ticket_lock rejects interleaving and accepts handoff" {
+  // Handoff: 0 acquires, 0 releases, 1 acquires (next ticket), 1 releases.
+  let handoff = run(
+    from_json(
+      @json.parse(
+        "{\"model\":\"ticket_lock\",\"initial\":-1,\"operations\":[" +
+        "{\"id\":\"a\",\"client\":\"c1\",\"call\":1,\"return\":2,\"input\":{\"type\":\"acquire\",\"ticket\":0},\"output\":\"ok\"}," +
+        "{\"id\":\"b\",\"client\":\"c1\",\"call\":3,\"return\":4,\"input\":{\"type\":\"release\",\"ticket\":0},\"output\":\"ok\"}," +
+        "{\"id\":\"c\",\"client\":\"c1\",\"call\":5,\"return\":6,\"input\":{\"type\":\"acquire\",\"ticket\":1},\"output\":\"ok\"}," +
+        "{\"id\":\"d\",\"client\":\"c1\",\"call\":7,\"return\":8,\"input\":{\"type\":\"release\",\"ticket\":1},\"output\":\"ok\"}]}",
+      ),
+    ),
+  )
+  let verdict = match field(handoff, "verdict") {
+    String(s) => s
+    _ => "bad"
+  }
+  assert_eq(verdict, "linearizable")
+
+  // Non-owner release: 0 acquires, 1 tries to release - must fail.
+  let stolen = run(
+    from_json(
+      @json.parse(
+        "{\"model\":\"ticket_lock\",\"initial\":-1,\"operations\":[" +
+        "{\"id\":\"a\",\"client\":\"c1\",\"call\":1,\"return\":2,\"input\":{\"type\":\"acquire\",\"ticket\":0},\"output\":\"ok\"}," +
+        "{\"id\":\"b\",\"client\":\"c1\",\"call\":3,\"return\":4,\"input\":{\"type\":\"release\",\"ticket\":1},\"output\":\"ok\"}]}",
+      ),
+    ),
+  )
+  let verdict2 = match field(stolen, "verdict") {
+    String(s) => s
+    _ => "bad"
+  }
+  assert_eq(verdict2, "non_linearizable")
 }
