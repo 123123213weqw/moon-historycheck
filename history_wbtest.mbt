@@ -83,7 +83,7 @@ test "models operation lists every model with partition flags" {
     Array(list) => list
     _ => abort("models did not answer an array")
   }
-  assert_eq(items.length(), 26)
+  assert_eq(items.length(), 27)
   // Partition-capable models are exactly the three.
   let partitionable = items.filter(entry => {
     match field(entry, "supports_partition") {
@@ -113,6 +113,7 @@ test "models catalog matches the enum's model_name spellings" {
   assert_eq(catalog[23], "flag")
   assert_eq(catalog[24], "ticket_lock")
   assert_eq(catalog[25], "barrier")
+  assert_eq(catalog[26], "versioned_register")
   assert_eq(catalog.contains("kv_register"), true)
   assert_eq(catalog.contains("lww_map"), true)
   assert_eq(catalog.contains("map"), true)
@@ -190,4 +191,56 @@ test "barrier releases concurrent waiters at open" {
     _ => "bad"
   }
   assert_eq(verdict2, "non_linearizable")
+}
+
+///|
+test "versioned_register hands out each version exactly once" {
+  // A read racing the write observes the old pair; the later read the new.
+  let raced = run(
+    from_json(
+      @json.parse(
+        "{\"model\":\"versioned_register\",\"initial\":{\"value\":0,\"version\":0},\"operations\":[" +
+        "{\"id\":\"w\",\"client\":\"a\",\"call\":1,\"return\":4,\"input\":{\"type\":\"write\",\"value\":1},\"output\":1}," +
+        "{\"id\":\"r1\",\"client\":\"b\",\"call\":2,\"return\":3,\"input\":{\"type\":\"read\"},\"output\":{\"value\":0,\"version\":0}}," +
+        "{\"id\":\"r2\",\"client\":\"c\",\"call\":5,\"return\":6,\"input\":{\"type\":\"read\"},\"output\":{\"value\":1,\"version\":1}}]}",
+      ),
+    ),
+  )
+  let verdict = match field(raced, "verdict") {
+    String(s) => s
+    _ => "bad"
+  }
+  assert_eq(verdict, "linearizable")
+
+  // A read that finishes before the write starts cannot claim version 1.
+  let premature = run(
+    from_json(
+      @json.parse(
+        "{\"model\":\"versioned_register\",\"initial\":{\"value\":0,\"version\":0},\"operations\":[" +
+        "{\"id\":\"r\",\"client\":\"b\",\"call\":1,\"return\":2,\"input\":{\"type\":\"read\"},\"output\":{\"value\":1,\"version\":1}}," +
+        "{\"id\":\"w\",\"client\":\"a\",\"call\":3,\"return\":4,\"input\":{\"type\":\"write\",\"value\":1},\"output\":1}]}",
+      ),
+    ),
+  )
+  let verdict2 = match field(premature, "verdict") {
+    String(s) => s
+    _ => "bad"
+  }
+  assert_eq(verdict2, "non_linearizable")
+
+  // Two writes cannot both claim version 1: versions are exclusive.
+  let duplicated = run(
+    from_json(
+      @json.parse(
+        "{\"model\":\"versioned_register\",\"initial\":{\"value\":0,\"version\":0},\"operations\":[" +
+        "{\"id\":\"w1\",\"client\":\"a\",\"call\":1,\"return\":2,\"input\":{\"type\":\"write\",\"value\":5},\"output\":1}," +
+        "{\"id\":\"w2\",\"client\":\"b\",\"call\":3,\"return\":4,\"input\":{\"type\":\"write\",\"value\":7},\"output\":1}]}",
+      ),
+    ),
+  )
+  let verdict3 = match field(duplicated, "verdict") {
+    String(s) => s
+    _ => "bad"
+  }
+  assert_eq(verdict3, "non_linearizable")
 }

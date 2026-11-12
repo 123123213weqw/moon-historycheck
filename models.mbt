@@ -1092,5 +1092,44 @@ fn transition(model : Model, state : Value, op : Operation) -> Value? {
           }
         _ => None
       }
+    VersionedRegister =>
+      match (state, field(op.input, "type")) {
+        // Each write claims the next version and reports it; the version
+        // sequence is the observable proof that writes serialized.
+        (Object(reg), String("write")) => {
+          let version = match reg.get("version") {
+            Some(Number(n)) => n
+            _ => 0.0
+          }
+          let next = version + 1.0
+          if op.output == Number(next) &&
+            !next.is_nan() &&
+            !next.is_inf() &&
+            next <= 9007199254740991.0 {
+            Some(
+              record([
+                ("value", field(op.input, "value")),
+                ("version", Number(next)),
+              ]),
+            )
+          } else {
+            None
+          }
+        }
+        (Object(reg), String("read")) => {
+          let value = reg.get("value").unwrap_or(Null)
+          let version = match reg.get("version") {
+            Some(Number(n)) => n
+            _ => 0.0
+          }
+          if op.output ==
+            record([("value", value), ("version", Number(version))]) {
+            Some(state)
+          } else {
+            None
+          }
+        }
+        _ => None
+      }
   }
 }

@@ -140,6 +140,11 @@ pub fn list_models() -> Array[ModelInfo] {
       description: "one-shot distributed barrier",
       supports_partition: false,
     },
+    {
+      name: "versioned_register",
+      description: "register with per-write version numbers",
+      supports_partition: false,
+    },
   ]
 }
 

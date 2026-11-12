@@ -27,6 +27,7 @@ pub(all) enum Model {
   Flag
   TicketLock
   Barrier
+  VersionedRegister
 }
 
 ///|
@@ -78,6 +79,7 @@ fn model_name(model : Model) -> String {
     Flag => "flag"
     TicketLock => "ticket_lock"
     Barrier => "barrier"
+    VersionedRegister => "versioned_register"
   }
 }
 
@@ -358,6 +360,18 @@ fn validate_input(
         "open" => fields_only(input, ["type"])
         _ => raise HistoryError(id + ": unsupported barrier operation: " + kind)
       }
+    VersionedRegister =>
+      match kind {
+        "write" => {
+          fields_only(input, ["type", "value"])
+          ignore(required(input, "value"))
+        }
+        "read" => fields_only(input, ["type"])
+        _ =>
+          raise HistoryError(
+            id + ": unsupported versioned_register operation: " + kind,
+          )
+      }
   }
 }
 
@@ -399,6 +413,7 @@ fn parse_history_value(request : Value) -> History raise HistoryError {
     "flag" => Flag
     "ticket_lock" => TicketLock
     "barrier" => Barrier
+    "versioned_register" => VersionedRegister
     name => raise HistoryError("unsupported model: " + name)
   }
   let initial = required(request, "initial")
@@ -490,6 +505,19 @@ fn parse_history_value(request : Value) -> History raise HistoryError {
   }
   if model == Barrier {
     ignore(boolean(initial))
+  }
+  if model == VersionedRegister {
+    match initial {
+      Object(reg) => {
+        if !reg.contains("value") {
+          raise HistoryError("versioned_register initial requires value")
+        }
+        if reg.contains("version") {
+          ignore(ordinal(reg["version"]))
+        }
+      }
+      _ => raise HistoryError("versioned_register initial must be an object")
+    }
   }
   if model == LwwRegister && initial != Null {
     let reg = object(initial)

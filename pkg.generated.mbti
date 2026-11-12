@@ -65,6 +65,7 @@ pub(all) enum Model {
   Flag
   TicketLock
   Barrier
+  VersionedRegister
 }
 pub fn Model::equal(Self, Self) -> Bool
 pub fn Model::not_equal(Self, Self) -> Bool
