@@ -64,6 +64,7 @@ pub(all) enum Model {
   OrSet
   Flag
   TicketLock
+  Barrier
 }
 pub fn Model::equal(Self, Self) -> Bool
 pub fn Model::not_equal(Self, Self) -> Bool

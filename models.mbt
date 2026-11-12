@@ -1073,5 +1073,24 @@ fn transition(model : Model, state : Value, op : Operation) -> Value? {
         }
         _ => None
       }
+    Barrier =>
+      match (state, field(op.input, "type")) {
+        // A closed barrier blocks every waiter: a completed wait can only
+        // linearize once the barrier has opened.
+        (Bool(opened), String("wait")) =>
+          if opened && op.output == String("ok") {
+            Some(state)
+          } else {
+            None
+          }
+        // Opening is idempotent: an already-open barrier stays open.
+        (Bool(_), String("open")) =>
+          if op.output == String("ok") {
+            Some(Bool(true))
+          } else {
+            None
+          }
+        _ => None
+      }
   }
 }

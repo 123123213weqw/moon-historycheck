@@ -19,10 +19,10 @@ pub(all) struct ModelInfo {
 pub extend ModelInfo with @debug.Debug::{to_repr}
 
 ///|
-/// List every sequential model the checker supports: 24 entries in a
-/// stable order, with the partition-capable models marked. This is the
-/// machine-readable form of the README's model table - a caller does
-/// not need to read documentation to know what `model` strings the
+/// List every sequential model the checker supports in a stable order,
+/// with the partition-capable models marked. This is the
+/// machine-readable form of the README's model table - a caller does not
+/// need to read documentation to know what `model` strings the
 /// check operation accepts.
 pub fn list_models() -> Array[ModelInfo] {
   [
@@ -133,6 +133,11 @@ pub fn list_models() -> Array[ModelInfo] {
     {
       name: "ticket_lock",
       description: "ticket-based mutual exclusion lock",
+      supports_partition: false,
+    },
+    {
+      name: "barrier",
+      description: "one-shot distributed barrier",
       supports_partition: false,
     },
   ]
