@@ -1,4 +1,5 @@
 ///|
+#derive(Eq, @debug.Debug)
 pub(all) enum Model {
   Register
   KeyValue
@@ -24,9 +25,10 @@ pub(all) enum Model {
   LwwMap
   OrSet
   Flag
-} derive(Eq, @debug.Debug)
+}
 
 ///|
+#derive(Eq, @debug.Debug)
 pub(all) struct Operation {
   id : String
   client : String
@@ -35,14 +37,15 @@ pub(all) struct Operation {
   input : Value
   output : Value
   complete : Bool
-} derive(Eq, @debug.Debug)
+}
 
 ///|
+#derive(Eq, @debug.Debug)
 pub(all) struct History {
   model : Model
   initial : Value
   operations : Array[Operation]
-} derive(Eq, @debug.Debug)
+}
 
 ///|
 fn model_name(model : Model) -> String {

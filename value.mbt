@@ -1,4 +1,5 @@
 ///|
+#derive(Eq, @debug.Debug)
 pub(all) enum Value {
   Null
   Bool(Bool)
@@ -6,7 +7,7 @@ pub(all) enum Value {
   String(String)
   Array(Array[Value])
   Object(Map[String, Value])
-} derive(Eq, @debug.Debug)
+}
 
 ///|
 pub fn from_json(value : Json) -> Value {
@@ -69,9 +70,10 @@ fn lexical_compare(left : String, right : String) -> Int32 {
 }
 
 ///|
+#derive(@debug.Debug)
 pub(all) suberror HistoryError {
   HistoryError(String)
-} derive(@debug.Debug)
+}
 
 ///|
 fn object(value : Value) -> Map[String, Value] raise HistoryError {
