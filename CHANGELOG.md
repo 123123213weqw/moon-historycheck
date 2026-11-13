@@ -1,5 +1,37 @@
 # Changelog
 
+## 0.8.0 — 2026-11-13
+
+Twenty-eight sequential models, up from twenty-four at 0.7.0. Four new
+models join the checker, each with a distinct concurrency lesson:
+
+ticket_lock (model 25): ticket-based mutual exclusion. State is the
+currently-held ticket number; acquire(n) succeeds when free or when n
+is the next ticket; release(n) only from the holder. A blocked acquire
+leaves state unchanged, representing locks that fail rather than block.
+
+barrier (model 26): one-shot distributed barrier. open is idempotent;
+a completed wait can only linearize after open - a wait that returns
+before open violates real-time and the whole history is rejected.
+
+versioned_register (model 27): per-write version numbers. write
+returns the version it claims (previous + 1); read returns value and
+version. The write-output version sequence is the observable proof of
+write serialization; two writes claiming the same version cannot
+linearize.
+
+rw_register (model 28): concurrent reads with exclusive writers. read
+is pure (any number can overlap); write is get-and-set returning the
+exact prior state - two writes can never observe the same predecessor,
+so write exclusion is observable in the outputs.
+
+The models operation (new in this release) answers with the complete
+model catalog as machine-readable data: name, description, and
+supports_partition for exactly the three keyable models. The API test
+catalog grows to 28 entries; the hardcoded "24" in comments is gone.
+238 tests across js and native, zero warnings on 0.1.20261104.
+
+## 0.7.0
 ## 0.7.0 — 2026-11-03
 
 Registry version: 0.7.0. Twenty-four sequential models (adding the observed-remove set with per-tag add-wins and the one-way flag); the table-driven per-model oracle; randomized differential fuzzing; the 76-case malformed-input sweep; the 22-relation deterministic search-cost gate; serializer pinning; executed examples for every model; lww_map partitioning; the verification coverage matrix; and the deny-warn-aligned verify ladder.
