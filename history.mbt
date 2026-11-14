@@ -32,6 +32,7 @@ pub(all) enum Model {
   SetOfSets
   MultiPNCounter
   RegisterWithExpiry
+  FifoChannel
 }
 
 ///|
@@ -88,6 +89,7 @@ fn model_name(model : Model) -> String {
     SetOfSets => "set_of_sets"
     MultiPNCounter => "multi_pncounter"
     RegisterWithExpiry => "register_with_expiry"
+    FifoChannel => "fifo_channel"
   }
 }
 
@@ -452,6 +454,18 @@ fn validate_input(
             id + ": unsupported register_with_expiry operation: " + kind,
           )
       }
+    FifoChannel =>
+      match kind {
+        "send" => {
+          fields_only(input, ["type", "value"])
+          ignore(required(input, "value"))
+        }
+        "recv" => fields_only(input, ["type"])
+        _ =>
+          raise HistoryError(
+            id + ": unsupported fifo_channel operation: " + kind,
+          )
+      }
   }
 }
 
@@ -498,6 +512,7 @@ fn parse_history_value(request : Value) -> History raise HistoryError {
     "set_of_sets" => SetOfSets
     "multi_pncounter" => MultiPNCounter
     "register_with_expiry" => RegisterWithExpiry
+    "fifo_channel" => FifoChannel
     name => raise HistoryError("unsupported model: " + name)
   }
   let initial = required(request, "initial")
@@ -624,6 +639,10 @@ fn parse_history_value(request : Value) -> History raise HistoryError {
       ignore(object(regs["p"]))
       ignore(object(regs["n"]))
     }
+  }
+  if model == FifoChannel {
+    // The seed of a channel is its list of pending items.
+    ignore(array(initial))
   }
   if model == RegisterWithExpiry && initial != Null {
     let reg = object(initial)

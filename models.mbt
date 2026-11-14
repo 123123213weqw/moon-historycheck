@@ -2,6 +2,9 @@
 const BOUNDED_QUEUE_CAPACITY : Int32 = 3
 
 ///|
+const FIFO_CHANNEL_CAPACITY : Int32 = 2
+
+///|
 /// The two per-actor tables of one multi_pncounter key. A key that no
 /// operation has touched yet reads as two empty tables.
 fn multi_pncounter_tables(
@@ -1360,6 +1363,48 @@ fn transition(model : Model, state : Value, op : Operation) -> Value? {
             None
           }
         }
+        _ => None
+      }
+    FifoChannel =>
+      match state {
+        Array(items) =>
+          match field(op.input, "type") {
+            // A full channel refuses the send with false; the value never
+            // entered, so nothing else can be observed.
+            String("send") =>
+              if items.length() >= FIFO_CHANNEL_CAPACITY {
+                if op.output == Bool(false) {
+                  Some(state)
+                } else {
+                  None
+                }
+              } else if op.output != Bool(true) {
+                None
+              } else {
+                let next = items.copy()
+                next.push(field(op.input, "value"))
+                Some(Array(next))
+              }
+            // recv hands back the oldest item directly; an empty channel
+            // answers null.
+            String("recv") =>
+              if items.is_empty() {
+                if op.output == Null {
+                  Some(state)
+                } else {
+                  None
+                }
+              } else if op.output == items[0] {
+                let next : Array[Value] = []
+                for i in 1..<items.length() {
+                  next.push(items[i])
+                }
+                Some(Array(next))
+              } else {
+                None
+              }
+            _ => None
+          }
         _ => None
       }
   }

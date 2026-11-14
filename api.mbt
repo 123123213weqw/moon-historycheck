@@ -165,6 +165,11 @@ pub fn list_models() -> Array[ModelInfo] {
       description: "register whose value expires at a wall-clock instant",
       supports_partition: false,
     },
+    {
+      name: "fifo_channel",
+      description: "bounded FIFO channel with paired send/recv",
+      supports_partition: false,
+    },
   ]
 }
 

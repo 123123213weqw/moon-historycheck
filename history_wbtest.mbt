@@ -83,7 +83,7 @@ test "models operation lists every model with partition flags" {
     Array(list) => list
     _ => abort("models did not answer an array")
   }
-  assert_eq(items.length(), 31)
+  assert_eq(items.length(), 32)
   // Partition-capable models are exactly the four.
   let partitionable = items.filter(entry => {
     match field(entry, "supports_partition") {
@@ -118,6 +118,7 @@ test "models catalog matches the enum's model_name spellings" {
   assert_eq(catalog[28], "set_of_sets")
   assert_eq(catalog[29], "multi_pncounter")
   assert_eq(catalog[30], "register_with_expiry")
+  assert_eq(catalog[31], "fifo_channel")
   assert_eq(catalog.contains("kv_register"), true)
   assert_eq(catalog.contains("lww_map"), true)
   assert_eq(catalog.contains("map"), true)
@@ -464,6 +465,64 @@ test "register_with_expiry blinds readers at the expiry instant" {
     ),
   )
   let verdict3 = match field(stale, "verdict") {
+    String(s) => s
+    _ => "bad"
+  }
+  assert_eq(verdict3, "non_linearizable")
+}
+
+///|
+test "fifo_channel pairs sends with recv and refuses when full" {
+  // A recv straddling the first send hands the value back; the channel
+  // then holds two items and refuses a third send.
+  let paired = run(
+    from_json(
+      @json.parse(
+        "{\"model\":\"fifo_channel\",\"initial\":[],\"operations\":[" +
+        "{\"id\":\"s1\",\"client\":\"a\",\"call\":1,\"return\":4,\"input\":{\"type\":\"send\",\"value\":1},\"output\":true}," +
+        "{\"id\":\"r1\",\"client\":\"b\",\"call\":2,\"return\":3,\"input\":{\"type\":\"recv\"},\"output\":1}," +
+        "{\"id\":\"s2\",\"client\":\"a\",\"call\":5,\"return\":6,\"input\":{\"type\":\"send\",\"value\":2},\"output\":true}," +
+        "{\"id\":\"s3\",\"client\":\"a\",\"call\":7,\"return\":8,\"input\":{\"type\":\"send\",\"value\":3},\"output\":true}," +
+        "{\"id\":\"s4\",\"client\":\"a\",\"call\":9,\"return\":10,\"input\":{\"type\":\"send\",\"value\":4},\"output\":false}]}",
+      ),
+    ),
+  )
+  let verdict = match field(paired, "verdict") {
+    String(s) => s
+    _ => "bad"
+  }
+  assert_eq(verdict, "linearizable")
+
+  // A recv that completes before any send starts cannot hand back a
+  // value: the channel was empty for its whole interval.
+  let phantom_recv = run(
+    from_json(
+      @json.parse(
+        "{\"model\":\"fifo_channel\",\"initial\":[],\"operations\":[" +
+        "{\"id\":\"r\",\"client\":\"b\",\"call\":1,\"return\":2,\"input\":{\"type\":\"recv\"},\"output\":1}," +
+        "{\"id\":\"s\",\"client\":\"a\",\"call\":3,\"return\":4,\"input\":{\"type\":\"send\",\"value\":1},\"output\":true}]}",
+      ),
+    ),
+  )
+  let verdict2 = match field(phantom_recv, "verdict") {
+    String(s) => s
+    _ => "bad"
+  }
+  assert_eq(verdict2, "non_linearizable")
+
+  // Three sends all reporting true cannot serialize into a two-slot
+  // channel: the third send always finds it full.
+  let overflow = run(
+    from_json(
+      @json.parse(
+        "{\"model\":\"fifo_channel\",\"initial\":[],\"operations\":[" +
+        "{\"id\":\"s1\",\"client\":\"a\",\"call\":1,\"return\":2,\"input\":{\"type\":\"send\",\"value\":1},\"output\":true}," +
+        "{\"id\":\"s2\",\"client\":\"b\",\"call\":3,\"return\":4,\"input\":{\"type\":\"send\",\"value\":2},\"output\":true}," +
+        "{\"id\":\"s3\",\"client\":\"c\",\"call\":5,\"return\":6,\"input\":{\"type\":\"send\",\"value\":3},\"output\":true}]}",
+      ),
+    ),
+  )
+  let verdict3 = match field(overflow, "verdict") {
     String(s) => s
     _ => "bad"
   }
