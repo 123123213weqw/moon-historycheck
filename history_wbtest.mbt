@@ -83,7 +83,7 @@ test "models operation lists every model with partition flags" {
     Array(list) => list
     _ => abort("models did not answer an array")
   }
-  assert_eq(items.length(), 28)
+  assert_eq(items.length(), 29)
   // Partition-capable models are exactly the three.
   let partitionable = items.filter(entry => {
     match field(entry, "supports_partition") {
@@ -115,6 +115,7 @@ test "models catalog matches the enum's model_name spellings" {
   assert_eq(catalog[25], "barrier")
   assert_eq(catalog[26], "versioned_register")
   assert_eq(catalog[27], "rw_register")
+  assert_eq(catalog[28], "set_of_sets")
   assert_eq(catalog.contains("kv_register"), true)
   assert_eq(catalog.contains("lww_map"), true)
   assert_eq(catalog.contains("map"), true)
@@ -298,4 +299,58 @@ test "rw_register allows concurrent reads but exclusive writes" {
     _ => "bad"
   }
   assert_eq(verdict3, "linearizable")
+}
+
+///|
+test "set_of_sets admits whole subsets and rejects phantom members" {
+  // A contains racing an add of the same subset may linearize after it;
+  // the later remove then applies to the added subset.
+  let admitted = run(
+    from_json(
+      @json.parse(
+        "{\"model\":\"set_of_sets\",\"initial\":[],\"operations\":[" +
+        "{\"id\":\"a1\",\"client\":\"a\",\"call\":1,\"return\":4,\"input\":{\"type\":\"add_set\",\"set\":[1,2]},\"output\":\"ok\"}," +
+        "{\"id\":\"c1\",\"client\":\"b\",\"call\":2,\"return\":3,\"input\":{\"type\":\"contains_set\",\"set\":[1,2]},\"output\":true}," +
+        "{\"id\":\"r1\",\"client\":\"a\",\"call\":5,\"return\":6,\"input\":{\"type\":\"remove_set\",\"set\":[1,2]},\"output\":true}]}",
+      ),
+    ),
+  )
+  let verdict = match field(admitted, "verdict") {
+    String(s) => s
+    _ => "bad"
+  }
+  assert_eq(verdict, "linearizable")
+
+  // A removal reporting success for a subset that was never added cannot
+  // replay: no linearization point holds [7].
+  let phantom_removal = run(
+    from_json(
+      @json.parse(
+        "{\"model\":\"set_of_sets\",\"initial\":[],\"operations\":[" +
+        "{\"id\":\"r\",\"client\":\"a\",\"call\":1,\"return\":2,\"input\":{\"type\":\"remove_set\",\"set\":[7]},\"output\":true}]}",
+      ),
+    ),
+  )
+  let verdict2 = match field(phantom_removal, "verdict") {
+    String(s) => s
+    _ => "bad"
+  }
+  assert_eq(verdict2, "non_linearizable")
+
+  // Membership of a different subset returning true is likewise impossible:
+  // only [1] was ever added, and subsets compare structurally.
+  let phantom_member = run(
+    from_json(
+      @json.parse(
+        "{\"model\":\"set_of_sets\",\"initial\":[],\"operations\":[" +
+        "{\"id\":\"a\",\"client\":\"a\",\"call\":1,\"return\":4,\"input\":{\"type\":\"add_set\",\"set\":[1]},\"output\":\"ok\"}," +
+        "{\"id\":\"c\",\"client\":\"b\",\"call\":2,\"return\":3,\"input\":{\"type\":\"contains_set\",\"set\":[2]},\"output\":true}]}",
+      ),
+    ),
+  )
+  let verdict3 = match field(phantom_member, "verdict") {
+    String(s) => s
+    _ => "bad"
+  }
+  assert_eq(verdict3, "non_linearizable")
 }

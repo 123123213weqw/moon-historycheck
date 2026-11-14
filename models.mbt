@@ -1146,5 +1146,50 @@ fn transition(model : Model, state : Value, op : Operation) -> Value? {
           }
         _ => None
       }
+    SetOfSets =>
+      match state {
+        Array(sets) =>
+          match field(op.input, "type") {
+            // Membership and removal compare whole subsets with structural
+            // equality: adding [1,2] twice keeps one copy.
+            String("add_set") =>
+              if op.output != String("ok") {
+                None
+              } else if sets.contains(field(op.input, "set")) {
+                Some(state)
+              } else {
+                let next = sets.copy()
+                next.push(field(op.input, "set"))
+                Some(Array(next))
+              }
+            String("remove_set") => {
+              let target = field(op.input, "set")
+              if op.output != Bool(sets.contains(target)) {
+                None
+              } else if sets.contains(target) {
+                let next : Array[Value] = []
+                let mut skipped = false
+                for item in sets {
+                  if !skipped && item == target {
+                    skipped = true
+                  } else {
+                    next.push(item)
+                  }
+                }
+                Some(Array(next))
+              } else {
+                Some(state)
+              }
+            }
+            String("contains_set") =>
+              if op.output == Bool(sets.contains(field(op.input, "set"))) {
+                Some(state)
+              } else {
+                None
+              }
+            _ => None
+          }
+        _ => None
+      }
   }
 }

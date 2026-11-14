@@ -29,6 +29,7 @@ pub(all) enum Model {
   Barrier
   VersionedRegister
   RwRegister
+  SetOfSets
 }
 
 ///|
@@ -82,6 +83,7 @@ fn model_name(model : Model) -> String {
     Barrier => "barrier"
     VersionedRegister => "versioned_register"
     RwRegister => "rw_register"
+    SetOfSets => "set_of_sets"
   }
 }
 
@@ -386,6 +388,20 @@ fn validate_input(
             id + ": unsupported rw_register operation: " + kind,
           )
       }
+    SetOfSets =>
+      match kind {
+        // The element of a set_of_sets is itself a set, so the payload
+        // must be an array: membership is structural equality over whole
+        // subsets, never over their members.
+        "add_set" | "remove_set" | "contains_set" => {
+          fields_only(input, ["type", "set"])
+          ignore(array(required(input, "set")))
+        }
+        _ =>
+          raise HistoryError(
+            id + ": unsupported set_of_sets operation: " + kind,
+          )
+      }
   }
 }
 
@@ -429,6 +445,7 @@ fn parse_history_value(request : Value) -> History raise HistoryError {
     "barrier" => Barrier
     "versioned_register" => VersionedRegister
     "rw_register" => RwRegister
+    "set_of_sets" => SetOfSets
     name => raise HistoryError("unsupported model: " + name)
   }
   let initial = required(request, "initial")
@@ -538,6 +555,12 @@ fn parse_history_value(request : Value) -> History raise HistoryError {
     let reg = object(initial)
     ignore(reg.get("value").unwrap_or(Null))
     ignore(ordinal(reg["at"]))
+  }
+  if model == SetOfSets {
+    // Every seed element must itself be a set.
+    for entry in array(initial) {
+      ignore(array(entry))
+    }
   }
   if model == LwwSet {
     let sets = object(initial)

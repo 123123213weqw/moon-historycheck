@@ -150,6 +150,11 @@ pub fn list_models() -> Array[ModelInfo] {
       description: "register with concurrent reads and exclusive writes",
       supports_partition: false,
     },
+    {
+      name: "set_of_sets",
+      description: "set whose elements are themselves sets",
+      supports_partition: false,
+    },
   ]
 }
 
