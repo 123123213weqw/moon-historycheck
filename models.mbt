@@ -1314,5 +1314,53 @@ fn transition(model : Model, state : Value, op : Operation) -> Value? {
           }
         _ => None
       }
+    RegisterWithExpiry =>
+      match (field(op.input, "type"), state) {
+        // A write is legal from any state and overwrites unconditionally:
+        // expiry never blocks a writer, it only blinds readers.
+        (String("write"), _) => {
+          let expires_at = match field(op.input, "expires_at") {
+            Number(n) => n
+            _ => -1.0
+          }
+          if op.output != String("ok") || expires_at < 0.0 {
+            None
+          } else {
+            Some(
+              record([
+                ("value", field(op.input, "value")),
+                ("expires_at", Number(expires_at)),
+              ]),
+            )
+          }
+        }
+        // An unwritten register reads as null however late the observer is.
+        (String("read"), Null) =>
+          if op.output == Null {
+            Some(state)
+          } else {
+            None
+          }
+        // Live strictly before the expiry instant; at the instant itself
+        // (and after) the register reads as expired.
+        (String("read"), Object(reg)) => {
+          let at = match field(op.input, "at") {
+            Number(n) => n
+            _ => -1.0
+          }
+          let value = reg.get("value").unwrap_or(Null)
+          let expires_at = match reg.get("expires_at") {
+            Some(Number(n)) => n
+            _ => -1.0
+          }
+          let want = if at < expires_at && at >= 0.0 { value } else { Null }
+          if op.output == want {
+            Some(state)
+          } else {
+            None
+          }
+        }
+        _ => None
+      }
   }
 }

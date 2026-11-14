@@ -160,6 +160,11 @@ pub fn list_models() -> Array[ModelInfo] {
       description: "multi-key positive-negative counter with per-actor tables",
       supports_partition: true,
     },
+    {
+      name: "register_with_expiry",
+      description: "register whose value expires at a wall-clock instant",
+      supports_partition: false,
+    },
   ]
 }
 

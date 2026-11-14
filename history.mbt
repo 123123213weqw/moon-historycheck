@@ -31,6 +31,7 @@ pub(all) enum Model {
   RwRegister
   SetOfSets
   MultiPNCounter
+  RegisterWithExpiry
 }
 
 ///|
@@ -86,6 +87,7 @@ fn model_name(model : Model) -> String {
     RwRegister => "rw_register"
     SetOfSets => "set_of_sets"
     MultiPNCounter => "multi_pncounter"
+    RegisterWithExpiry => "register_with_expiry"
   }
 }
 
@@ -426,6 +428,30 @@ fn validate_input(
             id + ": unsupported multi_pncounter operation: " + kind,
           )
       }
+    RegisterWithExpiry =>
+      match kind {
+        // Writes stamp an expiry; reads carry the instant they observe at,
+        // because liveness is judged against that instant, not the call.
+        "write" => {
+          fields_only(input, ["type", "value", "expires_at"])
+          ignore(required(input, "value"))
+          let expires_at = ordinal(required(input, "expires_at"))
+          if expires_at < 0.0 {
+            raise HistoryError(id + ": expires_at must not be negative")
+          }
+        }
+        "read" => {
+          fields_only(input, ["type", "at"])
+          let at = ordinal(required(input, "at"))
+          if at < 0.0 {
+            raise HistoryError(id + ": at must not be negative")
+          }
+        }
+        _ =>
+          raise HistoryError(
+            id + ": unsupported register_with_expiry operation: " + kind,
+          )
+      }
   }
 }
 
@@ -471,6 +497,7 @@ fn parse_history_value(request : Value) -> History raise HistoryError {
     "rw_register" => RwRegister
     "set_of_sets" => SetOfSets
     "multi_pncounter" => MultiPNCounter
+    "register_with_expiry" => RegisterWithExpiry
     name => raise HistoryError("unsupported model: " + name)
   }
   let initial = required(request, "initial")
@@ -597,6 +624,15 @@ fn parse_history_value(request : Value) -> History raise HistoryError {
       ignore(object(regs["p"]))
       ignore(object(regs["n"]))
     }
+  }
+  if model == RegisterWithExpiry && initial != Null {
+    let reg = object(initial)
+    if !reg.contains("value") || !reg.contains("expires_at") {
+      raise HistoryError(
+        "register_with_expiry initial requires value and expires_at",
+      )
+    }
+    ignore(ordinal(reg["expires_at"]))
   }
   if model == LwwSet {
     let sets = object(initial)

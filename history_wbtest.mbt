@@ -83,7 +83,7 @@ test "models operation lists every model with partition flags" {
     Array(list) => list
     _ => abort("models did not answer an array")
   }
-  assert_eq(items.length(), 30)
+  assert_eq(items.length(), 31)
   // Partition-capable models are exactly the four.
   let partitionable = items.filter(entry => {
     match field(entry, "supports_partition") {
@@ -117,6 +117,7 @@ test "models catalog matches the enum's model_name spellings" {
   assert_eq(catalog[27], "rw_register")
   assert_eq(catalog[28], "set_of_sets")
   assert_eq(catalog[29], "multi_pncounter")
+  assert_eq(catalog[30], "register_with_expiry")
   assert_eq(catalog.contains("kv_register"), true)
   assert_eq(catalog.contains("lww_map"), true)
   assert_eq(catalog.contains("map"), true)
@@ -408,6 +409,61 @@ test "multi_pncounter totals per key from merged actor tables" {
     ),
   )
   let verdict3 = match field(cross_key, "verdict") {
+    String(s) => s
+    _ => "bad"
+  }
+  assert_eq(verdict3, "non_linearizable")
+}
+
+///|
+test "register_with_expiry blinds readers at the expiry instant" {
+  // A read racing the write linearizes after it and observes the live
+  // value; a later read at the expiry instant itself observes expiration.
+  let expiring = run(
+    from_json(
+      @json.parse(
+        "{\"model\":\"register_with_expiry\",\"initial\":null,\"operations\":[" +
+        "{\"id\":\"w\",\"client\":\"a\",\"call\":1,\"return\":4,\"input\":{\"type\":\"write\",\"value\":1,\"expires_at\":10},\"output\":\"ok\"}," +
+        "{\"id\":\"r1\",\"client\":\"b\",\"call\":2,\"return\":3,\"input\":{\"type\":\"read\",\"at\":5},\"output\":1}," +
+        "{\"id\":\"r2\",\"client\":\"b\",\"call\":5,\"return\":6,\"input\":{\"type\":\"read\",\"at\":10},\"output\":null}]}",
+      ),
+    ),
+  )
+  let verdict = match field(expiring, "verdict") {
+    String(s) => s
+    _ => "bad"
+  }
+  assert_eq(verdict, "linearizable")
+
+  // A read that completes before any write starts cannot observe a value:
+  // the register was null for its whole interval.
+  let premature = run(
+    from_json(
+      @json.parse(
+        "{\"model\":\"register_with_expiry\",\"initial\":null,\"operations\":[" +
+        "{\"id\":\"r\",\"client\":\"b\",\"call\":1,\"return\":2,\"input\":{\"type\":\"read\",\"at\":5},\"output\":1}," +
+        "{\"id\":\"w\",\"client\":\"a\",\"call\":3,\"return\":4,\"input\":{\"type\":\"write\",\"value\":1,\"expires_at\":10},\"output\":\"ok\"}]}",
+      ),
+    ),
+  )
+  let verdict2 = match field(premature, "verdict") {
+    String(s) => s
+    _ => "bad"
+  }
+  assert_eq(verdict2, "non_linearizable")
+
+  // A read at the expiry instant claiming the value ignores expiration:
+  // at == expires_at is already expired, in every linearization.
+  let stale = run(
+    from_json(
+      @json.parse(
+        "{\"model\":\"register_with_expiry\",\"initial\":null,\"operations\":[" +
+        "{\"id\":\"w\",\"client\":\"a\",\"call\":1,\"return\":2,\"input\":{\"type\":\"write\",\"value\":1,\"expires_at\":10},\"output\":\"ok\"}," +
+        "{\"id\":\"r\",\"client\":\"b\",\"call\":3,\"return\":4,\"input\":{\"type\":\"read\",\"at\":10},\"output\":1}]}",
+      ),
+    ),
+  )
+  let verdict3 = match field(stale, "verdict") {
     String(s) => s
     _ => "bad"
   }
