@@ -33,6 +33,7 @@ pub(all) enum Model {
   MultiPNCounter
   RegisterWithExpiry
   FifoChannel
+  PriorityDeque
 }
 
 ///|
@@ -90,6 +91,7 @@ fn model_name(model : Model) -> String {
     MultiPNCounter => "multi_pncounter"
     RegisterWithExpiry => "register_with_expiry"
     FifoChannel => "fifo_channel"
+    PriorityDeque => "priority_deque"
   }
 }
 
@@ -466,6 +468,19 @@ fn validate_input(
             id + ": unsupported fifo_channel operation: " + kind,
           )
       }
+    PriorityDeque =>
+      match kind {
+        "push" => {
+          fields_only(input, ["type", "value", "priority"])
+          ignore(required(input, "value"))
+          ignore(ordinal(required(input, "priority")))
+        }
+        "pop_min" | "pop_max" => fields_only(input, ["type"])
+        _ =>
+          raise HistoryError(
+            id + ": unsupported priority_deque operation: " + kind,
+          )
+      }
   }
 }
 
@@ -513,6 +528,7 @@ fn parse_history_value(request : Value) -> History raise HistoryError {
     "multi_pncounter" => MultiPNCounter
     "register_with_expiry" => RegisterWithExpiry
     "fifo_channel" => FifoChannel
+    "priority_deque" => PriorityDeque
     name => raise HistoryError("unsupported model: " + name)
   }
   let initial = required(request, "initial")
@@ -640,8 +656,8 @@ fn parse_history_value(request : Value) -> History raise HistoryError {
       ignore(object(regs["n"]))
     }
   }
-  if model == FifoChannel {
-    // The seed of a channel is its list of pending items.
+  if model == FifoChannel || model == PriorityDeque {
+    // Channels and priority deques seed their pending items.
     ignore(array(initial))
   }
   if model == RegisterWithExpiry && initial != Null {

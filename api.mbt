@@ -170,6 +170,11 @@ pub fn list_models() -> Array[ModelInfo] {
       description: "bounded FIFO channel with paired send/recv",
       supports_partition: false,
     },
+    {
+      name: "priority_deque",
+      description: "double-ended priority queue with min and max extract",
+      supports_partition: false,
+    },
   ]
 }
 

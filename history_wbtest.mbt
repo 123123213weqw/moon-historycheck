@@ -83,7 +83,7 @@ test "models operation lists every model with partition flags" {
     Array(list) => list
     _ => abort("models did not answer an array")
   }
-  assert_eq(items.length(), 32)
+  assert_eq(items.length(), 33)
   // Partition-capable models are exactly the four.
   let partitionable = items.filter(entry => {
     match field(entry, "supports_partition") {
@@ -119,6 +119,7 @@ test "models catalog matches the enum's model_name spellings" {
   assert_eq(catalog[29], "multi_pncounter")
   assert_eq(catalog[30], "register_with_expiry")
   assert_eq(catalog[31], "fifo_channel")
+  assert_eq(catalog[32], "priority_deque")
   assert_eq(catalog.contains("kv_register"), true)
   assert_eq(catalog.contains("lww_map"), true)
   assert_eq(catalog.contains("map"), true)
@@ -527,4 +528,79 @@ test "fifo_channel pairs sends with recv and refuses when full" {
     _ => "bad"
   }
   assert_eq(verdict3, "non_linearizable")
+}
+
+///|
+test "priority_deque extracts both extremes with first-inserted tie bias" {
+  // A pop_min racing the first push linearizes after it and hands back
+  // that element; the later pop_max answers empty.
+  let drained = run(
+    from_json(
+      @json.parse(
+        "{\"model\":\"priority_deque\",\"initial\":[],\"operations\":[" +
+        "{\"id\":\"p\",\"client\":\"a\",\"call\":1,\"return\":6,\"input\":{\"type\":\"push\",\"value\":1,\"priority\":3},\"output\":\"ok\"}," +
+        "{\"id\":\"min\",\"client\":\"b\",\"call\":2,\"return\":5,\"input\":{\"type\":\"pop_min\"},\"output\":{\"value\":1}}," +
+        "{\"id\":\"max\",\"client\":\"b\",\"call\":7,\"return\":8,\"input\":{\"type\":\"pop_max\"},\"output\":{\"empty\":true}}]}",
+      ),
+    ),
+  )
+  let verdict = match field(drained, "verdict") {
+    String(s) => s
+    _ => "bad"
+  }
+  assert_eq(verdict, "linearizable")
+
+  // With priorities 5, 3, 5 the min is unique but the max tie goes to the
+  // first-inserted element; claiming the later tie cannot replay.
+  let ordered = run(
+    from_json(
+      @json.parse(
+        "{\"model\":\"priority_deque\",\"initial\":[],\"operations\":[" +
+        "{\"id\":\"p1\",\"client\":\"a\",\"call\":1,\"return\":2,\"input\":{\"type\":\"push\",\"value\":1,\"priority\":5},\"output\":\"ok\"}," +
+        "{\"id\":\"p2\",\"client\":\"a\",\"call\":3,\"return\":4,\"input\":{\"type\":\"push\",\"value\":2,\"priority\":3},\"output\":\"ok\"}," +
+        "{\"id\":\"p3\",\"client\":\"a\",\"call\":5,\"return\":6,\"input\":{\"type\":\"push\",\"value\":3,\"priority\":5},\"output\":\"ok\"}," +
+        "{\"id\":\"min\",\"client\":\"b\",\"call\":7,\"return\":8,\"input\":{\"type\":\"pop_min\"},\"output\":{\"value\":2}}]}",
+      ),
+    ),
+  )
+  let verdict2 = match field(ordered, "verdict") {
+    String(s) => s
+    _ => "bad"
+  }
+  assert_eq(verdict2, "linearizable")
+
+  // pop_max claiming the second of two tied maxima violates the
+  // first-inserted tie bias: only the first 5 is extractable.
+  let late_tie = run(
+    from_json(
+      @json.parse(
+        "{\"model\":\"priority_deque\",\"initial\":[],\"operations\":[" +
+        "{\"id\":\"p1\",\"client\":\"a\",\"call\":1,\"return\":2,\"input\":{\"type\":\"push\",\"value\":1,\"priority\":5},\"output\":\"ok\"}," +
+        "{\"id\":\"p2\",\"client\":\"a\",\"call\":3,\"return\":4,\"input\":{\"type\":\"push\",\"value\":2,\"priority\":3},\"output\":\"ok\"}," +
+        "{\"id\":\"p3\",\"client\":\"a\",\"call\":5,\"return\":6,\"input\":{\"type\":\"push\",\"value\":3,\"priority\":5},\"output\":\"ok\"}," +
+        "{\"id\":\"max\",\"client\":\"b\",\"call\":7,\"return\":8,\"input\":{\"type\":\"pop_max\"},\"output\":{\"value\":3}}]}",
+      ),
+    ),
+  )
+  let verdict3 = match field(late_tie, "verdict") {
+    String(s) => s
+    _ => "bad"
+  }
+  assert_eq(verdict3, "non_linearizable")
+
+  // A pop_min on an empty deque cannot hand back a value: nothing was
+  // ever pushed.
+  let phantom = run(
+    from_json(
+      @json.parse(
+        "{\"model\":\"priority_deque\",\"initial\":[],\"operations\":[" +
+        "{\"id\":\"min\",\"client\":\"b\",\"call\":1,\"return\":2,\"input\":{\"type\":\"pop_min\"},\"output\":{\"value\":9}}]}",
+      ),
+    ),
+  )
+  let verdict4 = match field(phantom, "verdict") {
+    String(s) => s
+    _ => "bad"
+  }
+  assert_eq(verdict4, "non_linearizable")
 }
