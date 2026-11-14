@@ -68,6 +68,7 @@ pub(all) enum Model {
   VersionedRegister
   RwRegister
   SetOfSets
+  MultiPNCounter
 }
 pub fn Model::equal(Self, Self) -> Bool
 pub fn Model::not_equal(Self, Self) -> Bool

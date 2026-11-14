@@ -55,3 +55,51 @@ test "unsafe model partition request is rejected" {
     String("invalid_input"),
   )
 }
+
+///|
+test "multi_pncounter partitions into per-key sub-histories" {
+  let result = from_json(
+    execute({
+      "model": "multi_pncounter",
+      "partition": true,
+      "initial": {},
+      "operations": [
+        {
+          "id": "ax",
+          "client": "a",
+          "call": 1,
+          "return": 4,
+          "input": { "type": "increment", "key": "x", "who": "alice", "by": 2 },
+          "output": "ok",
+        },
+        {
+          "id": "by",
+          "client": "b",
+          "call": 2,
+          "return": 3,
+          "input": { "type": "increment", "key": "y", "who": "bob", "by": 5 },
+          "output": "ok",
+        },
+        {
+          "id": "rx",
+          "client": "a",
+          "call": 5,
+          "return": 6,
+          "input": { "type": "read", "key": "x" },
+          "output": 2,
+        },
+        {
+          "id": "ry",
+          "client": "b",
+          "call": 7,
+          "return": 8,
+          "input": { "type": "read", "key": "y" },
+          "output": 5,
+        },
+      ],
+    }),
+  )
+  assert_eq(field(result, "verdict"), String("linearizable"))
+  assert_eq(field(result, "partitioned"), Bool(true))
+  assert_eq(field(result, "witness_verified"), Bool(true))
+}

@@ -61,13 +61,14 @@ fixture writer-excludes-readers caught immediately.
 
 ## Partition family
 
-kv_register, map and lww_map are per-key independent, so their histories
+kv_register, map, lww_map and multi_pncounter are per-key independent, so their histories
 decompose: each key's operations form a sub-history checked in isolation,
 the aggregate budget is shared, and the merged witness is re-verified
 against the full history. kv_register strips the key (each object becomes a
-plain register); map and lww_map keep the key because their commands name
+plain register); map, lww_map and multi_pncounter keep the key because their commands name
 it. lww_map keys seed from their own entry ({value, at}) or an empty object
-when never written — the first cut seeded Null, which broke every get on a
+when never written; multi_pncounter keys seed from their own entry ({p, n})
+or two empty tables when never touched — the first cut seeded Null, which broke every get on a
 never-written key. The oracle cross-checks 360 partition equivalences
 (120 each for kv_register, map and lww_map).
 

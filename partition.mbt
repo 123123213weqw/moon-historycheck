@@ -5,9 +5,10 @@ fn check_partitioned(
 ) -> Value raise HistoryError {
   if history.model != KeyValue &&
     history.model != Mapping &&
-    history.model != LwwMap {
+    history.model != LwwMap &&
+    history.model != MultiPNCounter {
     raise HistoryError(
-      "partition is only supported by kv_register, map and lww_map",
+      "partition is only supported by kv_register, map, lww_map and multi_pncounter",
     )
   }
   if !pending_ids(history).is_empty() {
@@ -60,6 +61,12 @@ fn check_partitioned(
       match initial.get(key) {
         Some(entry) => entry
         None => Object(Map([]))
+      }
+    } else if history.model == MultiPNCounter {
+      // A key no operation touched reads as two empty tables.
+      match initial.get(key) {
+        Some(entry) => entry
+        None => record([("p", Object(Map([]))), ("n", Object(Map([])))])
       }
     } else {
       let seed : Map[String, Value] = Map([])

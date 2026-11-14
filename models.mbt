@@ -2,6 +2,67 @@
 const BOUNDED_QUEUE_CAPACITY : Int32 = 3
 
 ///|
+/// The two per-actor tables of one multi_pncounter key. A key that no
+/// operation has touched yet reads as two empty tables.
+fn multi_pncounter_tables(
+  entries : Map[String, Value],
+  key : String,
+) -> (Map[String, Value], Map[String, Value]) {
+  match entries.get(key) {
+    Some(Object(regs)) =>
+      match (regs.get("p"), regs.get("n")) {
+        (Some(Object(p)), Some(Object(n))) => (p, n)
+        _ => (Map([]), Map([]))
+      }
+    _ => (Map([]), Map([]))
+  }
+}
+
+///|
+/// Apply one multi_pncounter increment (positive) or decrement to the
+/// named key's table, creating the key when absent.
+fn multi_pncounter_bump(
+  entries : Map[String, Value],
+  key : String,
+  who : String,
+  by : Double,
+  positive : Bool,
+) -> Value? {
+  let (p, n) = multi_pncounter_tables(entries, key)
+  if positive {
+    let current = match p.get(who) {
+      Some(Number(v)) => v
+      _ => 0.0
+    }
+    let next = current + by
+    if next.is_nan() || next.is_inf() || next.abs() > 9007199254740991.0 {
+      None
+    } else {
+      let next_p = p.copy()
+      next_p[who] = Number(next)
+      let result = entries.copy()
+      result[key] = record([("p", Object(next_p)), ("n", Object(n))])
+      Some(Object(result))
+    }
+  } else {
+    let current = match n.get(who) {
+      Some(Number(v)) => v
+      _ => 0.0
+    }
+    let next = current + by
+    if next.is_nan() || next.is_inf() || next.abs() > 9007199254740991.0 {
+      None
+    } else {
+      let next_n = n.copy()
+      next_n[who] = Number(next)
+      let result = entries.copy()
+      result[key] = record([("p", Object(p)), ("n", Object(next_n))])
+      Some(Object(result))
+    }
+  }
+}
+
+///|
 fn register_transition(state : Value, input : Value, output : Value) -> Value? {
   match field(input, "type") {
     String("read") => if output == state { Some(state) } else { None }
@@ -1187,6 +1248,68 @@ fn transition(model : Model, state : Value, op : Operation) -> Value? {
               } else {
                 None
               }
+            _ => None
+          }
+        _ => None
+      }
+    MultiPNCounter =>
+      match state {
+        Object(entries) =>
+          match field(op.input, "type") {
+            String("increment") | String("decrement") => {
+              let key = match field(op.input, "key") {
+                String(k) => k
+                _ => ""
+              }
+              let who = match field(op.input, "who") {
+                String(name) => name
+                _ => ""
+              }
+              let by = match field(op.input, "by") {
+                Number(v) => v
+                _ => -1.0
+              }
+              if op.output != String("ok") || key == "" || who == "" || by < 1.0 {
+                None
+              } else {
+                multi_pncounter_bump(
+                  entries,
+                  key,
+                  who,
+                  by,
+                  field(op.input, "type") == String("increment"),
+                )
+              }
+            }
+            String("read") => {
+              let key = match field(op.input, "key") {
+                String(k) => k
+                _ => ""
+              }
+              if key == "" {
+                None
+              } else {
+                let (p, n) = multi_pncounter_tables(entries, key)
+                let mut total = 0.0
+                for _, v in p {
+                  match v {
+                    Number(x) => total += x
+                    _ => ()
+                  }
+                }
+                for _, v in n {
+                  match v {
+                    Number(x) => total -= x
+                    _ => ()
+                  }
+                }
+                if op.output == Number(total) {
+                  Some(state)
+                } else {
+                  None
+                }
+              }
+            }
             _ => None
           }
         _ => None

@@ -30,6 +30,7 @@ pub(all) enum Model {
   VersionedRegister
   RwRegister
   SetOfSets
+  MultiPNCounter
 }
 
 ///|
@@ -84,6 +85,7 @@ fn model_name(model : Model) -> String {
     VersionedRegister => "versioned_register"
     RwRegister => "rw_register"
     SetOfSets => "set_of_sets"
+    MultiPNCounter => "multi_pncounter"
   }
 }
 
@@ -402,6 +404,28 @@ fn validate_input(
             id + ": unsupported set_of_sets operation: " + kind,
           )
       }
+    MultiPNCounter =>
+      match kind {
+        // Every increment names its key, its actor and its step, so the
+        // per-key totals stay attributable.
+        "increment" | "decrement" => {
+          fields_only(input, ["type", "key", "who", "by"])
+          ignore(identifier(required(input, "key")))
+          ignore(identifier(required(input, "who")))
+          let by = ordinal(required(input, "by"))
+          if by < 1.0 {
+            raise HistoryError(id + ": by must be at least 1")
+          }
+        }
+        "read" => {
+          fields_only(input, ["type", "key"])
+          ignore(identifier(required(input, "key")))
+        }
+        _ =>
+          raise HistoryError(
+            id + ": unsupported multi_pncounter operation: " + kind,
+          )
+      }
   }
 }
 
@@ -446,6 +470,7 @@ fn parse_history_value(request : Value) -> History raise HistoryError {
     "versioned_register" => VersionedRegister
     "rw_register" => RwRegister
     "set_of_sets" => SetOfSets
+    "multi_pncounter" => MultiPNCounter
     name => raise HistoryError("unsupported model: " + name)
   }
   let initial = required(request, "initial")
@@ -560,6 +585,17 @@ fn parse_history_value(request : Value) -> History raise HistoryError {
     // Every seed element must itself be a set.
     for entry in array(initial) {
       ignore(array(entry))
+    }
+  }
+  if model == MultiPNCounter {
+    // Every seed key carries both tables, so reads never meet a half-built entry.
+    for _, entry in object(initial) {
+      let regs = object(entry)
+      if !regs.contains("p") || !regs.contains("n") {
+        raise HistoryError("multi_pncounter initial requires p and n objects")
+      }
+      ignore(object(regs["p"]))
+      ignore(object(regs["n"]))
     }
   }
   if model == LwwSet {

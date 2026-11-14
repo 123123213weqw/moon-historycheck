@@ -155,6 +155,11 @@ pub fn list_models() -> Array[ModelInfo] {
       description: "set whose elements are themselves sets",
       supports_partition: false,
     },
+    {
+      name: "multi_pncounter",
+      description: "multi-key positive-negative counter with per-actor tables",
+      supports_partition: true,
+    },
   ]
 }
 
@@ -196,10 +201,11 @@ pub fn run(request : Value) -> Value {
     }
     let partitionable = history.model == KeyValue ||
       history.model == Mapping ||
-      history.model == LwwMap
+      history.model == LwwMap ||
+      history.model == MultiPNCounter
     if partitioned && (!partitionable || operation != "check") {
       raise HistoryError(
-        "partition requires check on kv_register, map or lww_map",
+        "partition requires check on kv_register, map, lww_map or multi_pncounter",
       )
     }
     match operation {

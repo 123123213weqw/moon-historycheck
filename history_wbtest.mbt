@@ -83,15 +83,15 @@ test "models operation lists every model with partition flags" {
     Array(list) => list
     _ => abort("models did not answer an array")
   }
-  assert_eq(items.length(), 29)
-  // Partition-capable models are exactly the three.
+  assert_eq(items.length(), 30)
+  // Partition-capable models are exactly the four.
   let partitionable = items.filter(entry => {
     match field(entry, "supports_partition") {
       Bool(true) => true
       _ => false
     }
   })
-  assert_eq(partitionable.length(), 3)
+  assert_eq(partitionable.length(), 4)
   // Every name is unique.
   let seen : Map[String, Bool] = Map([])
   for entry in items {
@@ -116,6 +116,7 @@ test "models catalog matches the enum's model_name spellings" {
   assert_eq(catalog[26], "versioned_register")
   assert_eq(catalog[27], "rw_register")
   assert_eq(catalog[28], "set_of_sets")
+  assert_eq(catalog[29], "multi_pncounter")
   assert_eq(catalog.contains("kv_register"), true)
   assert_eq(catalog.contains("lww_map"), true)
   assert_eq(catalog.contains("map"), true)
@@ -349,6 +350,64 @@ test "set_of_sets admits whole subsets and rejects phantom members" {
     ),
   )
   let verdict3 = match field(phantom_member, "verdict") {
+    String(s) => s
+    _ => "bad"
+  }
+  assert_eq(verdict3, "non_linearizable")
+}
+
+///|
+test "multi_pncounter totals per key from merged actor tables" {
+  // Two actors race increments on one key while a second key decays below
+  // zero; each read observes its own key's merged total.
+  let merged = run(
+    from_json(
+      @json.parse(
+        "{\"model\":\"multi_pncounter\",\"initial\":{},\"operations\":[" +
+        "{\"id\":\"a\",\"client\":\"c1\",\"call\":1,\"return\":6,\"input\":{\"type\":\"increment\",\"key\":\"orders\",\"who\":\"alice\",\"by\":2},\"output\":\"ok\"}," +
+        "{\"id\":\"b\",\"client\":\"c2\",\"call\":2,\"return\":5,\"input\":{\"type\":\"increment\",\"key\":\"orders\",\"who\":\"bob\",\"by\":3},\"output\":\"ok\"}," +
+        "{\"id\":\"c\",\"client\":\"c1\",\"call\":7,\"return\":8,\"input\":{\"type\":\"read\",\"key\":\"orders\"},\"output\":5}," +
+        "{\"id\":\"d\",\"client\":\"c3\",\"call\":9,\"return\":10,\"input\":{\"type\":\"decrement\",\"key\":\"returns\",\"who\":\"alice\",\"by\":1},\"output\":\"ok\"}," +
+        "{\"id\":\"e\",\"client\":\"c3\",\"call\":11,\"return\":12,\"input\":{\"type\":\"read\",\"key\":\"returns\"},\"output\":-1}]}",
+      ),
+    ),
+  )
+  let verdict = match field(merged, "verdict") {
+    String(s) => s
+    _ => "bad"
+  }
+  assert_eq(verdict, "linearizable")
+
+  // No linearization of one increment of 2 and one of 3 can answer 4:
+  // the reachable totals are 0, 2, 3 and 5.
+  let phantom_total = run(
+    from_json(
+      @json.parse(
+        "{\"model\":\"multi_pncounter\",\"initial\":{},\"operations\":[" +
+        "{\"id\":\"a\",\"client\":\"c1\",\"call\":1,\"return\":4,\"input\":{\"type\":\"increment\",\"key\":\"orders\",\"who\":\"alice\",\"by\":2},\"output\":\"ok\"}," +
+        "{\"id\":\"b\",\"client\":\"c2\",\"call\":2,\"return\":5,\"input\":{\"type\":\"increment\",\"key\":\"orders\",\"who\":\"bob\",\"by\":3},\"output\":\"ok\"}," +
+        "{\"id\":\"c\",\"client\":\"c1\",\"call\":6,\"return\":7,\"input\":{\"type\":\"read\",\"key\":\"orders\"},\"output\":4}]}",
+      ),
+    ),
+  )
+  let verdict2 = match field(phantom_total, "verdict") {
+    String(s) => s
+    _ => "bad"
+  }
+  assert_eq(verdict2, "non_linearizable")
+
+  // Keys are independent: a read of an untouched key cannot observe the
+  // other key's total.
+  let cross_key = run(
+    from_json(
+      @json.parse(
+        "{\"model\":\"multi_pncounter\",\"initial\":{},\"operations\":[" +
+        "{\"id\":\"a\",\"client\":\"c1\",\"call\":1,\"return\":2,\"input\":{\"type\":\"increment\",\"key\":\"orders\",\"who\":\"alice\",\"by\":2},\"output\":\"ok\"}," +
+        "{\"id\":\"c\",\"client\":\"c2\",\"call\":3,\"return\":4,\"input\":{\"type\":\"read\",\"key\":\"returns\"},\"output\":2}]}",
+      ),
+    ),
+  )
+  let verdict3 = match field(cross_key, "verdict") {
     String(s) => s
     _ => "bad"
   }
