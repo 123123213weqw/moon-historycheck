@@ -1,5 +1,49 @@
 # Changelog
 
+## 0.9.0 — 2026-11-14
+
+Thirty-three sequential models, up from twenty-eight at 0.8.0. Five new
+models join the checker, each with a distinct observability lesson, and
+CI now pins its toolchain:
+
+set_of_sets (model 29): a set whose elements are themselves sets.
+add_set pushes a whole subset once (structural equality, duplicates
+collapse), remove_set drops exactly one matching subset and reports
+whether one existed, contains_set answers membership. Validation
+requires the payload to be an array, so a bare element cannot sneak
+into a collection-of-collections history.
+
+multi_pncounter (model 30): one PN-counter family spread over named
+keys, each key carrying its own positive and negative per-actor tables.
+Keys never see each other's totals, and that per-key independence makes
+it the fourth partitionable model: check_partitioned splits a history
+by key, seeds never-touched keys as two empty tables, and re-verifies
+the merged witness against the full history.
+
+register_with_expiry (model 31): writes stamp an expiry instant and
+always succeed - expiry never blocks a writer, it only blinds readers.
+Reads carry the instant they observe at: strictly before expires_at the
+value is visible, at the instant itself and after the register reads
+null, and an unwritten register reads null however late the observer
+is.
+
+fifo_channel (model 32): a two-slot FIFO channel with paired
+send/recv. send reports true while a slot is free and false once full
+(a refused send never entered); recv hands back the oldest item
+directly and answers null on an empty channel.
+
+priority_deque (model 33): a double-ended priority queue. push stamps a
+priority, pop_min extracts the smallest and pop_max the largest, both
+taking the first-inserted element among ties - the tie bias makes the
+extract order observable, not just the extremes. An empty deque answers
+{empty: true} on either end.
+
+CI installs the moon toolchain from this repository's own
+toolchain-0.1.20261104 release asset instead of whatever the setup
+action fetched that day, so toolchain drift cannot flip verdicts or
+deny-warns without a local change. 244 tests across the four targets,
+zero warnings on 0.1.20261104.
+
 ## 0.8.0 — 2026-11-13
 
 Twenty-eight sequential models, up from twenty-four at 0.7.0. Four new

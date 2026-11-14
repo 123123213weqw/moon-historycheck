@@ -3,7 +3,7 @@
 Bounded linearizability checking for concurrent operation histories across thirty-three sequential models, implemented in MoonBit. Register/CAS, independent keyed registers, FIFO queues, LIFO stacks, mutual-exclusion locks, membership sets, integer counters, key-value maps, timestamped LWW sets, monotonic max-registers, grow-only sets, two-phase sets, min-registers, last-writer-wins registers, bounded queues, deques, counting semaphores, reader-writer locks, multisets, priority queues, positive-negative counters, LWW maps, observed-remove sets, one-way flags, ticket locks, one-shot barriers, versioned registers, exclusive-writer registers, sets of sets, multi-key positive-negative counters, expiry registers, bounded FIFO channels and double-ended priority queues have executable sequential models. Results distinguish a verified legal ordering, an exhaustive rejection, an unknown result and malformed input.
 
 - Owner: `123123213weqw`
-- Module: `123123213weqw/moon_historycheck@0.7.0`
+- Module: `123123213weqw/moon_historycheck@0.9.0`
 - License: Apache-2.0
 - New project: no inherited FindCore code, releases or commit counts.
 
@@ -22,7 +22,7 @@ The result applies only to the supplied finite history and supported model. A va
 ## Install
 
 ```sh
-moon add 123123213weqw/moon_historycheck@0.7.0
+moon add 123123213weqw/moon_historycheck@0.9.0
 ```
 
 Consumer moon.pkg:
